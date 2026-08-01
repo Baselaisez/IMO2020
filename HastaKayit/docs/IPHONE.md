@@ -65,16 +65,34 @@ sync` yeterlidir, ardından Xcode'da tekrar **Run**.
 `SceneDelegate.swift` içinde üç hata olarak görünür. Kod doğrudur; hata Xcode'un
 YANLIŞ Capacitor sürümünü derlemesinden kaynaklanır.
 
-`ios/App/CapApp-SPM/Package.swift` Capacitor'ı `exact: "8.5.0"` ile ister, ama
-Xcode bir kez daha eski bir sürüm çözümlediyse o pini kendiliğinden bırakmaz.
-Sol paneldeki **capacitor-swift-pm** satırında sürümü görebilirsiniz — 8.5.0
-değilse sorun budur. (`SceneDelegateProxy` sınıfı Capacitor 8.5.0'ın ikili
-çerçevesinde vardır, 8.0.0'da yoktur; ikisi de indirilip doğrulandı.)
+**Asıl sebep bir eklenti hatasıdır.** `@capacitor-community/sqlite` (8.1.0 dahil,
+en güncel sürüm) Capacitor'ı bir SÜRÜM değil, bir DAL ile ister:
 
-Çözüm:
+```swift
+.package(url: ".../capacitor-swift-pm.git", branch: "8.0.0")   // sqlite
+.package(url: ".../capacitor-swift-pm.git", from:   "8.0.0")   // diğer tüm eklentiler
+```
+
+Swift Package Manager'da dal gereksinimi sürüm gereksinimlerini EZER ve tüm
+grafiğe dayatılır. Bu yüzden bizim `exact: "8.5.0"` isteğimiz hiçbir zaman
+geçerli olmaz; SPM "8.0.0" dalını çeker. Xcode'un yan panelindeki
+"capacitor-swift-pm 8.0.0" bir sürüm etiketi değil, o dalın adıdır — bu yüzden
+teşhisi zordur.
+
+`SceneDelegateProxy` sınıfı Capacitor 8.5.0'ın ikili çerçevesinde vardır,
+8.0.0'da yoktur (iki çerçeve de indirilip doğrulandı); CLI 8.5.0'ın ürettiği
+SceneDelegate.swift ise o sınıfı kullanır.
+
+`npm install` sonrası çalışan `postinstall` kancası bu satırı `from:` yapar
+(bkz. `scripts/patch-capacitor-spm.mjs`) — eklentinin kendi kodu değişmez,
+yalnızca sürüm aralığı serbest bırakılır. Yukarı akış düzeltince yama
+kendiliğinden etkisiz hâle gelir.
+
+Çözüm — yama zaten uygulanmışsa yalnızca eski çözümlemeyi atmak kalır:
 
 ```bash
-npm run ios:reset
+npm install        # postinstall yamayı uygular
+npm run ios:reset  # eski pinleri ve önbelleği atıp yeniden çözümler
 ```
 
 Betik pinleri siler, çözümlemeyi `xcodebuild` ile KENDİSİ yapar ve sonunda
