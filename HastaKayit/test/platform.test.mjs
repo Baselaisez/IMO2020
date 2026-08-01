@@ -96,3 +96,13 @@ test('exportMessage: Mac’te iptal edilen kaydetme "hazırlandı" demez', () =>
   assert.match(exportMessage({ shared: true }, 'Excel').text, /hazırlandı/);
   assert.match(exportMessage(undefined, 'Excel').text, /hazırlandı/);
 });
+
+test('hasIosSdk: iOS platformu kurulu mu ayrımı', async () => {
+  const { hasIosSdk } = await import('../scripts/ios-preflight.mjs');
+  // Gerçek `xcodebuild -showsdks` çıktısı biçimi
+  assert.equal(hasIosSdk('iOS SDKs:\n\tiOS 18.2\t-sdk iphoneos18.2\n\nmacOS SDKs:\n\tmacOS 15.2\t-sdk macosx15.2'), true);
+  // Yalnızca macOS SDK'sı varsa iPhone derlenemez — simülatör eksikliğiyle
+  // karıştırılmamalı.
+  assert.equal(hasIosSdk('macOS SDKs:\n\tmacOS 15.2\t-sdk macosx15.2'), false);
+  assert.equal(hasIosSdk(''), false);
+});

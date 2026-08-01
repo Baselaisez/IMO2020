@@ -48,6 +48,19 @@ export function hasIosRuntime(out) {
   return /iOS\s+\d+/.test(String(out || ''));
 }
 
+/**
+ * `xcodebuild -showsdks` çıktısında iOS SDK'sı var mı? Saf.
+ *
+ * Xcode 16'dan beri platformlar (iOS dahil) Xcode'un kendisiyle GELMEZ, ayrıca
+ * indirilir. Yalnızca Xcode kurulmuşsa iOS uygulaması HİÇ derlenemez; hata
+ * "iOS x.y is not installed. Please download and install the platform from
+ * Xcode > Settings > Components." biçiminde çıkar ve simülatör eksikliğiyle
+ * karıştırılır. Simülatör isteğe bağlıdır; SDK zorunludur.
+ */
+export function hasIosSdk(out) {
+  return /-sdk\s+iphoneos\d/.test(String(out || ''));
+}
+
 // --- Denetim ---------------------------------------------------------------
 // Gövde yalnızca dosya DOĞRUDAN çalıştırıldığında yürür. Testler saf
 // ayrıştırıcıları içe aktarıyor; koruma olmasaydı `import` bile denetimi
@@ -105,12 +118,24 @@ if (kind === 'xcode') {
   }
 }
 
-// 4) Simülatör çalışma zamanı (zorunlu değil — gerçek cihaz da olur)
+// 4) iOS PLATFORMU (SDK) kurulu mu? — ZORUNLU
+// Xcode 16'dan beri iOS platformu ayrı indiriliyor; yoksa ne cihaza ne
+// simülatöre derleme yapılabilir. En sık atlanan adım budur.
+if (kind === 'xcode') {
+  const sdks = run('xcodebuild', ['-showsdks']);
+  if (hasIosSdk(sdks.out)) ok('iOS platformu (SDK) kurulu');
+  else {
+    bad('iOS platformu Xcode\'a indirilmemiş — iPhone uygulaması derlenemez.');
+    blockers.push('Xcode\'u açın ▸ menüden Xcode ▸ Settings… (⌘,) ▸ Components sekmesi\n        ▸ listedeki "iOS" satırının yanındaki GET / indirme düğmesine basın.\n        Yaklaşık 7-10 GB, internet hızınıza göre 15-60 dakika sürer.');
+  }
+}
+
+// 5) Simülatör çalışma zamanı (zorunlu DEĞİL — gerçek cihaza kuracaksanız gerekmez)
 const rt = run('xcrun', ['simctl', 'list', 'runtimes']);
 if (hasIosRuntime(rt.out)) ok('iOS simülatörü kurulu');
-else warn('iOS simülatörü kurulu değil. Xcode ▸ Settings ▸ Components ▸ iOS Simulator ile kurabilir\n      ya da doğrudan kendi iPhone\'unuzu USB ile bağlayabilirsiniz.');
+else warn('iOS simülatörü kurulu değil — gerçek iPhone\'a kuracaksanız GEREKMEZ.');
 
-// 5) Proje hazır mı?
+// 6) Proje hazır mı?
 if (existsSync(path.join(root, 'node_modules', '@capacitor', 'ios'))) ok('npm bağımlılıkları kurulu');
 else {
   bad('node_modules eksik — Xcode eklentileri göreli yolla buradan bulur.');
