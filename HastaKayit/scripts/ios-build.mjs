@@ -6,8 +6,14 @@
 // derleme yapılıp `error:` satırları benzersizleştirilerek yazdırılıyor; tam
 // günlük de dosyaya kaydediliyor.
 //
-// Simülatör hedefi seçilir: imzalama GEREKTİRMEZ, yani "development team"
-// ayarından bağımsız olarak derleyici hatalarını görebiliriz.
+// GERÇEK CİHAZ mimarisine (arm64) derlenir ama imzalama kapatılır
+// (CODE_SIGNING_ALLOWED=NO). Böylece:
+//   • Apple hesabı / "development team" ayarı GEREKMEZ,
+//   • iPhone simülatörünün kurulu olması GEREKMEZ — simülatör çalışma zamanı
+//     ~10 GB'lık ayrı bir indirmedir ve çoğu Mac'te yoktur. Simülatör hedefi
+//     seçen eski hâli, kod hiç derlenmeden "iOS ... is not installed" ile
+//     patlıyordu; yani gerçek derleme hatalarını göstermiyordu.
+//   • telefonun takılı olması GEREKMEZ.
 //
 // Çalıştırma:  npm run ios:build
 import { spawn } from 'node:child_process';
@@ -45,13 +51,18 @@ async function main() {
   const args = [
     '-project', path.join(root, 'ios/App/App.xcodeproj'),
     '-scheme', 'App',
-    // Simülatör: imzalama gerekmez, derleyici hataları yine de görünür.
-    '-destination', 'generic/platform=iOS Simulator',
+    // Cihaz mimarisi, ama imzasız: hesap da simülatör de telefon da gerekmez.
+    '-destination', 'generic/platform=iOS',
+    '-configuration', 'Debug',
     '-clonedSourcePackagesDirPath', path.join(root, 'ios/.spm'),
+    'CODE_SIGNING_ALLOWED=NO',
+    'CODE_SIGNING_REQUIRED=NO',
+    'CODE_SIGN_IDENTITY=',
     'build',
   ];
 
-  console.log('\niOS derleniyor (simülatör hedefi, imzalama gerekmez)…\n');
+  console.log('\niOS derleniyor (cihaz mimarisi, imzalama kapalı)…');
+  console.log('İlk derleme birkaç dakika sürebilir.\n');
   const child = spawn('xcodebuild', args, { cwd: root });
 
   let log = '';
