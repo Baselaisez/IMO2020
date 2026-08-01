@@ -58,6 +58,37 @@ Xcode'da:
 Kodda bir değişiklik yaptıktan sonra Xcode'u kapatmanıza gerek yok; `npm run
 sync` yeterlidir, ardından Xcode'da tekrar **Run**.
 
+## Sık karşılaşılan iki hata
+
+### "Cannot find 'SceneDelegateProxy' in scope"
+
+`SceneDelegate.swift` içinde üç hata olarak görünür. Kod doğrudur; hata Xcode'un
+YANLIŞ Capacitor sürümünü derlemesinden kaynaklanır.
+
+`ios/App/CapApp-SPM/Package.swift` Capacitor'ı `exact: "8.5.0"` ile ister, ama
+Xcode bir kez daha eski bir sürüm çözümlediyse o pini kendiliğinden bırakmaz.
+Sol paneldeki **capacitor-swift-pm** satırında sürümü görebilirsiniz — 8.5.0
+değilse sorun budur. (`SceneDelegateProxy` sınıfı Capacitor 8.5.0'ın ikili
+çerçevesinde vardır, 8.0.0'da yoktur; ikisi de indirilip doğrulandı.)
+
+Çözüm:
+
+```bash
+npm run ios:reset
+```
+
+Ardından Xcode'da **File ▸ Packages ▸ Resolve Package Versions**, sonra ⇧⌘K
+(Clean Build Folder) ve ⌘R. Betik yalnızca bu projeye ait pinleri ve türetilmiş
+veriyi siler; diğer Xcode projeleriniz etkilenmez.
+
+### "Signing for 'App' requires a development team"
+
+Xcode'a henüz Apple Kimliği eklenmemiş. **Add Account…** ile giriş yapın
+(ücretsiz hesap yeterli), sonra **Team** listesinden "… (Personal Team)" seçin.
+Ardından "Failed to register bundle identifier" gelirse `com.hastakayit.app`
+başkasına ait demektir; **Bundle Identifier**'ı kendinize özgü bir değerle
+(örn. `com.adsoyad.hastakayit`) değiştirmeniz yeterlidir.
+
 ## Cihazda ilk açılış
 
 1. **PIN kurulumu** — 4-6 haneli PIN belirlenir (veriler bu PIN'e bağlıdır)

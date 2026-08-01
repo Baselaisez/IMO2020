@@ -21,7 +21,8 @@
     "mac:dist": "npm run build && electron-builder --mac --arm64 --x64",
     "test": "node --test \"test/**/*.test.mjs\"",
     "icons": "node resources/make-icons.mjs",
-    "ios:check": "node scripts/ios-preflight.mjs"
+    "ios:check": "node scripts/ios-preflight.mjs",
+    "ios:reset": "node scripts/ios-reset-packages.mjs"
   },
   "dependencies": {
     "@aparajita/capacitor-biometric-auth": "^10.0.0",
