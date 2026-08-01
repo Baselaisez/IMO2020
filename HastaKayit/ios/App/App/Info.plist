@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>CAPACITOR_DEBUG</key>
+	<string>$(CAPACITOR_DEBUG)</string>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>tr</string>
+	<key>CFBundleDisplayName</key>
+        <string>Hasta Kayıt</string>
+	<key>CFBundleExecutable</key>
+	<string>$(EXECUTABLE_NAME)</string>
+	<key>CFBundleIdentifier</key>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>$(PRODUCT_NAME)</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>$(MARKETING_VERSION)</string>
+	<key>CFBundleVersion</key>
+	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<key>CFBundleLocalizations</key>
+	<array>
+		<string>tr</string>
+		<string>en</string>
+	</array>
+	<!-- Uygulama tamamen çevrimdışıdır ve yalnızca işletim sisteminin standart
+	     şifreleme API'lerini (PIN için WebCrypto PBKDF2) kullanır; bu kullanım
+	     ihracat kısıtı kapsamı dışındadır. Anahtar olmadan her yüklemede
+	     App Store Connect aynı soruyu tekrar sorar. -->
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
+	<!-- Kilit ekranındaki biyometrik açma (Face ID / Touch ID). Bu metin, iOS'un
+	     izin penceresinde AYNEN görünür; boş bırakılırsa uygulama Face ID'ye ilk
+	     erişimde ÇÖKER. -->
+	<key>NSFaceIDUsageDescription</key>
+	<string>Hasta kayıtlarınızı PIN yerine Face ID / Touch ID ile açmak için kullanılır.</string>
+	<!-- Randevuların telefonun takvimine yazılması. iOS 17 erişimi ikiye ayırdı
+	     (tam erişim / yalnızca yazma); eski sürümler için NSCalendarsUsageDescription
+	     de bırakıldı. -->
+	<key>NSCalendarsUsageDescription</key>
+	<string>Hasta randevularını takviminize eklemek ve güncellemek için kullanılır.</string>
+	<key>NSCalendarsFullAccessUsageDescription</key>
+	<string>Eklenen randevuları sonradan güncelleyip silebilmek için takvim erişimi gerekir.</string>
+	<key>NSCalendarsWriteOnlyAccessUsageDescription</key>
+	<string>Hasta randevularını takviminize eklemek için kullanılır.</string>
+	<!-- Hasta fotoğrafı: form ekranındaki "Fotoğraf Ekle" alanı kamerayı ya da
+	     fotoğraf kitaplığını açar. Fotoğraf cihazda, veritabanının içinde kalır. -->
+	<key>NSCameraUsageDescription</key>
+	<string>Hasta formuna fotoğraf çekmek için kullanılır. Fotoğraf yalnızca bu cihazda saklanır.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Hasta formuna fotoğraf seçmek için kullanılır. Fotoğraf yalnızca bu cihazda saklanır.</string>
+	<!-- Yedek dosyaları Belgeler klasörüne yazılıyor. Bu iki anahtar olmadan
+	     doktor o yedeklere Dosyalar uygulamasından ULAŞAMAZ; yedeğin görünür
+	     olması bu uygulamanın en kritik özelliği. -->
+	<key>UIFileSharingEnabled</key>
+	<true/>
+	<key>LSSupportsOpeningDocumentsInPlace</key>
+	<true/>
+	<!-- Üst çubuk koyu mavi; durum çubuğu yazıları beyaz olmalı. -->
+	<key>UIStatusBarStyle</key>
+	<string>UIStatusBarStyleLightContent</string>
+	<key>LSRequiresIPhoneOS</key>
+	<true/>
+	<key>UIApplicationSceneManifest</key>
+	<dict>
+		<key>UIApplicationSupportsMultipleScenes</key>
+    <false/>
+    <key>UISceneConfigurations</key>
+    <dict>
+      <key>UIWindowSceneSessionRoleApplication</key>
+      <array>
+        <dict>
+            <key>UISceneConfigurationName</key>
+            <string>Default Configuration</string>
+            <key>UISceneDelegateClassName</key>
+            <string>$(PRODUCT_MODULE_NAME).SceneDelegate</string>
+            <key>UISceneStoryboardFile</key>
+            <string>Main</string>
+        </dict>
+      </array>
+    </dict>
+	</dict>
+	<key>UILaunchStoryboardName</key>
+	<string>LaunchScreen</string>
+	<key>UIMainStoryboardFile</key>
+	<string>Main</string>
+	<key>UIRequiredDeviceCapabilities</key>
+	<array>
+		<string>arm64</string>
+	</array>
+	<key>UISupportedInterfaceOrientations</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationLandscapeLeft</string>
+		<string>UIInterfaceOrientationLandscapeRight</string>
+	</array>
+	<key>UISupportedInterfaceOrientations~ipad</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationPortraitUpsideDown</string>
+		<string>UIInterfaceOrientationLandscapeLeft</string>
+		<string>UIInterfaceOrientationLandscapeRight</string>
+	</array>
+	<key>UIViewControllerBasedStatusBarAppearance</key>
+	<false/>
+</dict>
+</plist>

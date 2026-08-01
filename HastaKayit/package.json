@@ -1,0 +1,88 @@
+{
+  "name": "hastakayit",
+  "version": "5.0.0",
+  "description": "Hasta Kayıt — iPhone (iOS) ve Mac (macOS) sürümleri",
+  "private": true,
+  "type": "module",
+  "main": "electron/main.cjs",
+  "scripts": {
+    "build": "node build.mjs",
+    "watch": "node build.mjs --watch",
+    "serve": "node build.mjs && node -e \"import('node:http').then(async({default:h})=>{const {readFile}=await import('node:fs/promises');const {extname,join}=await import('node:path');const T={'.html':'text/html','.js':'text/javascript','.css':'text/css','.wasm':'application/wasm','.map':'application/json'};h.createServer(async(q,s)=>{const p=join('www',q.url==='/'?'index.html':decodeURIComponent(q.url).split('?')[0]);try{s.writeHead(200,{'content-type':T[extname(p)]||'application/octet-stream'});s.end(await readFile(p))}catch{s.writeHead(404);s.end()}}).listen(5173,()=>console.log('http://localhost:5173'))})\"",
+    "sync": "npm run build && cap sync ios",
+    "ios": "npm run sync && cap open ios",
+    "mac": "npm run build && electron electron/main.cjs",
+    "mac:dist": "npm run build && electron-builder --mac --arm64 --x64",
+    "test": "node --test \"test/**/*.test.mjs\"",
+    "icons": "node resources/make-icons.mjs"
+  },
+  "dependencies": {
+    "@aparajita/capacitor-biometric-auth": "^10.0.0",
+    "@capacitor-community/sqlite": "^8.1.0",
+    "@capacitor/app": "^8.1.1",
+    "@capacitor/core": "^8.5.0",
+    "@capacitor/filesystem": "^8.1.2",
+    "@capacitor/ios": "^8.5.0",
+    "@capacitor/local-notifications": "^8.2.1",
+    "@capacitor/share": "^8.0.1",
+    "@ebarooni/capacitor-calendar": "^8.2.0",
+    "docx": "^9.7.1",
+    "fflate": "^0.8.3",
+    "pdf-lib": "^1.17.1",
+    "sql.js": "^1.13.0",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^8.5.0",
+    "electron": "^38.0.0",
+    "electron-builder": "^26.0.12",
+    "esbuild": "^0.25.0",
+    "sharp": "^0.35.3"
+  },
+  "build": {
+    "appId": "com.hastakayit.app",
+    "productName": "Hasta Kayıt",
+    "copyright": "Hasta Kayıt",
+    "asar": true,
+    "files": [
+      "www/**/*",
+      "electron/**/*",
+      "package.json"
+    ],
+    "directories": {
+      "output": "dist-mac",
+      "buildResources": "resources"
+    },
+    "mac": {
+      "category": "public.app-category.medical",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "arm64",
+            "x64"
+          ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "arm64",
+            "x64"
+          ]
+        }
+      ],
+      "icon": "resources/icon.icns",
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false,
+      "entitlements": "electron/entitlements.mac.plist",
+      "entitlementsInherit": "electron/entitlements.mac.plist",
+      "extendInfo": {
+        "NSMicrophoneUsageDescription": "Sesli not yazdırmak için macOS dikte özelliği mikrofonu kullanır.",
+        "NSCalendarsUsageDescription": "Randevuları takviminize eklemek için kullanılır."
+      }
+    },
+    "dmg": {
+      "title": "Hasta Kayıt ${version}"
+    }
+  }
+}

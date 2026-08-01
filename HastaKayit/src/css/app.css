@@ -1,0 +1,182 @@
+* { box-sizing: border-box; margin: 0; }
+:root { --blue:#2b5ea7; --green:#1a7f37; --bg:#fafafa; --line:#e5e5e5; --red:#b3261e; --orange:#b26a00; }
+body { font-family: system-ui, sans-serif; background: var(--bg); color: #222; font-size: 16px; }
+.hidden { display: none !important; }
+.screen { min-height: 100vh; padding-bottom: 80px; }
+.appbar { position: sticky; top: 0; z-index: 5; background: var(--blue); color: #fff; padding: 14px 12px;
+  padding-top: calc(14px + env(safe-area-inset-top)); font-weight: 600; display: flex; justify-content: space-between; align-items: center; }
+.iconbtn { background: none; border: 0; color: inherit; font-size: 18px; padding: 4px 8px; }
+/* Form/kart/ayarlar üst çubukları: solda ← ve 🏠 birlikte, ortada başlık, sağda
+   (varsa) tek eylem düğmesi. Başlık flex:1 + text-align:center ile GERÇEKTEN
+   ortalanır; sol ve sağ gruplara aynı min-width verildiği için 🏠 eklenmesi
+   başlığı kaydırmaz ve sağ grubun boş olması da fark etmez. Uzun başlık (uzun
+   hasta adı) 360px'te taşmak yerine tek satırda "…" ile kısalır. Ana ekranın
+   üst çubuğunda bu sınıflar yok — o çubuk eski space-between düzeninde kalır. */
+.appbar > .bar-left, .appbar > .bar-right { display: flex; align-items: center; gap: 2px; min-width: 72px; }
+.appbar > .bar-right { justify-content: flex-end; }
+.appbar > .bar-title { flex: 1 1 auto; min-width: 0; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.banner { position: fixed; top: 0; left: 0; right: 0; z-index: 99; padding: 14px 12px; color: #fff; font-weight: 600; }
+.banner.error { background: var(--red); }
+.banner.ok { background: var(--green); }
+#search { width: calc(100% - 16px); margin: 8px; padding: 12px; border: 1px solid #ddd; border-radius: 10px; font-size: 16px; }
+.today { background: #eaf1fb; margin: 0 8px 8px; border-radius: 10px; padding: 10px 12px; }
+.chips-row { display: flex; gap: 6px; margin: 0 8px 8px; }
+.chip-filter { border: 1px solid #cfd8e6; background: #fff; color: var(--blue); border-radius: 16px; padding: 6px 14px; }
+.chip-filter.active { background: var(--blue); color: #fff; }
+.plist { padding: 0 8px; }
+.prow { background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 12px; margin-bottom: 8px;
+  display: flex; justify-content: space-between; align-items: center; }
+.prow .sub { color: #888; font-size: 13px; margin-top: 2px; }
+.money { color: var(--green); font-weight: 600; white-space: nowrap; }
+.prow.done { background: #f2f8f4; }
+.prow.blocked { background: #fdecea; border-color: var(--red); }
+.prow.blocked .name-line { color: var(--red); font-weight: 700; }
+.fab { position: fixed; right: 20px; bottom: 24px; width: 56px; height: 56px; border-radius: 50%; border: 0;
+  background: var(--blue); color: #fff; font-size: 28px; box-shadow: 0 4px 12px rgba(0,0,0,.25); }
+.form { padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+.form label { display: flex; flex-direction: column; gap: 4px; font-size: 14px; color: #555; }
+.form input, .form textarea { padding: 12px; border: 1px solid #ccc; border-radius: 10px; font-size: 16px; }
+button.primary { background: var(--blue); color: #fff; border: 0; border-radius: 10px; padding: 14px; font-size: 16px; font-weight: 600; }
+button.ghost { background: none; border: 0; color: var(--blue); padding: 10px; }
+.form > button { border: 1px solid #cfd8e6; background: #fff; color: var(--blue); border-radius: 10px; padding: 14px; font-size: 16px; font-weight: 600; }
+.form > button.primary { background: var(--blue); color: #fff; }
+.muted { color: #888; font-size: 13px; }
+.lock-box { max-width: 300px; margin: 25vh auto 0; text-align: center; display: flex; flex-direction: column; gap: 12px; }
+.lock-box input { text-align: center; font-size: 24px; letter-spacing: 8px; padding: 10px; border: 1px solid #ccc; border-radius: 10px; }
+.overlay { position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 50; display: flex; align-items: flex-end; }
+.sheet { background: #fff; width: 100%; border-radius: 16px 16px 0 0; padding: 16px; padding-bottom: calc(16px + env(safe-area-inset-bottom)); }
+.sheet h4 { margin-bottom: 10px; }
+.quick-row { display: flex; gap: 8px; margin-bottom: 10px; }
+.quick-row button { flex: 1; border: 1px solid #cfd8e6; background: #fff; color: var(--blue); border-radius: 10px; padding: 10px 0; font-weight: 600; }
+.ledger { background: #fff; border: 1px solid var(--line); border-radius: 10px; margin: 0 12px 12px; }
+.lrow { display: flex; justify-content: space-between; padding: 10px 12px; border-bottom: 1px solid #f0f0f0; align-items: center; }
+.lrow:last-child { border-bottom: 0; }
+.lrow.total { background: #f2f8f4; font-weight: 700; }
+.card-hdr { background: #fff; padding: 12px; border-bottom: 1px solid var(--line); }
+.chips { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+.chip { background: #eaf1fb; color: var(--blue); border-radius: 12px; padding: 4px 10px; font-size: 13px; border: 0; text-decoration: none; }
+.actions { display: flex; gap: 8px; padding: 10px 12px; }
+.actions button { flex: 1; border: 1px solid #cfd8e6; background: #fff; color: var(--blue); border-radius: 10px; padding: 10px 0; font-weight: 600; font-size: 13px; }
+.actions button.primary { background: var(--blue); color: #fff; border-color: var(--blue); }
+.sec-title { padding: 8px 14px 4px; color: #888; font-size: 12px; text-transform: uppercase; letter-spacing: .5px; }
+table.monthly { width: 100%; border-collapse: collapse; background: #fff; }
+table.monthly td, table.monthly th { border: 1px solid var(--line); padding: 8px; font-size: 14px; text-align: left; }
+.warn-band { background: var(--red); color: #fff; font-weight: 700; text-align: center; padding: 10px; }
+.seg { display: flex; gap: 6px; margin-bottom: 8px; }
+.seg button { flex: 1; border: 1px solid #cfd8e6; background: #fff; color: var(--blue); border-radius: 8px; padding: 8px 0; }
+.seg button.on { background: var(--blue); color: #fff; }
+.pending-line { color: var(--orange); font-weight: 600; margin-top: 4px; }
+/* Sürükle-bırak: pencere kaplaması + Ayarlar'daki görünür bırakma alanı.
+   Kaplama pointer-events:none — böylece sürükleme olayları altındaki
+   elemanlara/window'a geçer ve kaplamanın kendisi enter/leave üretmez. */
+.dnd-overlay { position: fixed; inset: 0; z-index: 200; background: rgba(43,94,167,.14);
+  display: flex; align-items: center; justify-content: center; padding: 20px; pointer-events: none; }
+.dnd-overlay .dnd-box { border: 3px dashed var(--blue); border-radius: 16px; background: #fff;
+  color: var(--blue); font-weight: 700; text-align: center; padding: 22px 24px; max-width: 420px; line-height: 1.5; }
+.dnd-zone { border: 2px dashed var(--line); border-radius: 10px; padding: 16px 12px; text-align: center;
+  color: #888; font-size: 14px; font-weight: 600; }
+.dnd-zone .muted { display: block; margin-top: 4px; font-weight: 400; }
+.dnd-zone.over { border-color: var(--blue); color: var(--blue); background: #eaf1fb; }
+.pay-badge { font-size: 11px; }
+/* Sesli yazma düğmesi — etiketle aynı satırda, küçük ve sade.
+   Sadece masaüstünde (Mac / Windows) görünür: iPhone ve Android'de sistem
+   klavyesinin kendi mikrofon tuşu zaten var, orada bu düğme gereksiz tekrar
+   olur. .is-desktop sınıfını ui-voice.js masaüstü tespit ederse gövdeye ekler. */
+.lbl-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.mic-btn { padding: 2px 6px; font-size: 15px; line-height: 1; border: 1px solid var(--line); border-radius: 8px; }
+.mic-btn:hover { background: #eaf1fb; border-color: #cfd8e6; }
+body:not(.is-desktop) .mic-btn { display: none; }
+
+/* ===========================================================================
+   PLATFORMA ÖZGÜ KATMAN
+   Buraya kadar olan her şey üç hedefte ortaktır. Aşağısı yalnızca iPhone ve
+   Mac'in kaçınılmaz farklarını kapatır; kural sayısı bilerek az tutuldu ki iki
+   sürüm görsel olarak ayrışmasın. Platform adını app.js açılışta
+   <html data-platform="..."> olarak yazar (bkz. src/js/platform.js).
+   =========================================================================== */
+
+/* --- Ortak: dokunmatik cila --------------------------------------------- */
+html { -webkit-text-size-adjust: 100%; }
+button, .chip-filter, .fab, .iconbtn { -webkit-tap-highlight-color: transparent; }
+/* Düğme ve etiket metinleri uzun basınca seçilmesin (iOS'ta büyüteç/kopyala
+   balonu çıkarıyordu); hasta verisi taşıyan alanlar seçilebilir kalır. */
+button, .appbar, .chip-filter { -webkit-user-select: none; user-select: none; }
+input, textarea, select, .plist, #card-body, .ledger { -webkit-user-select: text; user-select: text; }
+
+/* --- iPhone / iPad -------------------------------------------------------
+   1) 100vh iOS'ta adres/araç çubuğu yüzünden yalan söyler → 100dvh.
+   2) Ekranın altındaki ana sayfa çizgisi (home indicator) FAB'ı ve son satırı
+      örtmesin diye güvenli alan kadar boşluk bırakılır.
+   3) Sabit konumlu klavye açıldığında iOS sayfayı kaydırır; #search'ün sticky
+      olmaması bu yüzden bilinçli.                                          */
+html[data-platform="ios"] .screen { min-height: 100dvh; padding-bottom: calc(80px + env(safe-area-inset-bottom)); }
+html[data-platform="ios"] .fab { bottom: calc(24px + env(safe-area-inset-bottom)); right: calc(20px + env(safe-area-inset-right)); }
+html[data-platform="ios"] .banner { padding-top: calc(14px + env(safe-area-inset-top)); }
+html[data-platform="ios"] .form,
+html[data-platform="ios"] .plist { padding-left: calc(8px + env(safe-area-inset-left)); padding-right: calc(8px + env(safe-area-inset-right)); }
+/* iOS'ta bir <input>'un yazı boyu 16px'in altına düşerse Safari odaklanınca
+   sayfayı yakınlaştırır ve bir daha geri çıkmaz. Tüm giriş alanları 16px'e
+   sabitlenir (görsel olarak zaten öyleydi, burada garanti altına alınıyor). */
+html[data-platform="ios"] input,
+html[data-platform="ios"] textarea,
+html[data-platform="ios"] select { font-size: 16px; }
+/* iOS'ta tarih/saat kutuları varsayılan olarak içeriğe göre daralır ve sağa
+   yaslanır; diğer alanlarla aynı genişlikte ve sola yaslı görünmeleri için. */
+html[data-platform="ios"] input[type="date"],
+html[data-platform="ios"] input[type="datetime-local"] { -webkit-appearance: none; appearance: none; width: 100%; text-align: left; min-height: 46px; }
+
+/* --- Mac ----------------------------------------------------------------
+   1) Pencere başlık çubuğu gizli (titleBarStyle: 'hiddenInset'), trafik ışıkları
+      mavi üst çubuğun üzerinde duruyor → soldan 78px boşluk bırakılır, yoksa
+      ışıklar ← ve 🏠 düğmelerini örter.
+   2) Üst çubuktan pencere sürüklenebilir; içindeki düğmeler sürükleme alanı
+      DIŞINDA kalmalı, aksi halde tıklanamazlar.
+   3) Geniş pencerede satırlar 1000px'e yayılmasın: içerik ortalanır. Telefon
+      düzeninin kendisi değişmez — sadece bir sütun genişliği sınırı gelir.   */
+html[data-platform="macos"] .appbar { padding-left: 78px; -webkit-app-region: drag; }
+html[data-platform="macos"] .appbar button,
+html[data-platform="macos"] .appbar input { -webkit-app-region: no-drag; }
+html[data-platform="macos"] body { font-size: 15px; }
+html[data-platform="macos"] .screen { padding-bottom: 40px; }
+
+@media (min-width: 720px) {
+  html[data-platform="macos"] #search,
+  html[data-platform="macos"] .today,
+  html[data-platform="macos"] .chips-row,
+  html[data-platform="macos"] .plist,
+  html[data-platform="macos"] .form,
+  html[data-platform="macos"] .ledger,
+  html[data-platform="macos"] .card-hdr,
+  html[data-platform="macos"] .actions,
+  html[data-platform="macos"] #monthly-table { max-width: 760px; margin-left: auto; margin-right: auto; }
+  html[data-platform="macos"] #search { width: calc(100% - 16px); }
+  /* Masaüstünde alt kenardan yüzen yuvarlak düğme yerine, listenin üstünde
+     duran normal bir düğme daha yerindedir; ama iki sürümde de aynı öğe
+     kullanıldığı için yalnızca konumu sabitleniyor (davranış aynı). */
+  html[data-platform="macos"] .fab { right: calc(50% - 380px + 4px); }
+}
+
+/* Fare olan platformlarda tıklanabilir her şey imleç ve vurgu versin. */
+html[data-platform="macos"] button,
+html[data-platform="macos"] .chip,
+html[data-platform="macos"] .prow { cursor: pointer; }
+html[data-platform="macos"] .prow:hover { border-color: #cfd8e6; background: #f7faff; }
+html[data-platform="macos"] .form > button:hover,
+html[data-platform="macos"] .chip-filter:hover { border-color: var(--blue); }
+html[data-platform="macos"] button.primary:hover { filter: brightness(1.08); }
+/* Klavyeyle gezinen kullanıcı için görünür odak halkası (macOS geleneği). */
+html[data-platform="macos"] :focus-visible { outline: 3px solid #7aa7e6; outline-offset: 2px; }
+
+/* Panodan hasta ekleme düğmesi — mavi "+" düğmesinin hemen üstünde durur.
+   ui-home.js bu sınıfı verir; konumun CSS'te olması, Mac'te ortalanmış içerik
+   sütununa hizalanabilmesi için gerekli (satır-içi stil geçersiz kılınamıyordu). */
+.fab-mini { position: fixed; right: 24px; bottom: 92px; width: 48px; height: 48px; border-radius: 50%;
+  border: 0; background: var(--green); color: #fff; display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,.25); z-index: 6; padding: 0; }
+#list-total { padding: 0 12px 4px; }
+html[data-platform="ios"] .fab-mini { bottom: calc(92px + env(safe-area-inset-bottom)); right: calc(24px + env(safe-area-inset-right)); }
+@media (min-width: 720px) {
+  html[data-platform="macos"] #list-total { max-width: 760px; margin-left: auto; margin-right: auto; }
+  html[data-platform="macos"] #sel-toolbar { max-width: 744px; margin-left: auto; margin-right: auto; }
+  html[data-platform="macos"] .fab-mini { right: calc(50% - 380px + 8px); }
+}

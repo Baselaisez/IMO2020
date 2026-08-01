@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <!-- Electron, hardened runtime altında JIT ve imzasız bellek çalıştırmak için
+       bu iki izne ihtiyaç duyar; olmadan uygulama noterlenmiş imzayla açılmaz. -->
+  <key>com.apple.security.cs.allow-jit</key>
+  <true/>
+  <key>com.apple.security.cs.allow-unsigned-executable-memory</key>
+  <true/>
+  <!-- macOS diktesi (Fn Fn) uygulamanın mikrofon iznini kullanır. Uygulama
+       KENDİSİ ses kaydetmez; izin yalnızca sistem diktesi içindir. -->
+  <key>com.apple.security.device.audio-input</key>
+  <true/>
+  <!-- Yedek dosyalarını kullanıcının seçtiği yere ("Farklı Kaydet…") yazabilmek için. -->
+  <key>com.apple.security.files.user-selected.read-write</key>
+  <true/>
+</dict>
+</plist>

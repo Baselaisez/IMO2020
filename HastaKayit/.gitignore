@@ -1,0 +1,5 @@
+node_modules/
+www/
+dist-mac/
+*.log
+.DS_Store

@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!-- Uygulama tamamen çevrimdışıdır: hiçbir uzak kaynak yüklenmez, hiçbir yere
+     bağlanılmaz. CSP bunu ZORUNLU kılar — hem WKWebView'de (iPhone) hem
+     Electron'da (Mac) hasta verisinin dışarı sızabileceği bir yol bırakmaz.
+     'wasm-unsafe-eval': sql.js'in WASM motoru için gerekli. blob:/data: img:
+     hasta fotoğrafı önizlemesi için. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; connect-src 'self'; font-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'">
+<meta name="color-scheme" content="light">
+<title>Hasta Kayıt</title>
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+<div id="banner" class="banner hidden"></div>
+
+<section id="screen-lock" class="screen">
+  <div class="lock-box">
+    <h1>🔒 Hasta Kayıt</h1>
+    <p id="lock-msg">PIN girin</p>
+    <input id="pin-input" type="password" inputmode="numeric" maxlength="6" autocomplete="off">
+    <button id="btn-pin-ok" class="primary">Aç</button>
+    <button id="btn-bio" class="ghost hidden">🔓 Biyometri ile aç</button>
+    <button id="btn-forgot-pin" class="ghost hidden">PİN'imi unuttum</button>
+  </div>
+</section>
+
+<section id="screen-home" class="screen hidden">
+  <header class="appbar">
+    <span>Hasta Kayıtları</span>
+    <button id="btn-settings" class="iconbtn">⚙️</button>
+  </header>
+  <input id="search" type="search" placeholder="🔍 Hasta ara…">
+  <div id="today-strip" class="today hidden"></div>
+  <div class="chips-row">
+    <button class="chip-filter active" data-f="active">Aktif</button>
+    <button class="chip-filter" data-f="done">Tamamlandı</button>
+    <button class="chip-filter" data-f="all">Tümü</button>
+    <button class="chip-filter" data-f="blocked">⛔ Asla Bakılmayacak</button>
+  </div>
+  <div id="patient-list" class="plist"></div>
+  <button id="btn-new" class="fab">+</button>
+</section>
+
+<section id="screen-form" class="screen hidden">
+  <header class="appbar">
+    <div class="bar-left"><button class="iconbtn btn-back" title="Geri" aria-label="Geri">←</button><button class="iconbtn btn-home" title="Ana menü" aria-label="Ana menü">🏠</button></div>
+    <span id="form-title" class="bar-title">Yeni Hasta</span>
+    <div class="bar-right"></div>
+  </header>
+  <form id="patient-form" class="form">
+    <div class="photo-row" style="display:flex;align-items:center;gap:12px;margin-bottom:4px">
+      <img id="photo-preview" alt="Fotoğraf" style="width:72px;height:72px;border-radius:12px;object-fit:cover;background:#eee;border:1px solid var(--line)">
+      <div style="display:flex;flex-direction:column;gap:6px;flex:1">
+        <button type="button" id="btn-photo-add" class="ghost">📷 Fotoğraf Ekle/Değiştir</button>
+        <button type="button" id="btn-photo-remove" class="ghost">Kaldır</button>
+      </div>
+      <input id="photo-input" type="file" accept="image/*" class="hidden">
+    </div>
+    <label>Ad Soyad *<input name="name" required></label>
+    <label>Anne Adı<input name="mother_name"></label>
+    <label>Doğum Tarihi<input name="birth_date" type="date"></label>
+    <label>Telefon<input name="phone" inputmode="tel"></label>
+    <label>İkametgah<input name="residence"></label>
+    <label><span class="lbl-row">Tanı<button type="button" class="mic-btn ghost" data-voice-for="f-diagnosis" title="Sesli yaz" aria-label="Sesli yaz">🎤</button></span><input id="f-diagnosis" name="diagnosis"></label>
+    <label>Sevk Eden<input name="referral"></label>
+    <label>Başlangıç Tarihi *<input name="start_date" type="date" required></label>
+    <label>Sonraki Randevu<input name="next_appt" type="datetime-local"></label>
+    <label>Planlanan Seans<input name="planned_sessions" type="number" inputmode="numeric" min="1" step="1"></label>
+    <label><span class="lbl-row">Notlar<button type="button" class="mic-btn ghost" data-voice-for="f-notes" title="Sesli yaz" aria-label="Sesli yaz">🎤</button></span><textarea id="f-notes" name="notes" rows="3"></textarea></label>
+    <button type="submit" class="primary">Kaydet</button>
+  </form>
+</section>
+
+<section id="screen-card" class="screen hidden">
+  <header class="appbar">
+    <div class="bar-left"><button class="iconbtn btn-back" title="Geri" aria-label="Geri">←</button><button class="iconbtn btn-home" title="Ana menü" aria-label="Ana menü">🏠</button></div>
+    <span id="card-name" class="bar-title"></span>
+    <div class="bar-right"><button id="btn-edit" class="iconbtn" title="Düzenle" aria-label="Düzenle">✏️</button></div>
+  </header>
+  <div id="card-body"></div>
+</section>
+
+<section id="screen-settings" class="screen hidden">
+  <header class="appbar">
+    <div class="bar-left"><button class="iconbtn btn-back" title="Geri" aria-label="Geri">←</button><button class="iconbtn btn-home" title="Ana menü" aria-label="Ana menü">🏠</button></div>
+    <span class="bar-title">Ayarlar &amp; Yedekleme</span>
+    <div class="bar-right"></div>
+  </header>
+  <div class="form">
+    <button id="btn-export-xlsx" class="primary">📊 Excel'e Aktar (.xlsx)</button>
+    <button id="btn-export-json">💾 Yedek Al (JSON)</button>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button id="btn-blank-form" style="flex:1">📄 Boş Form (PDF)</button>
+      <button id="btn-blank-form-docx" style="flex:1">📝 Boş Form (Word)</button>
+    </div>
+    <button id="btn-restore">♻️ Yedekten Geri Yükle (TÜM veriyi değiştir)</button>
+    <input id="restore-file" type="file" accept=".json,application/json" class="hidden">
+    <button id="btn-import">📥 İçe Aktar / Birleştir (JSON/Excel/PDF/Word)</button>
+    <input id="import-file" type="file" accept=".json,.xlsx,.pdf,.docx,application/json,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" class="hidden">
+    <button id="btn-batch-forms">📚 Toplu Form Aktarımı</button>
+    <input id="batch-forms-file" type="file" accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" multiple class="hidden">
+    <div id="dnd-zone" class="dnd-zone">📂 Dosyaları buraya sürükleyip bırakın
+      <span class="muted">Form: PDF/Word (birden fazlası → toplu aktarım) · Veri: JSON/Excel · Fotoğraf: JPG/PNG (hasta formu açıkken)</span></div>
+    <button id="btn-change-pin">🔑 PIN Değiştir</button>
+    <button id="btn-recovery-setup">🔐 Kurtarma Ayarları</button>
+    <p id="recovery-status" class="muted"></p>
+    <label>PIN ne zaman sorulsun?<select id="lock-policy">
+      <option value="switch">Her uygulama değişiminde</option>
+      <option value="close">Sadece uygulama kapanınca</option>
+      <option value="2">2 dakika sonra</option>
+      <option value="5">5 dakika sonra</option>
+      <option value="10">10 dakika sonra</option>
+    </select></label>
+    <label>Varsayılan hatırlatma süresi<select id="default-remind">
+      <option value="0">Saatinde</option><option value="15">15 dk önce</option><option value="30">30 dk önce</option>
+      <option value="60">1 saat önce</option><option value="120">2 saat önce</option><option value="1440">1 gün önce</option>
+    </select></label>
+    <h3>🔔 Bildirim &amp; Ses</h3>
+    <label>Hatırlatma bildirimleri<select id="notif-sound">
+      <option value="on">Sesli (varsayılan)</option>
+      <option value="off">Sessiz — sadece yazılı bildirim</option>
+    </select></label>
+    <p id="notif-help" class="muted"></p>
+    <p id="backup-info" class="muted"></p>
+    <p id="data-location-info" class="muted"></p>
+    <button id="btn-reveal-data" class="hidden">📂 Veri Klasörünü Göster</button>
+    <p class="muted" id="version-info">Sürüm __APP_VERSION__</p>
+    <h3>Aylık Özet</h3>
+    <div id="monthly-table"></div>
+  </div>
+</section>
+
+<div id="sheet-overlay" class="overlay hidden">
+  <div id="sheet" class="sheet"></div>
+</div>
+
+<script src="js/bundle.js"></script>
+</body>
+</html>

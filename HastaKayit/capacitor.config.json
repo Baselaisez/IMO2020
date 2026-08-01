@@ -1,0 +1,27 @@
+{
+  "appId": "com.hastakayit.app",
+  "appName": "Hasta Kayıt",
+  "webDir": "www",
+  "android": {
+    "allowMixedContent": false
+  },
+  "ios": {
+    "contentInset": "never",
+    "scrollEnabled": true,
+    "backgroundColor": "#fafafa",
+    "preferredContentMode": "mobile"
+  },
+  "plugins": {
+    "CapacitorSQLite": {
+      "androidIsEncryption": false,
+      "androidBiometric": {
+        "biometricAuth": false
+      },
+      "iosDatabaseLocation": "Library/CapacitorDatabase",
+      "iosIsEncryption": false,
+      "iosBiometric": {
+        "biometricAuth": false
+      }
+    }
+  }
+}
