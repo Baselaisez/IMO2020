@@ -29,28 +29,57 @@ const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..')
 export const REQUIRED_CAPACITOR = '8.5.0';
 
 /**
- * Package.resolved içinden bir paketin çözülmüş sürümünü okur. Saf.
- * Xcode'un üç biçimi de destekleniyor: v1 (object.pins, "package" adı),
- * v2 ve v3 (üstte "pins", "identity" adı). Biçim ayrımı yapılmazsa doğrulama
- * eski Xcode'larda sessizce "bilinmiyor" der ve uyarı kaçar.
+ * Bir paketin çözülmüş sürümünü okur. Saf.
+ *
+ * İKİ AYRI DOSYA BİÇİMİ var ve ikisine de bakmak gerekiyor:
+ *  • Package.resolved — v1 (object.pins, "package" adı), v2/v3 (pins, "identity")
+ *  • workspace-state.json — xcodebuild'in çekilmiş paket durumu
+ *    (object.dependencies[].state.checkoutState.version)
+ * Tek biçime bakmak, doğrulamanın "okunamadı" deyip sessizce pes etmesine yol
+ * açıyordu; o zaman da kullanıcı hangi sürümün derlendiğini öğrenemiyor.
  */
 export function resolvedVersion(json, identity) {
   let data;
   try { data = typeof json === 'string' ? JSON.parse(json) : json; } catch { return null; }
-  const pins = data?.pins ?? data?.object?.pins ?? [];
   const want = String(identity).toLowerCase();
-  for (const p of pins) {
-    const name = String(p.identity ?? p.package ?? '').toLowerCase();
-    // v1'de ad "Capacitor" gibi paket adıdır, v2+'da "capacitor-swift-pm" kimliğidir.
-    if (name === want || (p.location ?? p.repositoryURL ?? '').toLowerCase().includes(want)) {
-      return p.state?.version ?? null;
+  const matches = (...names) => names.some(n => {
+    const s = String(n ?? '').toLowerCase();
+    return s === want || s.includes(want);
+  });
+
+  for (const p of data?.pins ?? data?.object?.pins ?? []) {
+    if (matches(p.identity, p.package, p.location, p.repositoryURL)) return p.state?.version ?? null;
+  }
+  for (const d of data?.object?.dependencies ?? data?.dependencies ?? []) {
+    if (matches(d.packageRef?.identity, d.packageRef?.name, d.packageRef?.location)) {
+      return d.state?.checkoutState?.version ?? d.state?.version ?? null;
     }
   }
   return null;
 }
 
-const resolvedPath = () =>
-  path.join(root, 'ios/App/App.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved');
+/**
+ * Çözümleme sonucunun yazılabileceği TÜM yerler. Xcode sürümüne ve projenin
+ * yerel paket (CapApp-SPM) kullanmasına göre değişiyor; tek yola güvenmek
+ * doğrulamayı kırıyordu.
+ */
+async function candidateStateFiles() {
+  const out = [
+    path.join(root, 'ios/App/App.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved'),
+    path.join(root, 'ios/App/CapApp-SPM/Package.resolved'),
+    path.join(root, 'ios/App/CapApp-SPM/.swiftpm/xcode/package.xcworkspace/xcshareddata/swiftpm/Package.resolved'),
+    path.join(root, 'ios/.spm/workspace-state.json'),
+  ];
+  const dd = path.join(os.homedir(), 'Library/Developer/Xcode/DerivedData');
+  if (existsSync(dd)) {
+    for (const name of await readdir(dd).catch(() => [])) {
+      if (!/^App-[a-z]+$/i.test(name)) continue;
+      out.push(path.join(dd, name, 'SourcePackages/Package.resolved'));
+      out.push(path.join(dd, name, 'SourcePackages/workspace-state.json'));
+    }
+  }
+  return out;
+}
 
 async function main() {
   if (process.platform !== 'darwin') {
@@ -85,21 +114,44 @@ async function main() {
     }
   }
 
+  // İkili çerçeve (xcframework) önbelleği de sürüm taşır: doğru pini alıp ESKİ
+  // ikiliyi derlemek mümkündür. Bu yüzden Capacitor'a ait çekilmiş paket ve
+  // artefakt kalıntıları da temizleniyor. Genel önbelleğin TAMAMI silinmiyor —
+  // diğer projelerin paketleri korunuyor.
+  const spmCache = path.join(os.homedir(), 'Library/Caches/org.swift.swiftpm');
+  for (const sub of ['artifacts', 'repositories', 'manifests']) {
+    const dir = path.join(spmCache, sub);
+    if (!existsSync(dir)) continue;
+    for (const name of await readdir(dir).catch(() => [])) {
+      if (!/capacitor/i.test(name)) continue;
+      await rm(path.join(dir, name), { recursive: true, force: true });
+      console.log(`  silindi: Caches/org.swift.swiftpm/${sub}/${name}`);
+    }
+  }
+
   console.log('\n  Paketler yeniden çözümleniyor (birkaç dakika sürebilir)…');
+  let output = '';
   try {
-    execFileSync('xcodebuild', [
+    output = execFileSync('xcodebuild', [
       '-resolvePackageDependencies',
       '-project', path.join(root, 'ios/App/App.xcodeproj'),
       '-scheme', 'App',
+      '-clonedSourcePackagesDirPath', path.join(root, 'ios/.spm'),
     ], { stdio: ['ignore', 'pipe', 'pipe'], encoding: 'utf8' });
   } catch (e) {
-    console.log(`\n  ❌ Çözümleme başarısız:\n${String(e.stdout || e.stderr || e.message).trim().slice(-1200)}\n`);
+    console.log(`\n  ❌ Çözümleme başarısız:\n${String(e.stdout || e.stderr || e.message).trim().slice(-1500)}\n`);
     process.exit(1);
   }
 
   // Doğrula: menüden tıklattırıp sonucu görmemek yerine gerçekten ne çözüldü?
   let got = null;
-  try { got = resolvedVersion(await readFile(resolvedPath(), 'utf8'), 'capacitor-swift-pm'); } catch {}
+  const looked = [];
+  for (const f of await candidateStateFiles()) {
+    if (!existsSync(f)) continue;
+    looked.push(path.relative(root, f));
+    const v = resolvedVersion(await readFile(f, 'utf8').catch(() => ''), 'capacitor-swift-pm');
+    if (v) { got = v; break; }
+  }
 
   if (got === REQUIRED_CAPACITOR) {
     console.log(`\n  ✅ capacitor-swift-pm ${got} çözümlendi.\n
@@ -107,14 +159,21 @@ async function main() {
     return;
   }
 
-  console.log(`\n  ❌ Beklenen ${REQUIRED_CAPACITOR}, çözümlenen: ${got ?? 'okunamadı'}
+  console.log(`\n  ❌ Beklenen ${REQUIRED_CAPACITOR}, çözümlenen: ${got ?? 'okunamadı'}`);
+  console.log(`  Bakılan dosyalar: ${looked.length ? looked.join(', ') : '(hiçbiri bulunamadı)'}`);
+  if (output.trim()) console.log(`\n  xcodebuild çıktısı:\n${output.trim().split('\n').slice(-12).map(l => '    ' + l).join('\n')}`);
 
-  Swift Package genel önbelleği de takılmış demektir. Şunu çalıştırıp bu betiği
-  tekrar deneyin (o klasör yalnızca bir önbellektir, silinmesi güvenlidir —
-  ama diğer Xcode projeleriniz de paketlerini yeniden indirir):
+  console.log(`
+  Son çare — Swift Package genel önbelleğinin TAMAMINI silin. Yalnızca bir
+  önbellektir, silinmesi güvenlidir; diğer Xcode projeleriniz paketlerini
+  yeniden indirir:
 
       rm -rf ~/Library/Caches/org.swift.swiftpm
       npm run ios:reset
+
+  Bu da işe yaramazsa Xcode'u açıp (npm run ios) sol panelde
+  "capacitor-swift-pm" sürümüne bakın ve File ▸ Packages ▸ Reset Package
+  Caches → Resolve Package Versions deneyin.
 `);
   process.exit(1);
 }

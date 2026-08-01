@@ -43,3 +43,24 @@ test('yanlış sürüm doğru sürümle karıştırılmaz', () => {
   assert.notEqual(resolvedVersion(V1, 'capacitor-swift-pm'), REQUIRED_CAPACITOR);
   assert.equal(resolvedVersion(V3, 'capacitor-swift-pm'), REQUIRED_CAPACITOR);
 });
+
+test('resolvedVersion: workspace-state.json biçimi (xcodebuild çıktısı)', () => {
+  const WS = JSON.stringify({
+    object: { dependencies: [
+      { packageRef: { identity: 'capacitor-swift-pm', name: 'capacitor-swift-pm',
+                      location: 'https://github.com/ionic-team/capacitor-swift-pm.git' },
+        state: { checkoutState: { version: '8.5.0', revision: '4f71d0b' }, name: 'checkout' } },
+    ] },
+    version: 6,
+  });
+  assert.equal(resolvedVersion(WS, 'capacitor-swift-pm'), '8.5.0');
+});
+
+test('resolvedVersion: başka paketle karıştırmaz', () => {
+  const WS = JSON.stringify({
+    object: { dependencies: [
+      { packageRef: { identity: 'zipfoundation' }, state: { checkoutState: { version: '0.9.20' } } },
+    ] },
+  });
+  assert.equal(resolvedVersion(WS, 'capacitor-swift-pm'), null);
+});

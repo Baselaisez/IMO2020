@@ -3,3 +3,4 @@ www/
 dist-mac/
 *.log
 .DS_Store
+ios/.spm/
