@@ -23,7 +23,8 @@
     "icons": "node resources/make-icons.mjs",
     "ios:check": "node scripts/ios-preflight.mjs",
     "ios:reset": "node scripts/ios-reset-packages.mjs",
-    "postinstall": "node scripts/patch-capacitor-spm.mjs"
+    "postinstall": "node scripts/patch-capacitor-spm.mjs",
+    "ios:build": "node scripts/ios-build.mjs"
   },
   "dependencies": {
     "@aparajita/capacitor-biometric-auth": "^10.0.0",

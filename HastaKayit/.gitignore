@@ -4,3 +4,4 @@ dist-mac/
 *.log
 .DS_Store
 ios/.spm/
+ios/build.log
