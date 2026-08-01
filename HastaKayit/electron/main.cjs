@@ -40,6 +40,20 @@ const dbFile = () => path.join(dataDir(), 'hastakayit.sqlite');
 let win = null;
 let readyToClose = false;
 
+/**
+ * Kullanılabilir pencere, yoksa null.
+ *
+ * DİKKAT — `if (win)` YETMEZ. macOS'ta pencere kapansa da uygulama ayakta kalır
+ * (aşağıdaki window-all-closed) ve `win` YOK EDİLMİŞ bir nesneyi göstermeye
+ * devam eder. Yok edilmiş bir BrowserWindow nesnesi hâlâ "truthy"dir; üzerinde
+ * herhangi bir metot çağırmak `TypeError: Object has been destroyed` ile ana
+ * süreci düşürür ve kullanıcı "A JavaScript error occurred in the main process"
+ * penceresini görür. Pencereye dokunan HER yol bu kapıdan geçmeli.
+ */
+function liveWin() {
+  return win && !win.isDestroyed() ? win : null;
+}
+
 const stateFile = () => path.join(app.getPath('userData'), 'window-state.json');
 
 function loadWindowState() {
@@ -91,6 +105,10 @@ function createWindow() {
   win.loadFile(path.join(__dirname, '..', 'www', 'index.html'));
 
   for (const ev of ['resize', 'move', 'close']) win.on(ev, saveWindowState);
+  // Referansı bırak: yok edilmiş bir pencereyi tutmak yukarıdaki çökmenin
+  // kaynağıydı. readyToClose da sıfırlanmalı, yoksa aynı oturumda açılan ikinci
+  // pencere kapanış el sıkışmasını hiç yapmaz ve bekleyen yazma kaybolur.
+  win.on('closed', () => { win = null; readyToClose = false; });
 
   // Kapanış el sıkışması: bekleyen veritabanı yazması diske inmeden pencere
   // KAPANMAZ. Renderer 'hk:before-quit' sinyalini alır, flush eder ve
@@ -100,7 +118,7 @@ function createWindow() {
     if (readyToClose) return;
     e.preventDefault();
     win.webContents.send('hk:before-quit');
-    setTimeout(() => { readyToClose = true; if (win && !win.isDestroyed()) win.close(); }, 3000);
+    setTimeout(() => { readyToClose = true; liveWin()?.close(); }, 3000);
   });
 
   // Dış bağlantılar (tel:, mailto:, https:) uygulamanın İÇİNDE açılmaz —
@@ -118,7 +136,7 @@ function createWindow() {
 // Gerçek bir macOS menü çubuğu. Düzen menüsü sadece süs değil: ⌘C/⌘V/⌘Z
 // kısayolları ve "Dikteyi Başlat" oradan gelir — menüsüz bir Electron
 // penceresinde kopyala-yapıştır bile çalışmaz.
-function send(cmd) { win?.webContents.send('hk:menu', cmd); }
+function send(cmd) { liveWin()?.webContents.send('hk:menu', cmd); }
 
 function buildMenu() {
   const template = [
@@ -237,7 +255,7 @@ ipcMain.handle('hk:file-delete', async (_e, kind, name) => {
 // Dışa aktarma: gerçek "Farklı Kaydet…" paneli. iPhone'daki paylaşım
 // sayfasının Mac'teki karşılığı budur.
 ipcMain.handle('hk:save-export', async (_e, name, base64) => {
-  const { canceled, filePath } = await dialog.showSaveDialog(win, {
+  const { canceled, filePath } = await dialog.showSaveDialog(liveWin() ?? undefined, {
     title: 'Farklı Kaydet',
     defaultPath: path.join(app.getPath('downloads'), String(name)),
     buttonLabel: 'Kaydet',
@@ -254,7 +272,7 @@ ipcMain.handle('hk:reveal-data-dir', async () => {
 
 ipcMain.handle('hk:ready-to-close', () => {
   readyToClose = true;
-  if (win && !win.isDestroyed()) win.close();
+  liveWin()?.close();
 });
 
 // --- Yaşam döngüsü ---------------------------------------------------------
@@ -263,7 +281,11 @@ if (!app.requestSingleInstanceLock()) {
   app.quit();
 } else {
   app.on('second-instance', () => {
-    if (win) { if (win.isMinimized()) win.restore(); win.focus(); }
+    const w = liveWin();
+    if (w) { if (w.isMinimized()) w.restore(); w.focus(); }
+    // Pencere kapatılmış ama uygulama macOS'ta ayakta kalmıştı: uygulamayı
+    // yeniden başlatmaya çalışan kullanıcı penceresini geri istiyor demektir.
+    else createWindow();
   });
 
   app.whenReady().then(() => {
