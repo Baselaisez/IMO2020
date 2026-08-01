@@ -77,9 +77,20 @@ değilse sorun budur. (`SceneDelegateProxy` sınıfı Capacitor 8.5.0'ın ikili
 npm run ios:reset
 ```
 
-Ardından Xcode'da **File ▸ Packages ▸ Resolve Package Versions**, sonra ⇧⌘K
-(Clean Build Folder) ve ⌘R. Betik yalnızca bu projeye ait pinleri ve türetilmiş
-veriyi siler; diğer Xcode projeleriniz etkilenmez.
+Betik pinleri siler, çözümlemeyi `xcodebuild` ile KENDİSİ yapar ve sonunda
+hangi sürümün çözüldüğünü yazar — "menüden şunu tıklayın" deyip sonucu
+görmemek yerine doğrulanmış bir çıktı verir:
+
+```
+  ✅ capacitor-swift-pm 8.5.0 çözümlendi.
+```
+
+Yalnızca bu projeye ait pinler ve türetilmiş veri silinir; diğer Xcode
+projeleriniz etkilenmez. Ardından Xcode'da ⇧⌘K (Clean Build Folder) ve ⌘R.
+
+Betik 8.5.0 dışında bir sürüm bulursa Swift'in genel önbelleği de takılmış
+demektir; ekrana yazdığı `rm -rf ~/Library/Caches/org.swift.swiftpm` komutunu
+çalıştırıp tekrar deneyin.
 
 ### "Signing for 'App' requires a development team"
 
