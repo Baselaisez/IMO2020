@@ -11,6 +11,19 @@ Xcode'un komut satırı araçları kuruluysa CocoaPods'a **gerek yok**: proje
 Swift Package Manager kullanıyor, bağımlılıklar Xcode açılınca kendiliğinden
 çözülür.
 
+## Önce ortam denetimi
+
+```bash
+npm run ios:check
+```
+
+Xcode kaynaklı hatalar Xcode'un içinde anlaşılmaz görünür ("Command
+CompileSwiftSources failed"), oysa sebep hemen her zaman şu üçünden biridir:
+`xcode-select` hâlâ Command Line Tools'u gösteriyordur, Xcode lisansı kabul
+edilmemiştir, ya da `npm install` çalıştırılmamıştır. Denetim bunları saniyeler
+içinde bulur ve düzeltme komutunu aynen yazar. `npm run ios` bu denetimi
+kendiliğinden çağırır.
+
 ## Çalıştırma
 
 ```bash
@@ -19,8 +32,18 @@ npm install
 npm run ios
 ```
 
-`npm run ios` sırayla şunları yapar: `www/` derlenir → `npx cap sync ios` ile
-`ios/App/App/public` altına kopyalanır → Xcode açılır.
+`npm run ios` sırayla şunları yapar: ortam denetimi → `www/` derlenir →
+`npx cap sync ios` ile `ios/App/App/public` altına kopyalanır → Xcode açılır.
+
+### En hızlı yol: Simülatör
+
+Apple Developer üyeliği, hatta iPhone bile gerekmez. Xcode açıldıktan sonra üst
+ortadaki cihaz seçiciden bir **iPhone simülatörü** seçip ▶ (⌘R) demeniz yeterli;
+imzalama için ekip seçmeye gerek yoktur. Simülatörde çalışmayan tek şey
+Face ID'nin gerçek donanımıdır — onu da menüden **Features ▸ Face ID ▸
+Enrolled** seçip **Matching Face** ile taklit edebilirsiniz.
+
+Gerçek cihaza kurmak için aşağıdaki imzalama adımı gerekir.
 
 Xcode'da:
 

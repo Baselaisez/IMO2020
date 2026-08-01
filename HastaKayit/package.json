@@ -16,11 +16,12 @@
     "watch": "node build.mjs --watch",
     "serve": "node build.mjs && node -e \"import('node:http').then(async({default:h})=>{const {readFile}=await import('node:fs/promises');const {extname,join}=await import('node:path');const T={'.html':'text/html','.js':'text/javascript','.css':'text/css','.wasm':'application/wasm','.map':'application/json'};h.createServer(async(q,s)=>{const p=join('www',q.url==='/'?'index.html':decodeURIComponent(q.url).split('?')[0]);try{s.writeHead(200,{'content-type':T[extname(p)]||'application/octet-stream'});s.end(await readFile(p))}catch{s.writeHead(404);s.end()}}).listen(5173,()=>console.log('http://localhost:5173'))})\"",
     "sync": "npm run build && cap sync ios",
-    "ios": "npm run sync && cap open ios",
+    "ios": "npm run ios:check && npm run sync && cap open ios",
     "mac": "npm run build && electron electron/main.cjs",
     "mac:dist": "npm run build && electron-builder --mac --arm64 --x64",
     "test": "node --test \"test/**/*.test.mjs\"",
-    "icons": "node resources/make-icons.mjs"
+    "icons": "node resources/make-icons.mjs",
+    "ios:check": "node scripts/ios-preflight.mjs"
   },
   "dependencies": {
     "@aparajita/capacitor-biometric-auth": "^10.0.0",
