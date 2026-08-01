@@ -21,6 +21,14 @@ npm run mac:dist
 `dist-mac/` altında Apple Silicon ve Intel için `.dmg` ve `.zip` üretilir.
 `resources/icon.icns` simgesi hazırdır (yeniden üretmek için `npm run icons`).
 
+Uygulama paketi (`app.asar`) ~2 MB'dir; geri kalan ~250 MB Electron'un kendi
+çalışma zamanıdır ve küçültülemez. `build.files` içindeki `!node_modules/**/*`
+kuralı önemlidir: bütün çalışma zamanı bağımlılıkları esbuild tarafından zaten
+`www/js/bundle.js` içine paketlendiği için masaüstü uygulamasının node_modules'a
+İHTİYACI YOKTUR. Kural olmadan electron-builder tüm üretim bağımlılıklarını
+(Capacitor eklentilerinin Android `.java` ve iOS `.swift` kaynakları dahil)
+pakete kopyalar ve `app.asar` 94 MB'a çıkar.
+
 ### İmzalama ve noterleme
 
 İmzasız bir `.dmg` başka bir Mac'te "geliştirici doğrulanamadı" uyarısı verir.

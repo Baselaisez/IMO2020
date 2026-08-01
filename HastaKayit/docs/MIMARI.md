@@ -49,7 +49,7 @@ Mac'te aynen geri yüklenir.
 | Masaüstü veri klasörü | her yerde `~/HastaKayit` | Mac'te `~/Library/Application Support/HastaKayit`, Windows'ta eskisi gibi |
 | Kapanışta kayıt | `beforeunload` (asenkron yazma yetişmeyebilirdi) | ana süreçle el sıkışma: yazma bitmeden pencere kapanmaz |
 | Biyometri düğmesi | sabit "Parmak izi ile aç" | cihaza göre Face ID / Touch ID / parmak izi |
-| Dışa aktarma | Android paylaşım sayfası; masaüstünde tarayıcı indirmesi | iPhone paylaşım sayfası (iPad için konum verilir), Mac'te "Farklı Kaydet…" paneli |
+| Dışa aktarma | Android paylaşım sayfası; masaüstünde tarayıcı indirmesi | iPhone/Android paylaşım sayfası, Mac'te "Farklı Kaydet…" paneli |
 | Dışa aktarma mesajı | daima "hazırlandı ✓" | iptal edilirse iptal, kaydedilirse dosya yolu |
 | Bildirim kanalları | her yerde çağrılıyordu | yalnızca Android; iOS'ta kanal kavramı yok, ilgili ayar gizlenir |
 | Sesli yazma | yalnızca Windows (Win + H) | Mac'te Fn Fn; iPhone'da düğme gizli (klavyenin kendi mikrofonu) |
@@ -77,11 +77,17 @@ Bu ortamda (Linux) doğrulanabilenler:
   yazıldı ve **ikinci açılışta geri okundu**. Hata banner'ı çıkmadı.
 - `npx cap sync ios` — 7 eklenti bulundu, `www/` iOS projesine kopyalandı,
   `Info.plist` geçerli bir plist olarak ayrıştırılıyor.
+- `electron-builder` paketlemesi: macOS `.app` ağacı üretildi, paketlenmiş
+  `Info.plist` beklenen anahtarları (kategori, izin metinleri, sürüm) taşıyor;
+  `app.asar` yalnızca `www/`, `electron/` ve `package.json` içeriyor.
+  **Paketlenmiş ikili çalıştırıldı** ve veritabanını oluşturdu — yani asar
+  içinden açılış, preload köprüsü ve WASM okuma paketlenmiş hâlde de çalışıyor.
 
 Doğrulanamayanlar (macOS ve Xcode gerektirir):
 
 - iOS projesinin derlenmesi ve cihazda çalışması
-- `.dmg` üretimi, imzalama ve noterleme
+- `.dmg` kabının üretimi (macOS'un `sips` aracını gerektirir), imzalama ve
+  noterleme — Linux'ta paketleme `.dmg` adımına kadar sorunsuz ilerliyor
 - Face ID / Touch ID, takvim ve bildirim izin akışları
 - macOS penceresinin trafik ışığı hizası (CSS'te 78px sol boşluk verildi,
   gerçek pencerede gözle kontrol edilmeli)

@@ -2,8 +2,14 @@
   "name": "hastakayit",
   "version": "5.0.0",
   "description": "Hasta Kayıt — iPhone (iOS) ve Mac (macOS) sürümleri",
+  "author": "Hasta Kayıt",
   "private": true,
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Baselaisez/IMO2020.git",
+    "directory": "HastaKayit"
+  },
   "main": "electron/main.cjs",
   "scripts": {
     "build": "node build.mjs",
@@ -47,7 +53,8 @@
     "files": [
       "www/**/*",
       "electron/**/*",
-      "package.json"
+      "package.json",
+      "!node_modules/**/*"
     ],
     "directories": {
       "output": "dist-mac",
