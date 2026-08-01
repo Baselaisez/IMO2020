@@ -1,15 +1,10 @@
 // Xcode'un takılı kalmış Swift Package çözümlemesini sıfırlar VE yeniden çözer.
 //
 // NEDEN GEREKLİ
-// ios/App/CapApp-SPM/Package.swift, Capacitor'ı `exact: "8.5.0"` ile ister.
-// Buna rağmen Xcode bir kez ESKİ bir sürümü çözümlemişse o pini kendiliğinden
-// bırakmaz ve derleme şu hatayı verir:
-//
-//     Cannot find 'SceneDelegateProxy' in scope     (SceneDelegate.swift)
-//
-// Sebep tam olarak budur: `SceneDelegateProxy` Capacitor 8.5.0'ın ikili
-// çerçevesinde VARDIR, 8.0.0'da YOKTUR (ikisi de indirilip doğrulandı). Yani
-// kod doğru, Xcode yanlış sürümü derliyor.
+// ios/App/CapApp-SPM/Package.swift, Capacitor'ı `exact: "8.0.0"` ile ister —
+// eklentilerin tamamının hedeflediği sürüm budur. Xcode bir kez BAŞKA bir
+// sürümü çözümlemişse o pini kendiliğinden bırakmaz ve tuhaf derleme hataları
+// verir. Bu betik pini atıp yeniden çözümler.
 //
 // Bu betik pinleri siler, çözümlemeyi KENDİSİ yapar (xcodebuild) ve sonucu
 // okuyup ekrana yazar — "menüden şunu tıklayın" deyip sonucu görmemek yerine
@@ -26,7 +21,7 @@ import { pathToFileURL } from 'node:url';
 const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
 
 /** Package.swift'in dayattığı sürüm. Uyuşmazlığı bununla ölçüyoruz. */
-export const REQUIRED_CAPACITOR = '8.5.0';
+export const REQUIRED_CAPACITOR = '8.0.0';
 
 /**
  * Bir paketin çözülmüş sürümünü okur. Saf.

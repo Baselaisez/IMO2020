@@ -11,19 +11,16 @@
 // dayatılır. Sonuç: uygulamamızın kendi Package.swift'i Capacitor'ı
 // `exact: "8.5.0"` ile istese bile SPM "8.0.0" DALINI çeker.
 //
-// Belirti (teşhis edilmesi çok zor, çünkü sürüm numarası doğru görünür):
-//
-//     Cannot find 'SceneDelegateProxy' in scope        SceneDelegate.swift
-//
-// Çünkü Capacitor CLI 8.5.0'ın ürettiği SceneDelegate.swift 8.5.0 API'sini
-// kullanır; 8.0.0 dalındaki ikili çerçevede o sınıf YOKTUR (iki çerçeve de
-// indirilip doğrulandı). Xcode'un yan panelinde "capacitor-swift-pm 8.0.0"
-// yazması bir sürüm etiketi değil, DAL adıdır.
+// Bir DAL gereksinimi ile bir SÜRÜM gereksinimi aynı pakette çakışır: kök
+// projemiz `exact: "8.0.0"` der, sqlite ise "8.0.0" DALINI ister. İkisi aynı
+// koda işaret etse bile SPM için farklı türde gereksinimlerdir ve çözümleme
+// öngörülemez hâle gelir (Xcode'un yan panelinde "capacitor-swift-pm 8.0.0"
+// yazması bir sürüm etiketi değil, dal adıdır — teşhisi bu yüzden zordur).
 //
 // ÇÖZÜM
-// `branch: "X"` → `from: "X"`. `from:` bir sonraki ana sürüme kadar izin
-// verdiği için 8.5.0 seçilebilir hâle gelir ve kök projedeki `exact: "8.5.0"`
-// gereksinimi karşılanır. Eklentinin kendi kodu değişmez.
+// `branch: "X"` → `from: "X"`. Böylece grafikteki tüm gereksinimler sürüm
+// tabanlı olur ve kökteki `exact: "8.0.0"` net biçimde 8.0.0'ı seçtirir.
+// Eklentinin kendi kodu değişmez.
 //
 // Bu bir node_modules yamasıdır: her `npm install` sonrası silinir, o yüzden
 // postinstall olarak çalışır. Yukarı akış düzeltince (sqlite `from:` kullanınca)

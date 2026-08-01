@@ -39,9 +39,11 @@ test('resolvedVersion: eksik/bozuk girdide sessizce null', () => {
   assert.equal(resolvedVersion(JSON.stringify({ pins: [] }), 'capacitor-swift-pm'), null);
 });
 
-test('yanlış sürüm doğru sürümle karıştırılmaz', () => {
-  assert.notEqual(resolvedVersion(V1, 'capacitor-swift-pm'), REQUIRED_CAPACITOR);
-  assert.equal(resolvedVersion(V3, 'capacitor-swift-pm'), REQUIRED_CAPACITOR);
+test('beklenen sürüm sabiti eklentilerin hedefiyle aynı olmalı', () => {
+  // Eklentilerin tamamı capacitor-swift-pm 8.0.0'ı hedefliyor; sabit bundan
+  // saparsa doğrulama her çalıştırmada yanlış alarm verir.
+  assert.equal(REQUIRED_CAPACITOR, '8.0.0');
+  assert.equal(resolvedVersion(V1, 'capacitor-swift-pm'), REQUIRED_CAPACITOR);
 });
 
 test('resolvedVersion: workspace-state.json biçimi (xcodebuild çıktısı)', () => {

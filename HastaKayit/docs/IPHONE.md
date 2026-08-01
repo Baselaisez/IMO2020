@@ -60,55 +60,52 @@ sync` yeterlidir, ardından Xcode'da tekrar **Run**.
 
 ## Sık karşılaşılan iki hata
 
-### "Cannot find 'SceneDelegateProxy' in scope"
+### Capacitor sürümü neden 8.0.0?
 
-`SceneDelegate.swift` içinde üç hata olarak görünür. Kod doğrudur; hata Xcode'un
-YANLIŞ Capacitor sürümünü derlemesinden kaynaklanır.
+Uygulama Capacitor **8.0.0**'a sabitlenmiştir; en güncel 8.5.0'a değil. Sebep
+eklenti ekosistemidir: `@capacitor-community/sqlite` (8.1.0 dahil, en güncel
+sürüm) Capacitor'ı bir sürümle değil, bir DALLA ister —
+`branch: "8.0.0"` — ve diğer tüm eklentiler `from: "8.0.0"` der. Yani hepsi
+8.0.0'ı hedefliyor.
 
-**Asıl sebep bir eklenti hatasıdır.** `@capacitor-community/sqlite` (8.1.0 dahil,
-en güncel sürüm) Capacitor'ı bir SÜRÜM değil, bir DAL ile ister:
+8.5.0'a zorlamak iki sorun doğuruyordu:
 
-```swift
-.package(url: ".../capacitor-swift-pm.git", branch: "8.0.0")   // sqlite
-.package(url: ".../capacitor-swift-pm.git", from:   "8.0.0")   // diğer tüm eklentiler
-```
+1. Swift Package Manager'da dal gereksinimi sürüm gereksinimlerini ezdiği için
+   çözümleme öngörülemez hâle geliyordu.
+2. Capacitor CLI 8.5.0'ın ürettiği `SceneDelegate.swift`, 8.0.0 çerçevesinde
+   bulunmayan `SceneDelegateProxy` sınıfını kullanıyor →
+   *Cannot find 'SceneDelegateProxy' in scope*.
 
-Swift Package Manager'da dal gereksinimi sürüm gereksinimlerini EZER ve tüm
-grafiğe dayatılır. Bu yüzden bizim `exact: "8.5.0"` isteğimiz hiçbir zaman
-geçerli olmaz; SPM "8.0.0" dalını çeker. Xcode'un yan panelindeki
-"capacitor-swift-pm 8.0.0" bir sürüm etiketi değil, o dalın adıdır — bu yüzden
-teşhisi zordur.
+CLI 8.0.0 `SceneDelegate.swift` üretmez (yalnızca `AppDelegate.swift`), bu
+yüzden o hata yapısal olarak ortadan kalkar. `postinstall` kancası ayrıca
+sqlite'ın dal sabitlemesini `from:` yapar (bkz. `scripts/patch-capacitor-spm.mjs`)
+ki grafikteki tüm gereksinimler aynı türden olsun ve kökteki `exact: "8.0.0"`
+net biçimde uygulansın.
 
-`SceneDelegateProxy` sınıfı Capacitor 8.5.0'ın ikili çerçevesinde vardır,
-8.0.0'da yoktur (iki çerçeve de indirilip doğrulandı); CLI 8.5.0'ın ürettiği
-SceneDelegate.swift ise o sınıfı kullanır.
+Capacitor'ı yükseltmek isterseniz önce sqlite eklentisinin dal sabitlemesini
+bırakmasını bekleyin.
 
-`npm install` sonrası çalışan `postinstall` kancası bu satırı `from:` yapar
-(bkz. `scripts/patch-capacitor-spm.mjs`) — eklentinin kendi kodu değişmez,
-yalnızca sürüm aralığı serbest bırakılır. Yukarı akış düzeltince yama
-kendiliğinden etkisiz hâle gelir.
+## Sık karşılaşılan hatalar
 
-Çözüm — yama zaten uygulanmışsa yalnızca eski çözümlemeyi atmak kalır:
+### Derleme hatalarını metin olarak görmek
 
 ```bash
-npm install        # postinstall yamayı uygular
-npm run ios:reset  # eski pinleri ve önbelleği atıp yeniden çözümler
+npm run ios:build
 ```
 
-Betik pinleri siler, çözümlemeyi `xcodebuild` ile KENDİSİ yapar ve sonunda
-hangi sürümün çözüldüğünü yazar — "menüden şunu tıklayın" deyip sonucu
-görmemek yerine doğrulanmış bir çıktı verir:
+Simülatör hedefiyle derler (imzalama gerekmez) ve `error:` satırlarını
+benzersizleştirip tekrar sayılarıyla yazar; tam günlük `ios/build.log`
+dosyasına kaydedilir. Xcode'un sorun panelinde 38 satır görmek, aslında 2
+farklı sebebin 38 tekrarı olabilir.
 
+### Paket çözümlemesi takılırsa
+
+```bash
+npm run ios:reset
 ```
-  ✅ capacitor-swift-pm 8.5.0 çözümlendi.
-```
 
-Yalnızca bu projeye ait pinler ve türetilmiş veri silinir; diğer Xcode
-projeleriniz etkilenmez. Ardından Xcode'da ⇧⌘K (Clean Build Folder) ve ⌘R.
-
-Betik 8.5.0 dışında bir sürüm bulursa Swift'in genel önbelleği de takılmış
-demektir; ekrana yazdığı `rm -rf ~/Library/Caches/org.swift.swiftpm` komutunu
-çalıştırıp tekrar deneyin.
+Pinleri ve bu projeye ait önbellekleri atıp yeniden çözümler, sonunda hangi
+sürümün çözüldüğünü yazar.
 
 ### "Signing for 'App' requires a development team"
 
