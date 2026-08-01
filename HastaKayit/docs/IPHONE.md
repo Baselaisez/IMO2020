@@ -11,6 +11,10 @@ Xcode'un komut satırı araçları kuruluysa CocoaPods'a **gerek yok**: proje
 Swift Package Manager kullanıyor, bağımlılıklar Xcode açılınca kendiliğinden
 çözülür.
 
+> **Xcode'a hiç aşina değilseniz:** ekran ekran, tıklama tıklama anlatan
+> [IPHONE-ADIM-ADIM.md](IPHONE-ADIM-ADIM.md) dosyasını okuyun. Bu dosya
+> arka plandaki teknik ayrıntıları anlatır.
+
 ## Önce ortam denetimi
 
 ```bash
