@@ -4,17 +4,23 @@
 // their own PDF reader and send back. parseForm() reads a returned PDF back into
 // the app's patient fields.
 //
-// Font note: pdf-lib's StandardFonts (Helvetica) cannot encode Turkish-only
-// glyphs (ş, ğ, ı, İ) in drawn text / appearance streams. Embedding a Unicode
-// TTF needs @pdf-lib/fontkit + a real .ttf, neither of which ships here, and a
-// base64 font blob in bundled source is not worth it. So visible LABELS are
-// ASCII-folded (İsim→Isim, Şikayet→Sikayet) via `fold()` below. This is purely
-// cosmetic: FIELD NAMES are ASCII by design, and field VALUES the client types
-// round-trip as Unicode through the field value (/V) — so parsing Turkish input
-// is unaffected.
+// YAZI TİPİ — Türkçe harfler
+// pdf-lib'in yerleşik Helvetica'sı (WinAnsi) ş, ğ, ı, İ harflerini KODLAYAMAZ.
+// Eskiden bu yüzden etiketler ASCII'ye katlanıyordu: hastanın eline "İsim
+// Soyisim" yerine "Isim Soyisim", "Şikayet" yerine "Sikayet" yazan bir form
+// gidiyordu. Dahası, alanların varsayılan görünümü (DA) Helvetica'yı
+// gösterdiğinden, hasta "Ayşe" yazdığında bazı okuyucular harfi çizemiyordu.
+//
+// Artık forma indirgenmiş bir Unicode yazı tipi gömülüyor (Liberation Sans,
+// SIL OFL 1.1, ~17 KB — bkz. pdf-font.js) ve etiketler olduğu gibi yazılıyor.
+// Ayrıca NeedAppearances açılıyor: okuyucu, hastanın yazdığı metnin görünümünü
+// kendisi üretir — Önizleme (Preview) ve telefon okuyucularında "yazdım ama
+// görünmüyor" sorununu bitiren ayar budur.
 
-import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
+import { PDFDocument, PDFName, PDFBool, rgb } from 'pdf-lib';
+import fontkit from '@pdf-lib/fontkit';
 import { emptyResult, normalizeBirthDate } from './form-fields.js';
+import { PDF_FONT_REGULAR_B64, PDF_FONT_BOLD_B64, fontBytes } from './pdf-font.js';
 
 // App-field mapping: the ASCII AcroForm field name -> the app's patient field.
 // `mother` is deliberately renamed to `mother_name` to match repo.js columns,
@@ -33,25 +39,16 @@ function cleanValue(s) {
   return String(s ?? '').replace(/\s+/g, ' ').trim();
 }
 
-// Fold Turkish-only glyphs to ASCII so Helvetica can draw them. WinAnsi already
-// handles ç/ö/ü, but ş/ğ/ı/İ are not encodable — fold the whole set for safety.
-const FOLD = {
-  ş: 's', Ş: 'S', ğ: 'g', Ğ: 'G', ı: 'i', İ: 'I',
-  ç: 'c', Ç: 'C', ö: 'o', Ö: 'O', ü: 'u', Ü: 'U',
-};
-function fold(s) {
-  return s.replace(/[şŞğĞıİçÇöÖüÜ]/g, (c) => FOLD[c] || c);
-}
-
-// Type sizes, in POINTS. The doctor's clients skew elderly and print this form,
-// so labels and the text they type are deliberately large; the layout below is
-// sized around these numbers and asserted to still fit A4 by the tests.
-const SIZE_TITLE = 20;
-const SIZE_INTRO = 12;
-const SIZE_LABEL = 13;
-const SIZE_VALUE = 13;
-const SIZE_PHOTO_CAPTION = 10;
-const SIZE_PHOTO_NOTE = 11;
+// Punto (POINT). Doktorun danışanları yaşlı ve bu formu basıp elle ya da
+// ekranda dolduruyorlar, bu yüzden hiçbir şey küçük değil. Yerleşim bu
+// sayılara göre hesaplanmıştır ve testler her alanın A4 sayfasının içinde
+// kaldığını doğrular — punto büyütülürse test önce kırılır, sessizce taşmaz.
+const SIZE_TITLE = 24;
+const SIZE_INTRO = 14;
+const SIZE_LABEL = 16;
+const SIZE_VALUE = 16;
+const SIZE_PHOTO_CAPTION = 12;
+const SIZE_PHOTO_NOTE = 13;
 
 // Vesikalık (passport photo) proportions: 3.5cm × 4.5cm in points.
 const PHOTO_W = 99;
@@ -64,10 +61,16 @@ const PHOTO_H = 128;
  */
 export async function generateBlankForm() {
   const doc = await PDFDocument.create();
+  doc.registerFontkit(fontkit);
   const page = doc.addPage([595.28, 841.89]); // A4 portrait, points
-  const font = await doc.embedFont(StandardFonts.Helvetica);
-  const fontBold = await doc.embedFont(StandardFonts.HelveticaBold);
+  // subset: false — alanların DA'sı bu yazı tipini gösterir ve hasta HENÜZ
+  // yazmadığı için hangi harfleri kullanacağını bilemeyiz; alt küme almak,
+  // yazdığı harfin gömülü olmaması riskini doğurur. Zaten indirgenmiş (~17 KB).
+  const font = await doc.embedFont(fontBytes(PDF_FONT_REGULAR_B64), { subset: false });
+  const fontBold = await doc.embedFont(fontBytes(PDF_FONT_BOLD_B64), { subset: false });
   const form = doc.getForm();
+  // Okuyucu, hastanın yazdığı metnin görünümünü kendisi üretsin.
+  form.acroForm.dict.set(PDFName.of('NeedAppearances'), PDFBool.True);
 
   const { width, height } = page.getSize();
   const marginX = 50;
@@ -77,10 +80,10 @@ export async function generateBlankForm() {
   const hint = rgb(0.45, 0.45, 0.45);
 
   // Title
-  page.drawText(fold('Danışan Kayıt Formu'), {
+  page.drawText(('Danışan Kayıt Formu'), {
     x: marginX, y: height - 60, size: SIZE_TITLE, font: fontBold, color: ink,
   });
-  page.drawText(fold('Lütfen aşağıdaki bilgileri doldurup geri gönderiniz.'), {
+  page.drawText(('Lütfen aşağıdaki bilgileri doldurup geri gönderiniz.'), {
     x: marginX, y: height - 84, size: SIZE_INTRO, font, color: hint,
   });
 
@@ -99,14 +102,14 @@ export async function generateBlankForm() {
   // the diagnosis block + ~148 for the photo box and its caption = ~712, which
   // leaves a ~110pt bottom margin. The diagnosis box is the shock absorber: if a
   // 7th field is ever added, shrink IT rather than the type.
-  let y = height - 130;
-  const rowGap = 16; // space below each field box
-  const labelGap = 18; // label baseline -> top of its box
+  let y = height - 132;
+  const rowGap = 14; // space below each field box
+  const labelGap = 20; // label baseline -> top of its box
 
   for (const row of rows) {
-    const boxHeight = row.multiline ? 80 : 30;
+    const boxHeight = row.multiline ? 88 : 34;
     // Label
-    page.drawText(fold(row.label), {
+    page.drawText(row.label, {
       x: marginX, y, size: SIZE_LABEL, font, color: ink,
     });
     y -= labelGap;
@@ -136,7 +139,7 @@ export async function generateBlankForm() {
     x: photoX, y: photoY, width: PHOTO_W, height: PHOTO_H,
     borderWidth: 1, borderColor: border, color: rgb(0.97, 0.97, 0.97),
   });
-  const caption = fold('Fotoğraf');
+  const caption = 'Fotoğraf';
   page.drawText(caption, {
     x: photoX + (PHOTO_W - font.widthOfTextAtSize(caption, SIZE_PHOTO_CAPTION)) / 2,
     y: photoY + PHOTO_H / 2,
@@ -144,11 +147,17 @@ export async function generateBlankForm() {
     font,
     color: hint,
   });
-  page.drawText(fold('Fotoğrafınızı bu alana yapıştırın veya ayrıca gönderin.'), {
+  page.drawText(('Fotoğrafınızı bu alana yapıştırın veya ayrıca gönderin.'), {
     x: photoX, y: photoY - 20, size: SIZE_PHOTO_NOTE, font, color: ink,
   });
 
-  const bytes = await doc.save();
+  // updateFieldAppearances: false — KRİTİK. Varsayılan save(), alanların
+  // görünümünü yeniden üretirken pdf-lib'in VARSAYILAN yazı tipini (Helvetica)
+  // kullanır ve az önce kurduğumuz /DA satırını ezer: alanlar yeniden
+  // "/Helvetica" gösterir, yani hastanın yazdığı ş/ğ/ı/İ harfleri gene
+  // çizilemez. Görünümler addToPage'de zaten doğru yazı tipiyle kuruldu;
+  // üstelik NeedAppearances açık olduğu için okuyucu da kendi üretir.
+  const bytes = await doc.save({ updateFieldAppearances: false });
   return bytes; // Uint8Array
 }
 

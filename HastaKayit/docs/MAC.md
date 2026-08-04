@@ -82,6 +82,23 @@ Menü öğeleri ekrandaki düğmelerin aynısını çalıştırır — ikinci bi
 yoktur, dolayısıyla onay soruları ve hata mesajları aynı kalır. Kilit
 ekranındayken veri açan menü öğeleri çalışmaz.
 
+## Sağ tık menüsü
+
+Electron bir web sayfası gösterir ve web sayfalarının kendiliğinden gelen bir
+sağ tık menüsü **yoktur** — tarayıcıdaki menüyü Chrome ekler, Electron eklemez.
+Bu yüzden uygulamada sağ tıklamak eskiden hiçbir şey yapmıyordu.
+
+Artık her yerde çalışıyor:
+
+| Nereye sağ tıkladığınıza göre | Menüde ne çıkar |
+|---|---|
+| Yazı kutusunda | Geri Al, Yinele, Kes, Kopyala, Yapıştır, Tümünü Seç |
+| Seçili metinde | Kopyala, Tümünü Seç |
+| Boş alanda | Tümünü Seç |
+
+Öğeler duruma göre sönükleşir: pano boşsa "Yapıştır" tıklanamaz. Yazım denetimi
+açık olduğunda önerilen kelimeler menünün en üstünde görünür.
+
 ## Pencere davranışı
 
 - Başlık çubuğu gizli (`hiddenInset`); trafik ışıkları uygulamanın mavi üst

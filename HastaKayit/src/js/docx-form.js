@@ -19,20 +19,21 @@ import {
 
 const NOTE = 'Fotoğrafınızı bu alana yapıştırın veya ayrıca gönderin.';
 
-// Font sizes, in HALF-POINTS (docx's unit): 40 = 20pt, 28 = 14pt, 24 = 12pt.
-// The doctor's clients skew elderly, so nothing on this form is small — every
-// run below sets its size explicitly rather than inheriting a ~10pt default.
-const SIZE_TITLE = 40;   // 20pt
-const SIZE_LABEL = 28;   // 14pt, bold
-const SIZE_VALUE = 28;   // 14pt — what the client types must be just as legible
-const SIZE_INTRO = 24;   // 12pt
-const SIZE_NOTE = 24;    // 12pt
-const SIZE_PHOTO_CAPTION = 20; // 10pt, inside the box
+// Punto, YARIM PUNTO cinsinden (docx'in birimi): 48 = 24pt, 32 = 16pt.
+// Doktorun danışanları yaşlı, bu yüzden formda hiçbir şey küçük değil — her
+// metin puntosunu açıkça belirtir, Word'ün ~10pt varsayılanını devralmaz.
+// PDF sürümüyle aynı puntolar kullanılır ki iki dosya tek belge gibi dursun.
+const SIZE_TITLE = 48;   // 24pt
+const SIZE_LABEL = 32;   // 16pt, kalın
+const SIZE_VALUE = 32;   // 16pt — hastanın yazdığı da en az etiket kadar okunaklı olmalı
+const SIZE_INTRO = 28;   // 14pt
+const SIZE_NOTE = 26;    // 13pt
+const SIZE_PHOTO_CAPTION = 24; // 12pt, kutunun içinde
 
 // Row heights in TWIPS (1cm ≈ 567 twips). A tall, empty value cell is an
 // invitation to write; a one-line cell is not.
-const ROW_HEIGHT = 850;         // ~1.5cm for a normal answer
-const ROW_HEIGHT_TALL = 1800;   // ~3.2cm for "Şikayet / Hastalık"
+const ROW_HEIGHT = 1000;        // ~1.8cm — 16pt yazıya rahat elle yazma payı
+const ROW_HEIGHT_TALL = 2100;   // ~3.7cm, "Şikayet / Hastalık" için
 
 // Vesikalık (passport photo) proportions: 3.5cm × 4.5cm.
 const PHOTO_W = 1985; // 3.5cm in DXA twips

@@ -121,6 +121,8 @@ function createWindow() {
     setTimeout(() => { readyToClose = true; liveWin()?.close(); }, 3000);
   });
 
+  attachContextMenu(win);
+
   // Dış bağlantılar (tel:, mailto:, https:) uygulamanın İÇİNDE açılmaz —
   // varsayılan tarayıcıya/telefon uygulamasına gider.
   win.webContents.setWindowOpenHandler(({ url }) => {
@@ -129,6 +131,55 @@ function createWindow() {
   });
   win.webContents.on('will-navigate', (e, url) => {
     if (!url.startsWith('file://')) { e.preventDefault(); shell.openExternal(url); }
+  });
+}
+
+// --- Sağ tık menüsü --------------------------------------------------------
+// Electron bir web sayfası gösterir ve web sayfalarının VARSAYILAN sağ tık
+// menüsü YOKTUR — tarayıcıdaki menüyü Chrome'un kendisi ekler, Electron
+// eklemez. Bu yüzden uygulamada sağ tıklamak hiçbir şey yapmıyordu: kopyala,
+// yapıştır, geri al hepsi yalnızca klavyeden erişilebiliyordu. Bir hasta
+// kaydında metin taşıyan doktor için bu ciddi bir eksikti.
+//
+// Menü içeriği tıklanan yere göre değişir: yazı kutusundaysanız düzenleme
+// eylemleri, düz metindeyseniz yalnızca kopyalama. Etkin/pasif durumları
+// Chromium'un bildirdiği editFlags'ten gelir — yani "Yapıştır" panoda bir şey
+// yoksa sönük görünür, tıklayıp hiçbir şey olmamasını izlemezsiniz.
+function attachContextMenu(w) {
+  w.webContents.on('context-menu', (_event, params) => {
+    const f = params.editFlags || {};
+    const items = [];
+
+    // Yazım önerileri (varsa) en üstte — macOS'ta beklenen yer burasıdır.
+    for (const suggestion of params.dictionarySuggestions || []) {
+      items.push({ label: suggestion, click: () => w.webContents.replaceMisspelling(suggestion) });
+    }
+    if (items.length) items.push({ type: 'separator' });
+
+    if (params.isEditable) {
+      items.push(
+        { label: 'Geri Al', role: 'undo', enabled: f.canUndo !== false },
+        { label: 'Yinele', role: 'redo', enabled: f.canRedo !== false },
+        { type: 'separator' },
+        { label: 'Kes', role: 'cut', enabled: !!f.canCut },
+        { label: 'Kopyala', role: 'copy', enabled: !!f.canCopy },
+        { label: 'Yapıştır', role: 'paste', enabled: !!f.canPaste },
+        { type: 'separator' },
+        { label: 'Tümünü Seç', role: 'selectAll' },
+      );
+    } else if (params.selectionText && params.selectionText.trim()) {
+      items.push(
+        { label: 'Kopyala', role: 'copy' },
+        { type: 'separator' },
+        { label: 'Tümünü Seç', role: 'selectAll' },
+      );
+    } else {
+      // Boş alanda sağ tık: hiç menü açmamak, "bozuk" hissi verir. Tek bir
+      // anlamlı eylem bırakıyoruz.
+      items.push({ label: 'Tümünü Seç', role: 'selectAll' });
+    }
+
+    Menu.buildFromTemplate(items).popup({ window: w });
   });
 }
 
