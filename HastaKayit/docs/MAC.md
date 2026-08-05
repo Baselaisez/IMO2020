@@ -15,8 +15,16 @@ npm run mac
 ## Dağıtım paketi
 
 ```bash
-npm run mac:dist
+npm run mac:release
 ```
+
+Paketler ve makinenizin mimarisine uyan `.dmg` dosyasını **Finder'da seçili
+olarak açar** — çift tıklayıp Applications'a sürüklemek kalır.
+
+`npm run mac:dist` de aynı paketleri üretir ama Finder'ı açmaz; dist-mac/
+altında Apple Silicon ve Intel için ayrı `.dmg` ve `.zip` bulunur. Doğru olanı
+elle seçmek gerekir: Intel dosyasında mimari eki YOKTUR
+(`Hasta Kayıt-5.0.1.dmg`), Apple Silicon dosyası `-arm64.dmg` ile biter.
 
 `dist-mac/` altında Apple Silicon ve Intel için `.dmg` ve `.zip` üretilir.
 `resources/icon.icns` simgesi hazırdır (yeniden üretmek için `npm run icons`).
