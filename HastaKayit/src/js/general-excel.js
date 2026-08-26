@@ -1,4 +1,5 @@
 import * as XLSX from 'xlsx';
+import { labelToKey } from './form-fields.js';
 
 // Doktorun kendi (serbest biçimli) Excel'ini içe aktarır: sütun başlıklarını
 // Türkçe/İngilizce eşanlamlı sözlüğüyle eşleştirip alan adlarına haritalar.
@@ -75,9 +76,34 @@ export function parseGeneralWorkbook(input, todayIso = '2026-01-01') {
   }
 
   const mapping = {};
+  const taken = new Set();
+  // 1) Tam eşleşme (en güvenilir).
   for (const field of FIELD_ORDER) {
     for (const syn of SYNONYMS[field]) {
-      if (normToOriginal.has(syn)) { mapping[field] = normToOriginal.get(syn); break; }
+      if (normToOriginal.has(syn)) { mapping[field] = normToOriginal.get(syn); taken.add(mapping[field]); break; }
+    }
+  }
+  // 2) Formlarla ORTAK sözlük: labelToKey noktalama/parantez temizler ve Türkçe
+  //    I ailesini katlar; böylece "Telefon No", "Adı Soyadı:", "Doğum Tarihi
+  //    (GG.AA.YYYY)" gibi gerçek başlıklar da eşleşir (tam eşleşme bunları kaçırır).
+  for (const h of originalHeaders) {
+    if (taken.has(h)) continue;
+    const field = labelToKey(h);
+    if (field && !mapping[field]) { mapping[field] = h; taken.add(h); }
+  }
+  // 3) Son çare: başlık bir eşanlamlıyı İÇERİYORSA ("Hasta Telefon Numarası").
+  //    Yalnızca hâlâ boş alanlar için, en uzun eşanlamlıdan başlayarak.
+  for (const field of FIELD_ORDER) {
+    if (mapping[field]) continue;
+    const syns = [...SYNONYMS[field]].sort((a, b) => b.length - a.length);
+    outer: for (const syn of syns) {
+      if (syn.length < 3) continue; // "ad"/"tel" gibi kısa parçalar yanlış eşleşir
+      for (const h of originalHeaders) {
+        if (taken.has(h)) continue;
+        if (normalizeHeaderVariants(h).some((n) => n.includes(syn))) {
+          mapping[field] = h; taken.add(h); break outer;
+        }
+      }
     }
   }
 

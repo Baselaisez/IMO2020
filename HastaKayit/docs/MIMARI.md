@@ -55,6 +55,8 @@ Mac'te aynen geri yüklenir.
 | Sesli yazma | yalnızca Windows (Win + H) | Mac'te Fn Fn; iPhone'da düğme gizli (klavyenin kendi mikrofonu) |
 | Yedek/otomatik yedek metinleri | "Google Drive" (Android) | platforma göre iCloud / Google / yerel klasör |
 | İçerik güvenliği | — | `index.html` içinde CSP; dış bağlantılar sistem tarayıcısına |
+| Eşitleme klasörü seçimi (5.2.2) | gizli `<input webkitdirectory>` + dosya yolundan klasör tahmini | yerli klasör paneli (`dialog.showOpenDialog`) |
+| Eşitleme dosya erişimi (5.2.2) | renderer'da `fs` | ana süreçte iki dosya adıyla sınırlı ayrı kapı (`electron/sync-path.cjs`) |
 
 ## SQLite: iOS'a özgü tek düzeltme
 
@@ -70,11 +72,17 @@ bağlantıyı geri alıyor. Android'de bu çağrılar zararsızdır.
 Bu ortamda (Linux) doğrulanabilenler:
 
 - `npm run build` — esbuild paketi üretiliyor
-- `npm test` — 12 saf mantık testi geçiyor
+- `npm test` — 50 saf mantık testi geçiyor
 - **Electron kabuğu uçtan uca çalıştırıldı**: pencere açıldı, preload köprüsü
   kuruldu, sql.js WASM ana süreçten okundu, şema kuruldu, PIN belirlendi,
   hasta eklendi, liste ve ayarlar ekranı doğru göründü, veritabanı diske
   yazıldı ve **ikinci açılışta geri okundu**. Hata banner'ı çıkmadı.
+- **Eşitleme (5.2.2) gerçek kabukta doğrulandı**: eşitleme açıldı, klasör
+  kaydedildi (yazılabilirlik denetimi dahil), "🔄 Şimdi Eşitle" hatasız
+  tamamlandı, paylaşılan klasörde geçerli bir `hastakayit-sync.json` oluştu
+  (Türkçe karakterli hasta adı bozulmadan), geriye `.tmp` kalmadı ve renderer'ın
+  `syncRead(dir, 'gizli.txt')` denemesi *"Eşitleme dosyası değil"* ile
+  reddedildi.
 - `npx cap sync ios` — 7 eklenti bulundu, `www/` iOS projesine kopyalandı,
   `Info.plist` geçerli bir plist olarak ayrıştırılıyor.
 - `electron-builder` paketlemesi: macOS `.app` ağacı üretildi, paketlenmiş

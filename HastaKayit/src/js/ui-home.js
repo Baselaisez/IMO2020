@@ -306,7 +306,9 @@ function openPasteModal() {
     // Notlar too, regardless of what the heuristic parser managed to pull
     // out — the doctor reviews/edits everything on the normal form before
     // anything is saved; nothing pasted is ever silently dropped.
-    openForm(null, { name: p.name, mother_name: p.mother_name, residence: p.residence, birth_date: p.birth_date, diagnosis: p.diagnosis, notes: text });
+    // phone DAHİL: ayrıştırıcı telefonu buluyordu ama burada aktarılmadığı için
+    // Telefon alanı boş kalıyordu.
+    openForm(null, { name: p.name, mother_name: p.mother_name, residence: p.residence, birth_date: p.birth_date, phone: p.phone, diagnosis: p.diagnosis, notes: text });
   });
 }
 

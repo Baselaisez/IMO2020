@@ -24,7 +24,7 @@ olarak açar** — çift tıklayıp Applications'a sürüklemek kalır.
 `npm run mac:dist` de aynı paketleri üretir ama Finder'ı açmaz; dist-mac/
 altında Apple Silicon ve Intel için ayrı `.dmg` ve `.zip` bulunur. Doğru olanı
 elle seçmek gerekir: Intel dosyasında mimari eki YOKTUR
-(`Hasta Kayıt-5.0.1.dmg`), Apple Silicon dosyası `-arm64.dmg` ile biter.
+(`Hasta Kayıt-5.2.2.dmg`), Apple Silicon dosyası `-arm64.dmg` ile biter.
 
 `dist-mac/` altında Apple Silicon ve Intel için `.dmg` ve `.zip` üretilir.
 `resources/icon.icns` simgesi hazırdır (yeniden üretmek için `npm run icons`).
@@ -72,6 +72,17 @@ klasörü açar; menüden **Dosya ▸ Veri Klasörünü Göster** de aynı işi 
 
 Windows sürümünün konumu değişmedi (`%USERPROFILE%\HastaKayit`), böylece
 mevcut Windows kurulumları etkilenmez.
+
+## Cihazlar arası eşitleme
+
+Ayarlar ekranındaki **🔄 Cihazlar Arası Eşitleme** bölümü Mac ile iPhone'un
+aynı kayıtları görmesini sağlar: **📁 Klasör Seç** ile iCloud Drive (veya
+OneDrive / Drive / Dropbox) içinde bir klasör seçilir, **💾 Klasörü Kaydet**
+denir. Klasör kaydedilmeden önce yazılabilirliği denetlenir.
+
+Klasör seçimi **gerçek macOS panelidir** — Windows sürümündeki gizli
+`webkitdirectory` girdisi macOS'ta mutlak yol vermediği için burada
+kullanılmaz. Ayrıntılar ve güvenlik sınırı: [ESITLEME.md](ESITLEME.md).
 
 ## Menü çubuğu
 
@@ -139,7 +150,9 @@ Pencere Electron'un güvenli varsayılanlarıyla açılır: `contextIsolation: t
 `nodeIntegration: false`, `sandbox: true`. Renderer'da Node API'si **yoktur**;
 tüm dosya işlemleri `electron/preload.cjs` köprüsünden ana sürece gider ve
 orada yalnızca uygulamanın kendi veri klasörüne izin verilir (yol geçişi
-`resolveIn` ile engellenir).
+`resolveIn` ile engellenir). Eşitleme klasörü tanımı gereği o klasörün
+dışındadır; onun için `resolveIn` gevşetilmedi, ayrı ve **iki dosya adıyla
+sınırlı** bir kapı açıldı (`electron/sync-path.cjs`).
 
 `index.html` içindeki Content-Security-Policy hiçbir uzak kaynağın
 yüklenmesine ve hiçbir ağ isteğine izin vermez. Dış bağlantılar (tel:, https:)

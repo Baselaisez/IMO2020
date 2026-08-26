@@ -46,7 +46,7 @@
 
 <section id="screen-form" class="screen hidden">
   <header class="appbar">
-    <div class="bar-left"><button class="iconbtn btn-back" title="Geri" aria-label="Geri">←</button><button class="iconbtn btn-home" title="Ana menü" aria-label="Ana menü">🏠</button></div>
+    <div class="bar-left"><button class="iconbtn btn-back" title="Geri" aria-label="Geri">←</button><button class="iconbtn btn-home" title="Ana menü" aria-label="Ana menü">🏠</button><button id="btn-form-save" class="iconbtn" title="Kaydet" aria-label="Kaydet" style="color:#16a34a">✅</button></div>
     <span id="form-title" class="bar-title">Yeni Hasta</span>
     <div class="bar-right"></div>
   </header>
@@ -78,7 +78,7 @@
   <header class="appbar">
     <div class="bar-left"><button class="iconbtn btn-back" title="Geri" aria-label="Geri">←</button><button class="iconbtn btn-home" title="Ana menü" aria-label="Ana menü">🏠</button></div>
     <span id="card-name" class="bar-title"></span>
-    <div class="bar-right"><button id="btn-edit" class="iconbtn" title="Düzenle" aria-label="Düzenle">✏️</button></div>
+    <div class="bar-right"><button id="btn-complete-top" class="iconbtn hidden" title="Tedaviyi tamamla" aria-label="Tedaviyi tamamla">✅</button><button id="btn-edit" class="iconbtn" title="Düzenle" aria-label="Düzenle">✏️</button></div>
   </header>
   <div id="card-body"></div>
 </section>
@@ -123,7 +123,30 @@
       <option value="on">Sesli (varsayılan)</option>
       <option value="off">Sessiz — sadece yazılı bildirim</option>
     </select></label>
+    <!-- Bildirim yardım metni platforma göre doldurulur (bkz. notifHelpText):
+         Android'in "Uygulamalar → Bildirimler" yolu iPhone'da ve Mac'te yanlıştır. -->
     <p id="notif-help" class="muted"></p>
+    <h3>🔄 Cihazlar Arası Eşitleme</h3>
+    <label>Eşitleme<select id="sync-enabled">
+      <option value="off">Kapalı</option>
+      <option value="on">Açık</option>
+    </select></label>
+    <div id="sync-desktop" class="hidden">
+      <label>Paylaşılan klasör (iCloud Drive / OneDrive / Google Drive / Dropbox içinde bir klasör)
+        <input id="sync-folder" type="text" placeholder="/Users/…/Library/Mobile Documents/com~apple~CloudDocs/HastaKayit" autocomplete="off"></label>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button id="btn-sync-pick" style="flex:1">📁 Klasör Seç</button>
+        <button id="btn-sync-save" style="flex:1">💾 Klasörü Kaydet</button>
+      </div>
+      <!-- Yalnızca tarayıcı önizlemesi için yedek seçici. Mac/Windows uygulamasında
+           yerli klasör paneli (hk:sync-pick) kullanılır; webkitdirectory macOS'ta
+           mutlak yol vermez. -->
+      <input id="sync-folder-picker" type="file" webkitdirectory directory class="hidden">
+    </div>
+    <p id="sync-mobile-note" class="muted hidden"></p>
+    <button id="btn-sync-now">🔄 Şimdi Eşitle</button>
+    <button id="btn-sync-help" class="ghost">❓ Eşitleme Nasıl Kullanılır?</button>
+    <p id="sync-status" class="muted"></p>
     <p id="backup-info" class="muted"></p>
     <p id="data-location-info" class="muted"></p>
     <button id="btn-reveal-data" class="hidden">📂 Veri Klasörünü Göster</button>

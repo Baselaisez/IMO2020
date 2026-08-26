@@ -122,6 +122,81 @@ export async function readSnapshot(name) {
   return r.data;
 }
 
+// --- Cihazlar arası eşitleme: klasör deposu ---------------------------------
+// sync-file.js'in ihtiyaç duyduğu en küçük arayüz: { read, write, rename,
+// remove }. Platform ayrımı bu dosyada kalır (yedekleme yollarıyla aynı ayrım),
+// böylece sync-file.js saf mantık olarak test edilebilir.
+//
+// MASAÜSTÜNDE NEDEN KÖPRÜ: renderer sandbox'lı, `window.require('fs')` YOK.
+// Eşitleme klasörü, uygulamanın kendi veri klasörünün DIŞINDA — kullanıcının
+// seçtiği bir yer (iCloud Drive, Dropbox…). Bu yüzden ana süreç o klasörü
+// ayrıca "izin verilmiş" olarak tutar ve yalnızca eşitleme dosyalarına
+// (hastakayit-sync.json ve .tmp) erişime izin verir; rastgele bir yola değil
+// (bkz. electron/main.cjs → syncPath).
+//
+// - Mac/Windows: kullanıcının seçtiği MUTLAK klasör yolu, ana süreç üzerinden.
+// - iPhone/Android: Documents altındaki SABİT alt klasör (Capacitor Filesystem
+//   rastgele bir bulut klasörünü göremez).
+// - Tarayıcı önizlemesi: eşitleme yok (null).
+export function makeSyncStore(dir) {
+  if (isDesktop()) {
+    return {
+      read: (name) => desktop.syncRead(dir, name),
+      write: (name, text) => desktop.syncWrite(dir, name, text),
+      rename: (from, to) => desktop.syncRename(dir, from, to),
+      remove: (name) => desktop.syncRemove(dir, name),
+    };
+  }
+  if (isNative()) {
+    const d = Directory.Documents;
+    const full = (name) => `${dir}/${name}`;
+    return {
+      async read(name) {
+        try {
+          const r = await Filesystem.readFile({ path: full(name), directory: d, encoding: Encoding.UTF8 });
+          return r.data;
+        } catch { return null; } // dosya yok (veya klasör henüz oluşmadı)
+      },
+      async write(name, text) {
+        await Filesystem.writeFile({ path: full(name), directory: d, data: text, encoding: Encoding.UTF8, recursive: true });
+      },
+      async rename(from, to) {
+        // Hedef varsa rename bazı Android sürümlerinde hata verir: önce sil.
+        try { await Filesystem.deleteFile({ path: full(to), directory: d }); } catch { /* yoktu */ }
+        await Filesystem.rename({ from: full(from), to: full(to), directory: d, toDirectory: d });
+      },
+      async remove(name) { try { await Filesystem.deleteFile({ path: full(name), directory: d }); } catch { /* yoktu */ } },
+    };
+  }
+  return null;
+}
+
+/**
+ * Masaüstünde eşitleme klasörünü DOĞRULA: var mı, klasör mü, yazılabilir mi?
+ * (Yanlış yol sessizce "eşitleme çalışmıyor"a dönüşmesin.)
+ *
+ * Artık ASENKRON: kontrol ana süreçte yapılıyor. Mac'te kullanıcı yol
+ * yapıştırmak yerine gerçek bir klasör seçici de kullanabilir (pickSyncFolder).
+ */
+export async function validateSyncFolder(dir) {
+  if (!isDesktop()) return { ok: false, error: 'Klasör seçimi yalnızca masaüstü uygulamasında kullanılabilir.' };
+  const p = String(dir || '').trim();
+  if (!p) return { ok: false, error: 'Klasör yolu boş.' };
+  try { return await desktop.syncValidate(p); }
+  catch (e) { return { ok: false, error: 'Klasör denetlenemedi: ' + (e?.message || e) }; }
+}
+
+/**
+ * macOS/Windows'ta gerçek klasör seçici. Yol yapıştırmaktan çok daha güvenli:
+ * kullanıcı yanlış yazamaz ve seçtiği klasör aynı anda ana sürece "izin
+ * verilmiş" olarak kaydedilir.
+ * Dönüş: seçilen yol, ya da iptal edilirse null.
+ */
+export async function pickSyncFolder() {
+  if (!isDesktop()) return null;
+  return desktop.syncPick();
+}
+
 /**
  * Dışa aktarılan dosyayı (Excel / JSON / PDF / Word) kullanıcıya teslim eder.
  *   • iPhone & Android → dosya Cache'e yazılır, ardından sistemin paylaşım

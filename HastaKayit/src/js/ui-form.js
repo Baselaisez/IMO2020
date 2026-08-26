@@ -83,6 +83,14 @@ export async function openForm(patientId, prefill) {
 
 export function initForm() {
   const f = document.getElementById('patient-form');
+  // Başlıktaki yeşil ✅ = KAYDET kısayolu (evin yanında). Formu normal yoldan
+  // gönderir: `requestSubmit` zorunlu alan doğrulamasını çalıştırır — plain
+  // `submit()` onu ATLAR ve adsız hasta kaydedilebilirdi. Yeni kayıtta da,
+  // kalemle açılan mevcut kaydın düzenlemesinde de aynı submit çalışır.
+  document.getElementById('btn-form-save')?.addEventListener('click', () => {
+    if (typeof f.requestSubmit === 'function') f.requestSubmit();
+    else f.querySelector('button[type="submit"]')?.click();
+  });
   f.addEventListener('submit', async e => {
     e.preventDefault();
     const v = Object.fromEntries(new FormData(f).entries());

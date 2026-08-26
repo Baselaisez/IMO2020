@@ -12,6 +12,32 @@ import { initSettings } from './ui-settings.js';
 import { initSnapshots, dailyBackupIfDue, scheduleMidnight, writePreUpdateBackup } from './snapshot.js';
 import { rescheduleNotifications, requestNotifyPermission, ensureChannels, setNotifSound } from './notify.js';
 import { initDesktopMenu } from './desktop-menu.js';
+import { startAutoSync, scheduleSyncAfterMutation } from './sync-file.js';
+
+// Otomatik eşitlemenin tek "gürültü" kuralı: bir hata banner'ı EN FAZLA bir kez
+// gösterilir. Arka plandaki eşitleme kullanıcının işini asla kesmemeli; klasör
+// bir süre erişilemezse (bulut istemcisi kapalı, disk çıkarılmış) her 5 dakikada
+// bir uyarı basmak sadece rahatsız eder. Elle "Şimdi Eşitle" denince hata her
+// zaman gösterilir (bkz. ui-settings.js).
+let syncWarned = false;
+
+async function onSyncResult(r, reason) {
+  if (r?.error) {
+    if (!syncWarned) {
+      syncWarned = true;
+      banner(`Eşitleme yapılamadı — ${r.error} (kayıtlarınız yerinde duruyor)`, 'error', 6000);
+    }
+    return;
+  }
+  if (r?.skipped) return;
+  syncWarned = false;
+  // Karşı cihazdan gerçekten kayıt geldiyse listeyi tazele; boş turlarda DOM'a
+  // dokunma (doktor bir şey yazarken listenin altından kayması istenmez).
+  const a = r?.applied;
+  const changed = (a?.patientsUpserted || 0) + (a?.paymentsUpserted || 0) + (a?.deliveriesUpserted || 0) + (a?.deleted || 0);
+  if (changed && state.screen === 'home') await refreshHome();
+  if (changed && reason !== 'mutation') banner('Diğer cihazdan kayıtlar alındı ✓', 'ok');
+}
 
 async function main() {
   try {
@@ -42,6 +68,13 @@ async function main() {
       await rescheduleNotifications(d.patients, d.deliveries, d.payments);
       await dailyBackupIfDue();
       scheduleMidnight();
+      // Cihazlar arası eşitleme: kilit açıldıktan ~3 sn sonra bir kez, sonra her
+      // ~5 dk. Klasör ayarlanmamışsa hepsi sessiz no-op'tur. Mutasyon kancası
+      // initSnapshots'ın kancasını EZMEZ, ona ZİNCİRLENİR (yedek anlık görüntüsü
+      // + ~15 sn debounce ile eşitleme).
+      startAutoSync(state.exec, { onResult: onSyncResult });
+      const prevOnMutate = state.onMutate;
+      state.onMutate = () => { prevOnMutate?.(); scheduleSyncAfterMutation(); };
     });
   } catch (e) {
     console.error(e);

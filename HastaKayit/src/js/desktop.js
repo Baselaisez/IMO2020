@@ -66,10 +66,48 @@ function legacy() {
       fs.writeFileSync(full, Buffer.from(base64, 'base64'));
       return full;
     },
+    // Eşitleme klasörü uygulamanın veri klasörünün DIŞINDADIR; eski kabukta
+    // ana süreç kapısı yok, o yüzden aynı ad kısıtını burada uyguluyoruz.
+    async syncRead(dir, name) {
+      const full = path.join(dir, syncName(name));
+      return fs.existsSync(full) ? fs.readFileSync(full, 'utf8') : null;
+    },
+    async syncWrite(dir, name, text) {
+      fs.mkdirSync(dir, { recursive: true });
+      fs.writeFileSync(path.join(dir, syncName(name)), String(text), 'utf8');
+    },
+    async syncRename(dir, from, to) {
+      fs.renameSync(path.join(dir, syncName(from)), path.join(dir, syncName(to)));
+    },
+    async syncRemove(dir, name) { try { fs.unlinkSync(path.join(dir, syncName(name))); } catch {} },
+    async syncValidate(dir) {
+      const p = String(dir || '').trim();
+      if (!p) return { ok: false, error: 'Klasör yolu boş.' };
+      try {
+        if (!fs.statSync(p).isDirectory()) return { ok: false, error: 'Bu bir klasör değil: ' + p };
+        const probe = path.join(p, '.hastakayit-yazma-testi');
+        fs.writeFileSync(probe, 'ok', 'utf8');
+        fs.unlinkSync(probe);
+        return { ok: true, path: path.resolve(p) };
+      } catch (err) {
+        return { ok: false, error: 'Klasöre yazılamıyor: ' + (err?.message || err) };
+      }
+    },
+    // Eski kabukta yerli klasör paneli yok — çağıran gizli <input webkitdirectory>
+    // yedeğine düşer (bkz. ui-settings.js).
+    async syncPick() { return null; },
     onBeforeQuit() {},
     async readyToClose() {},
     async revealDataDir() {},
   };
+}
+
+// Eşitlemenin yazabileceği TEK iki dosya adı (electron/sync-path.cjs ile aynı).
+const SYNC_NAMES = ['hastakayit-sync.json', 'hastakayit-sync.json.tmp'];
+function syncName(name) {
+  const n = String(name);
+  if (!SYNC_NAMES.includes(n)) throw new Error(`Eşitleme dosyası değil: ${n}`);
+  return n;
 }
 
 let impl = null;
@@ -89,6 +127,15 @@ export const desktop = {
   list: (kind, prefix) => api().list(kind, prefix),
   remove: (kind, name) => api().remove(kind, name),
   saveExport: (name, base64, mime) => api().saveExport(name, base64, mime),
+  // Cihazlar arası eşitleme (5.2.2): klasör kullanıcının seçtiği yerde, bu
+  // yüzden çağrılar yolu parametre alır — ana süreç yalnızca eşitlemenin kendi
+  // dosya adlarına izin verir (bkz. electron/sync-path.cjs).
+  syncRead: (dir, name) => api().syncRead(dir, name),
+  syncWrite: (dir, name, text) => api().syncWrite(dir, name, text),
+  syncRename: (dir, from, to) => api().syncRename(dir, from, to),
+  syncRemove: (dir, name) => api().syncRemove(dir, name),
+  syncValidate: dir => api().syncValidate(dir),
+  syncPick: () => api().syncPick(),
   onBeforeQuit: cb => api().onBeforeQuit(cb),
   readyToClose: () => api().readyToClose(),
   revealDataDir: () => api().revealDataDir(),

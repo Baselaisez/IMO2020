@@ -47,9 +47,20 @@ const RAW_SYNONYMS = {
     'd.tarihi', 'doğum', 'dogum', 'birth date',
     'doğum tarihi (gg.aa.yyyy)', 'dogum tarihi (gg.aa.yyyy)',
   ],
-  residence: ['ikamet', 'ikametgah', 'ikametgâh', 'yaşadığı yer', 'yasadigi yer', 'adres', 'şehir', 'sehir', 'ikametgah yaşadığı yer'],
-  phone: ['telefon', 'tel', 'gsm', 'cep', 'cep telefonu', 'telefon no', 'telefon numarası'],
-  diagnosis: ['şikayet', 'şikâyet', 'sikayet', 'hastalık', 'hastalik', 'tanı', 'tani', 'durum', 'şikayet hastalık', 'sikayet hastalik'],
+  // 'nerede oturuyor' / 'il ilçe' come from the doctor's own WhatsApp template
+  // ("Nerede oturuyor (İl - İlçe):"), which clients copy back verbatim.
+  residence: [
+    'ikamet', 'ikametgah', 'ikametgâh', 'yaşadığı yer', 'yasadigi yer', 'adres',
+    'şehir', 'sehir', 'ikametgah yaşadığı yer',
+    'nerede oturuyor', 'nerede oturuyorsunuz', 'oturduğu yer', 'oturdugu yer',
+    'il ilçe', 'il ilce',
+  ],
+  phone: ['telefon', 'tel', 'gsm', 'cep', 'cep telefonu', 'telefon no', 'telefon numarası', 'telefon numarasi'],
+  diagnosis: [
+    'şikayet', 'şikâyet', 'sikayet', 'hastalık', 'hastalik', 'tanı', 'tani', 'durum',
+    'şikayet hastalık', 'sikayet hastalik',
+    'şikayetiniz', 'sikayetiniz', 'şikayetleriniz', 'sikayetleriniz', 'şikayeti', 'sikayeti',
+  ],
 };
 
 // Normalized label variant -> canonical key.
@@ -83,7 +94,11 @@ export function emptyResult() {
 // --- Birth date normalization ----------------------------------------------
 
 const MIN_YEAR = 1900;
-const DMY_RE = /^(\d{1,2})([./-])(\d{1,2})\2(\d{4})$/; // \2 = SAME separator twice
+// \2 = the SAME separator twice. A single space counts as a separator because
+// the doctor's template asks for "Doğum tarihi (gün/ay/yıl)" and clients answer
+// "28 06 1990" far more often than "28.06.1990". Still strict: exactly one
+// separator character, used consistently ("12. 05. 1980" stays rejected).
+const DMY_RE = /^(\d{1,2})([./\- ])(\d{1,2})\2(\d{4})$/;
 const ISO_RE = /^(\d{4})-(\d{2})-(\d{2})$/;
 
 // Real-calendar check: rejects 31.04, 31.02 and non-leap 29.02 (the Date

@@ -990,9 +990,20 @@ export async function bulkDeletePatients(x, ids = []) {
 // patient ids), so a 77k-row DB never loads every payment to render one screen.
 export async function listPatientsPage(x, { limit = 100, offset = 0, search = '' } = {}) {
   const like = `%${search}%`;
+  // Telefon aramasında rakam dışı her şeyi atıyoruz (hem aranan metinden hem
+  // kayıttaki numaradan): doktor "0534 017" yazsa da "05340174164" bulunsun.
+  // Ad, anne adı, tanı ve telefon birlikte taranır.
+  const digits = String(search).replace(/[^0-9]/g, '');
+  const dlike = digits ? `%${digits}%` : 'x';
   const patients = await x.query(
-    `SELECT * FROM patients WHERE (? = '' OR name LIKE ?) ORDER BY name COLLATE NOCASE LIMIT ? OFFSET ?`,
-    [search, like, limit, offset]
+    `SELECT * FROM patients
+       WHERE ? = ''
+          OR name LIKE ?
+          OR IFNULL(mother_name,'') LIKE ?
+          OR IFNULL(diagnosis,'') LIKE ?
+          OR REPLACE(REPLACE(REPLACE(REPLACE(IFNULL(phone,''),' ',''),'-',''),'(',''),')','') LIKE ?
+       ORDER BY name COLLATE NOCASE LIMIT ? OFFSET ?`,
+    [search, like, like, like, dlike, limit, offset]
   );
   if (!patients.length) return [];
   const ids = patients.map(p => p.id);
@@ -1005,7 +1016,16 @@ export async function listPatientsPage(x, { limit = 100, offset = 0, search = ''
 
 export async function countPatients(x, search = '') {
   const like = `%${search}%`;
-  const r = await x.query(`SELECT COUNT(*) c FROM patients WHERE (? = '' OR name LIKE ?)`, [search, like]);
+  const digits = String(search).replace(/[^0-9]/g, '');
+  const dlike = digits ? `%${digits}%` : 'x';
+  const r = await x.query(
+    `SELECT COUNT(*) c FROM patients
+       WHERE ? = ''
+          OR name LIKE ?
+          OR IFNULL(mother_name,'') LIKE ?
+          OR IFNULL(diagnosis,'') LIKE ?
+          OR REPLACE(REPLACE(REPLACE(REPLACE(IFNULL(phone,''),' ',''),'-',''),'(',''),')','') LIKE ?`,
+    [search, like, like, like, dlike]);
   return r[0].c;
 }
 

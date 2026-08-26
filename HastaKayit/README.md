@@ -17,6 +17,8 @@ src/                 uygulama (tek kaynak — üç platform da bunu çalıştır
   js/db-desktop.js   Mac / Windows     → sql.js + kalıcı dosya
   js/db-web.js       tarayıcı önizleme → bellek içi (kalıcı DEĞİL)
   js/desktop.js      Electron köprüsü (dosya işlemleri IPC üzerinden)
+  js/sync-file.js    cihazlar arası eşitleme — taşıma katmanı (5.2.2)
+  js/sync-merge.js   cihazlar arası eşitleme — saf birleştirme (LWW)
 ios/                 Xcode projesi (iPhone + iPad)
 electron/            Mac uygulama kabuğu: pencere, menü, IPC, izinler
 resources/           uygulama simgesi üreteci + üretilmiş simgeler
@@ -77,3 +79,10 @@ npm test
 
 Her iki platformda da Ayarlar ekranının altında gerçek konum yazar; Mac'te
 "📂 Finder'da Göster" düğmesi klasörü doğrudan açar.
+
+## Cihazlar arası eşitleme
+
+Mac ve iPhone aynı kayıtları görebilir: iki cihaz da paylaşılan bir bulut
+klasöründeki tek bir dosyayı okur/yazar (hesap yok, sunucu yok). Mac'te klasör
+gerçek bir Finder paneliyle seçilir. Ayrıntılar ve güvenlik sınırı:
+[docs/ESITLEME.md](docs/ESITLEME.md)

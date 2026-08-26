@@ -104,6 +104,12 @@ async function renderCard() {
   document.getElementById('btn-pay').addEventListener('click', () => paymentSheet(p, null));
   document.getElementById('btn-appt').addEventListener('click', () => apptSheet(p));
   document.getElementById('btn-done')?.addEventListener('click', () => confirmComplete(p));
+  // Başlıktaki ✅ kısayolu: sadece tedavi sürerken görünür, aynı onay akışını açar.
+  const topDone = document.getElementById('btn-complete-top');
+  if (topDone) {
+    topDone.classList.toggle('hidden', p.status !== 'active');
+    topDone.onclick = () => confirmComplete(p);
+  }
   document.getElementById('btn-del').addEventListener('click', () => confirmDeletePatient(p));
   document.getElementById('btn-block')?.addEventListener('click', async () => {
     const r = await guarded(() => setStatus(state.exec, p.id, 'blocked'));

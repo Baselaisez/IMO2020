@@ -4,9 +4,10 @@ import { makeBackup, parseBackup } from './backup.js';
 import { buildWorkbook, workbookToBase64, parseWorkbook } from './excel.js';
 import { parseGeneralWorkbook } from './general-excel.js';
 import { isHtsWorkbook, parseHtsWorkbook } from './hts-excel.js';
-import { shareFile, textToBase64, bytesToBase64, exportMessage } from './files.js';
+import { shareFile, textToBase64, bytesToBase64, exportMessage, validateSyncFolder, pickSyncFolder } from './files.js';
 import { isNative, isDesktop, platform, platformLabel } from './platform.js';
 import { desktop } from './desktop.js';
+import { getSyncSettings, syncIfConfigured, ANDROID_SYNC_LABEL } from './sync-file.js';
 import { state, showScreen, guarded, banner, openSheet, closeSheet, todayIso, esc } from './ui.js';
 import { monthlySummary, fmtTL } from './compute.js';
 import { refreshHome } from './ui-home.js';
@@ -169,6 +170,7 @@ export async function openSettings() {
     document.getElementById('default-remind').value = (await getMeta(state.exec, 'default_remind_min')) || '60';
     document.getElementById('notif-sound').value = (await getMeta(state.exec, 'notif_sound')) || 'on';
     await refreshRecoveryStatus();
+    await refreshSyncUi();
     showScreen('settings');
   } catch (e) {
     banner(`Ayarlar yüklenemedi — ${e.message || e}`, 'error', 0);
@@ -371,7 +373,139 @@ export function initSettings() {
     banner('Bildirim ayarı kaydedildi ✓', 'ok');
   });
 
+  initSyncUi();
   initDropHandling();
+}
+
+// --- 🔄 Cihazlar Arası Eşitleme ---------------------------------------------
+// Taşıma katmanı sync-file.js'te; burada yalnızca ayarlar ve durum satırı var.
+// Dil DÜRÜST olmak zorunda: Android'de klasörü bulut uygulaması eşitleyemiyorsa
+// bunu saklamıyoruz (bkz. docs/ESITLEME.md).
+
+function fmtSyncTime(iso) {
+  if (!iso) return 'henüz yapılmadı';
+  return String(iso).slice(0, 16).replace('T', ' ');
+}
+
+// Electron'da <input webkitdirectory> ile seçilen klasörün MUTLAK yolunu bul.
+// Electron 32+ File.path'i kaldırdı, yerine webUtils.getPathForFile geldi;
+// ikisini de deniyoruz. Hiçbiri çalışmazsa '' döner ve kullanıcıdan yolu
+// yapıştırması istenir (yol kutusu her zaman görünür durur).
+function folderPathFromFiles(files) {
+  const f = files && files[0];
+  if (!f) return '';
+  let full = '';
+  try {
+    const { webUtils } = window.require('electron');
+    if (webUtils?.getPathForFile) full = webUtils.getPathForFile(f);
+  } catch { /* webUtils yok */ }
+  if (!full) full = f.path || '';
+  if (!full) return '';
+  const path = window.require('path');
+  const rel = String(f.webkitRelativePath || '').replace(/\\/g, '/');
+  let dir = path.dirname(full);
+  const depth = rel ? rel.split('/').length - 1 : 1; // seçilen klasör ile dosya arasındaki basamak
+  for (let i = 1; i < depth; i++) dir = path.dirname(dir);
+  return dir;
+}
+
+export async function refreshSyncUi() {
+  const s = await getSyncSettings(state.exec);
+  const sel = document.getElementById('sync-enabled');
+  if (sel) sel.value = s.enabled ? 'on' : 'off';
+  const desk = document.getElementById('sync-desktop');
+  const note = document.getElementById('sync-mobile-note');
+  const nowBtn = document.getElementById('btn-sync-now');
+  const helpBtn = document.getElementById('btn-sync-help');
+  if (helpBtn) helpBtn.onclick = () => showSyncHelp(s.platform);
+  if (desk) desk.classList.toggle('hidden', s.platform !== 'desktop');
+  if (note) note.classList.toggle('hidden', s.platform === 'desktop');
+  if (s.platform === 'desktop') {
+    const inp = document.getElementById('sync-folder');
+    if (inp) inp.value = s.folder || '';
+  } else if (note) {
+    note.textContent = s.platform === 'mobile'
+      ? `Bu telefonda eşitleme dosyası şuraya yazılır: ${ANDROID_SYNC_LABEL}. `
+        + 'DİKKAT: Google Drive ve OneDrive’ın Android uygulamaları telefondaki bir klasörü kendiliğinden eşitlemez — '
+        + 'bu klasörün bilgisayara ulaşması için klasör eşitleyen bir uygulama (Syncthing, FolderSync vb.) kurmanız ya da '
+        + 'yukarıdaki “Yedek Al (JSON)” / “İçe Aktar” adımlarını elle kullanmanız gerekir.'
+      : 'Eşitleme yalnızca masaüstü uygulamasında (Mac/Windows) ve telefonda çalışır (tarayıcı önizlemesinde kapalıdır).';
+  }
+  if (nowBtn) nowBtn.disabled = !s.active;
+  const st = document.getElementById('sync-status');
+  if (st) {
+    st.textContent = s.active
+      ? `Son eşitleme: ${fmtSyncTime(s.last)}`
+      : (s.enabled ? 'Eşitleme açık ama klasör seçilmedi — henüz çalışmıyor.' : `Eşitleme kapalı. Son eşitleme: ${fmtSyncTime(s.last)}`);
+  }
+}
+
+async function runManualSync() {
+  const btn = document.getElementById('btn-sync-now');
+  const st = document.getElementById('sync-status');
+  if (btn) btn.disabled = true;
+  if (st) st.textContent = 'Eşitleniyor…';
+  try {
+    const r = await syncIfConfigured(state.exec, { onProgress: (p) => { if (st) st.textContent = `Eşitleniyor… (${p})`; } });
+    if (r.error) banner(`EŞİTLEME BAŞARISIZ — ${r.error} (kayıtlarınıza dokunulmadı)`, 'error', 0);
+    else if (r.skipped) banner(r.reason === 'busy' ? 'Eşitleme zaten sürüyor.' : 'Eşitleme kapalı.', 'ok');
+    else banner(`Eşitlendi ✓ (${r.applied.patientsUpserted} hasta, ${r.applied.paymentsUpserted} ödeme, ${r.applied.deliveriesUpserted} teslimat güncellendi)`, 'ok');
+    if (!r.error && !r.skipped) await refreshHome();
+  } finally {
+    if (btn) btn.disabled = false;
+    await refreshSyncUi();
+  }
+}
+
+function initSyncUi() {
+  const sel = document.getElementById('sync-enabled');
+  if (!sel) return; // eski markup — eşitleme bölümü yoksa sessizce çık
+  sel.addEventListener('change', async e => {
+    const v = e.target.value === 'on' ? 'on' : 'off';
+    const r = await guarded(() => setMeta(state.exec, 'sync_enabled', v));
+    if (r.ok) banner(v === 'on' ? 'Eşitleme açıldı ✓' : 'Eşitleme kapatıldı ✓', 'ok');
+    await refreshSyncUi();
+  });
+
+  // Mac/Windows'ta GERÇEK klasör seçme paneli. Eski yol gizli bir dosya
+  // seçicinin (webkitdirectory) döndürdüğü göreli yollardan klasörü tahmin
+  // etmeye çalışıyordu; macOS'ta o yol MUTLAK yolu hiç vermez, yani "Klasör
+  // yolu okunamadı" deyip kullanıcıyı elle yol yapıştırmaya zorlardı.
+  // Yerli panel hem yanlış yazmayı imkânsız kılar hem de seçilen klasörü aynı
+  // anda ana süreçte "izin verilmiş" olarak kaydeder.
+  document.getElementById('btn-sync-pick')?.addEventListener('click', async () => {
+    if (isDesktop()) {
+      const dir = await pickSyncFolder();
+      if (!dir) return; // kullanıcı vazgeçti
+      document.getElementById('sync-folder').value = dir;
+      banner('Klasör seçildi — kaydetmek için "Klasörü Kaydet"e basın.', 'ok');
+      return;
+    }
+    document.getElementById('sync-folder-picker')?.click();
+  });
+
+  document.getElementById('sync-folder-picker')?.addEventListener('change', e => {
+    const files = e.target.files;
+    e.target.value = '';
+    const dir = folderPathFromFiles(files);
+    if (!dir) {
+      banner('Klasör yolu okunamadı. Lütfen klasörün tam yolunu kutuya yapıştırıp "Klasörü Kaydet"e basın.', 'error', 0);
+      return;
+    }
+    document.getElementById('sync-folder').value = dir;
+    banner('Klasör seçildi — kaydetmek için "Klasörü Kaydet"e basın.', 'ok');
+  });
+
+  document.getElementById('btn-sync-save')?.addEventListener('click', async () => {
+    const dir = document.getElementById('sync-folder').value.trim();
+    const v = await validateSyncFolder(dir);
+    if (!v.ok) { banner(`KLASÖR KAYDEDİLEMEDİ — ${v.error}`, 'error', 0); return; }
+    const r = await guarded(() => setMeta(state.exec, 'sync_folder', v.path));
+    if (r.ok) banner('Eşitleme klasörü kaydedildi ✓', 'ok');
+    await refreshSyncUi();
+  });
+
+  document.getElementById('btn-sync-now')?.addEventListener('click', runManualSync);
 }
 
 // The single place that decides what an incoming file IS and where it goes.
@@ -514,4 +648,44 @@ function initDropHandling() {
     },
   });
   attachDropZone(document.getElementById('dnd-zone'));
+}
+
+// Eşitleme kullanım kılavuzu — doktorun ekranında, dosya açmadan.
+// Masaüstü ve telefon adımları farklı olduğu için platforma göre gösterilir.
+function showSyncHelp(platform) {
+  const desktop = platform === 'desktop';
+  openSheet(`
+    <h4>🔄 Eşitleme Nasıl Kullanılır?</h4>
+    <p class="muted">Aynı hasta kayıtlarını hem bilgisayarda hem telefonda görmek için,
+    iki cihazın da <b>aynı bulut klasörünü</b> kullanması yeterlidir. Hesap açmanıza gerek yok —
+    OneDrive, Google Drive veya Dropbox'ın bilgisayarınızdaki klasörünü kullanır.</p>
+
+    <div class="sec-title">1) Bir bulut klasörü seçin</div>
+    <p class="muted">Örn. Mac'te <code>iCloud Drive → HastaKayit</code>, Windows'ta <code>OneDrive\HastaKayit</code> klasörünü oluşturun.
+    Bu klasör iki cihazda da <b>otomatik eşitlenen</b> bir klasör olmalı.</p>
+
+    <div class="sec-title">2) Bilgisayarda</div>
+    <p class="muted">Ayarlar → Eşitleme'yi <b>Açık</b> yapın → <b>📁 Klasör Seç</b> ile o klasörü seçin →
+    <b>💾 Klasörü Kaydet</b>. Sonra <b>🔄 Şimdi Eşitle</b>.</p>
+
+    <div class="sec-title">3) Telefonda</div>
+    <p class="muted">${desktop
+      ? 'Telefonda uygulamayı açıp Eşitleme\'yi açın; telefon sabit bir klasör kullanır ve ekranda size o klasörün yolunu gösterir. Drive/OneDrive uygulamanızı <b>o klasörü</b> eşitleyecek şekilde ayarlayın.'
+      : 'Eşitleme\'yi <b>Açık</b> yapın. Telefon yukarıda yazan sabit klasörü kullanır. Drive/OneDrive uygulamanızda <b>o klasörü</b> eşitlemeye ekleyin.'}</p>
+
+    <div class="sec-title">Nasıl çalışır?</div>
+    <p class="muted">• Kayıtlar <b>birleştirilir</b>, üzerine yazılmaz. İki cihazda ayrı hastalar eklediyseniz ikisi de kalır.<br>
+    • Aynı hasta iki cihazda değiştiyse <b>en son yapılan değişiklik</b> geçerli olur.<br>
+    • Bir cihazda sildiğiniz kayıt diğerinde de silinir (ve geri gelmez).<br>
+    • İnternet yokken uygulama normal çalışır; bağlanınca kendiliğinden eşitler.<br>
+    • Bozuk/yarım bir eşitleme dosyası <b>reddedilir</b> — kayıtlarınıza dokunulmaz.</p>
+
+    <div class="sec-title">Ne zaman eşitler?</div>
+    <p class="muted">Uygulamayı açıp kilidi açtıktan kısa süre sonra, açıkken her birkaç dakikada bir,
+    ve bir kayıt ekleyip değiştirdiğinizde. <b>🔄 Şimdi Eşitle</b> ile istediğiniz an elle de yapabilirsiniz.</p>
+
+    <p class="muted"><b>Not:</b> Eşitleme yedek yerine geçmez. Günlük otomatik yedekleriniz ayrıca alınmaya devam eder.</p>
+    <div class="form" style="padding:0"><button id="sync-help-close" class="primary">Anladım</button></div>
+  `);
+  document.getElementById('sync-help-close').addEventListener('click', closeSheet);
 }

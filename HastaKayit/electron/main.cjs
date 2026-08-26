@@ -36,6 +36,64 @@ function resolveIn(kind, name) {
 
 const dbFile = () => path.join(dataDir(), 'hastakayit.sqlite');
 
+// --- Eşitleme klasörü ------------------------------------------------------
+// Eşitleme klasörünün dar kapısı ayrı bir dosyada (kendi testi var).
+const { syncPath } = require('./sync-path.cjs');
+
+ipcMain.handle('hk:sync-read', async (_e, dir, name) => {
+  try { return await fsp.readFile(syncPath(dir, name), 'utf8'); }
+  catch (err) {
+    // Dosya/klasör yok = "karşı cihaz henüz yazmamış", hata değil.
+    if (err && (err.code === 'ENOENT' || err.code === 'ENOTDIR')) return null;
+    throw err;
+  }
+});
+
+ipcMain.handle('hk:sync-write', async (_e, dir, name, text) => {
+  const full = syncPath(dir, name);
+  await fsp.mkdir(path.dirname(full), { recursive: true });
+  await fsp.writeFile(full, String(text), 'utf8');
+});
+
+ipcMain.handle('hk:sync-rename', async (_e, dir, from, to) => {
+  // rename mevcut hedefin üzerine yazar — eşitlemenin atomik değişimi buna dayanır.
+  await fsp.rename(syncPath(dir, from), syncPath(dir, to));
+});
+
+ipcMain.handle('hk:sync-remove', async (_e, dir, name) => {
+  try { await fsp.unlink(syncPath(dir, name)); } catch { /* zaten yok */ }
+});
+
+// Klasör gerçekten var mı, klasör mü, YAZILABİLİR mi? Salt-okunur bir klasör
+// seçilirse eşitleme sessizce hiç çalışmaz; deneme yazması bunu baştan yakalar.
+ipcMain.handle('hk:sync-validate', async (_e, dir) => {
+  const p = String(dir || '').trim();
+  if (!p) return { ok: false, error: 'Klasör yolu boş.' };
+  try {
+    const st = await fsp.stat(p);
+    if (!st.isDirectory()) return { ok: false, error: 'Bu bir klasör değil: ' + p };
+    const probe = path.join(p, '.hastakayit-yazma-testi');
+    await fsp.writeFile(probe, 'ok', 'utf8');
+    await fsp.unlink(probe);
+    return { ok: true, path: path.resolve(p) };
+  } catch (err) {
+    if (err && err.code === 'ENOENT') return { ok: false, error: 'Bu klasör bulunamadı: ' + p };
+    return { ok: false, error: 'Klasöre yazılamıyor: ' + (err?.message || err) };
+  }
+});
+
+// Yerli klasör seçici. Yol yapıştırmaktan iyidir: kullanıcı yanlış yazamaz ve
+// macOS'ta uygulamaya o klasör için erişim izni de bu panel üzerinden verilir.
+ipcMain.handle('hk:sync-pick', async () => {
+  const { canceled, filePaths } = await dialog.showOpenDialog(liveWin() ?? undefined, {
+    title: 'Eşitleme klasörünü seçin',
+    message: 'İki cihazın da göreceği bir klasör seçin (örn. iCloud Drive içinde bir klasör).',
+    properties: ['openDirectory', 'createDirectory'],
+    buttonLabel: 'Bu Klasörü Kullan',
+  });
+  return canceled || !filePaths?.length ? null : filePaths[0];
+});
+
 // --- Pencere ---------------------------------------------------------------
 let win = null;
 let readyToClose = false;

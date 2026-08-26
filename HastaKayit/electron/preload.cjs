@@ -30,6 +30,16 @@ contextBridge.exposeInMainWorld('hkDesktop', {
   remove: (kind, name) => ipcRenderer.invoke('hk:file-delete', kind, name),
 
   saveExport: (name, base64) => ipcRenderer.invoke('hk:save-export', name, base64),
+
+  // Cihazlar arası eşitleme. Klasör kullanıcının seçtiği yerdedir (uygulamanın
+  // veri klasörü DEĞİL), bu yüzden ayrı çağrılar — ve ana süreç yalnızca
+  // eşitlemenin kendi dosya adlarına izin verir.
+  syncRead: (dir, name) => ipcRenderer.invoke('hk:sync-read', dir, name),
+  syncWrite: (dir, name, text) => ipcRenderer.invoke('hk:sync-write', dir, name, text),
+  syncRename: (dir, from, to) => ipcRenderer.invoke('hk:sync-rename', dir, from, to),
+  syncRemove: (dir, name) => ipcRenderer.invoke('hk:sync-remove', dir, name),
+  syncValidate: (dir) => ipcRenderer.invoke('hk:sync-validate', dir),
+  syncPick: () => ipcRenderer.invoke('hk:sync-pick'),
   revealDataDir: () => ipcRenderer.invoke('hk:reveal-data-dir'),
 
   onBeforeQuit: cb => { if (typeof cb === 'function') beforeQuitHandlers.push(cb); },
