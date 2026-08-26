@@ -79,6 +79,35 @@ async function showDataLocation() {
 
 const FIELD_TR = { name: 'Ad Soyad', mother_name: 'Anne Adı', residence: 'İkametgah', birth_date: 'Doğum Tarihi', diagnosis: 'Tanı', referral: 'Sevk Eden', phone: 'Telefon', start_date: 'Başlangıç', end_date: 'Bitiş', amount: 'Ödeme', notes: 'Not' };
 
+/**
+ * Defterin NASIL okunduğunu açık açık yazan not. Saf (test edilebilir).
+ *
+ * Buna ihtiyaç doğdu çünkü 53.096 satırlık bir defter sessizce 15.727 kayda
+ * inmişti ve ekranda bunu haber veren hiçbir şey yoktu: dosya HTS olarak
+ * tanınmamış, genel içe aktarıcıya düşmüş, orada TARİH ve FİYAT sütunları
+ * "eşleşmedi" diye atılmış, "İSİM SOYİSİM" yer tutucusu da gerçek bir ad
+ * sanılıp 28.965 satır tek hastada birleştirilmişti. Bir daha aynı şey sessizce
+ * olmasın diye sayılar artık önizlemede duruyor.
+ */
+export function htsReadNote(stats) {
+  const cols = stats.columns || {};
+  const used = [
+    ['Ad', cols.isim], ['Anne', cols.anne], ['Tanı', cols.tani], ['Ücret', cols.ucret],
+    ['Tarih', cols.tarih], ['Telefon', cols.telefon], ['İkamet', cols.ikamet], ['Yaş/Doğum', cols.dogum],
+  ].filter(([, v]) => v).map(([k, v]) => `${k} ← “${esc(String(v))}”`);
+  const lines = [`<b>${stats.totalRows}</b> satır okundu.`];
+  if (stats.emptyRows) lines.push(`<b>${stats.emptyRows}</b> tamamen boş satır atlandı.`);
+  if (stats.merged) lines.push(`<b>${stats.merged}</b> satır, aynı kişinin başka satırıyla birleştirildi (anne adı veya telefon eşleşmesi).`);
+  if (stats.dateCarried) lines.push(`<b>${stats.dateCarried}</b> satırın tarihi okunamadı; defter kronolojik olduğu için bir önceki tarihe yazıldı (ham metin tanıya eklendi).`);
+  if (stats.undated) lines.push(`<b>${stats.undated}</b> satırın hiç tarihi yok; bugünün tarihiyle kaydedilecek.`);
+  if (stats.skipped) lines.push(`<b>${stats.skipped}</b> teslimat satırı isimsiz olduğu için atlandı.`);
+  const ignored = stats.ignoredColumns || [];
+  if (ignored.length) lines.push(`<b>Okunmayan sütun:</b> ${esc(ignored.join(', '))} — bu sütunlardaki bilgi aktarılmayacak.`);
+  return `<details style="margin:8px 0"><summary class="muted">Dosya nasıl okundu? (${stats.totalRows} satır)</summary>
+    <p class="muted" style="margin-top:6px">${lines.join('<br>')}</p>
+    <p class="muted"><b>Kullanılan sütunlar:</b> ${used.join(' · ') || 'yok'}</p></details>`;
+}
+
 // HTS (doktorun eski ~78k satırlık) Excel dosyasını içe aktarır: önce bir önizleme
 // onayı (kaç hasta/ödeme/teslimat), sonra bulkImport ile toplu yazım.
 // bulkImport zaten idempotent (uuid + INSERT OR IGNORE) ve her chunk kendi
@@ -94,10 +123,11 @@ async function importHtsWorkbook(workbook) {
   openSheet(`
     <h4>HTS Excel İçe Aktar</h4>
     <p class="muted">Bu dosyadan içeri aktarılacak:<br>
-    • <b>${stats.patients}</b> hasta (${stats.nameless} isimsiz)<br>
+    • <b>${stats.patients}</b> hasta kaydı — ${stats.named} isimli, ${stats.anonymous} isimsiz<br>
     • <b>${stats.payments}</b> ödeme<br>
-    • <b>${stats.deliveries}</b> teslimat<br><br>
-    Aynı kayıtlar tekrar eklenmez. Devam edilsin mi?</p>
+    • <b>${stats.deliveries}</b> teslimat</p>
+    ${htsReadNote(stats)}
+    <p class="muted">Aynı kayıtlar tekrar eklenmez. Devam edilsin mi?</p>
     <div class="form" style="padding:0">
       <button id="hts-go" class="primary">İçeri Aktar</button>
       <button id="hts-cancel" type="button" class="ghost">Vazgeç</button>
@@ -558,7 +588,10 @@ export async function handleImportFile(file) {
   if (/\.xlsx$/i.test(file.name)) {
     const buf = new Uint8Array(await file.arrayBuffer());
     let workbook = null;
-    try { workbook = XLSX.read(buf, { type: 'array' }); } catch { workbook = null; }
+    // cellDates ŞART: onsuz her tarih hücresi ham bir sayı (45524) olarak gelir
+    // ve tarih olarak tanınmaz — 53.096 satırlık defterin bütün tarihleri bu
+    // yüzden kayboluyordu.
+    try { workbook = XLSX.read(buf, { type: 'array', cellDates: true }); } catch { workbook = null; }
     if (workbook && isHtsWorkbook(workbook)) {
       await importHtsWorkbook(workbook);
       return;

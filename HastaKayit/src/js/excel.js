@@ -115,7 +115,8 @@ function parseDate(v) {
 // Uygulamanın kendi dışa aktarımını (buildWorkbook çıktısı) geri içe aktarır.
 export function parseWorkbook(input) {
   let wb;
-  try { wb = XLSX.read(input, { type: typeof input === 'string' ? 'base64' : 'array' }); }
+  // cellDates: tarih hücreleri Date olarak gelsin (yoksa ham Excel sayısı).
+  try { wb = XLSX.read(input, { type: typeof input === 'string' ? 'base64' : 'array', cellDates: true }); }
   catch { return { ok: false, error: 'Excel dosyası okunamadı.' }; }
   const H = wb.Sheets['Hastalar'], O = wb.Sheets['Ödemeler'], T = wb.Sheets['Teslimatlar'];
   if (!H) return { ok: false, error: 'Excel içinde "Hastalar" sayfası yok.' };

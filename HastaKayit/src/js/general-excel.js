@@ -57,7 +57,8 @@ function gDate(v) {
 
 export function parseGeneralWorkbook(input, todayIso = '2026-01-01') {
   let wb;
-  try { wb = XLSX.read(input, { type: typeof input === 'string' ? 'base64' : 'array' }); }
+  // cellDates: tarih hücreleri Date olarak gelsin (yoksa ham Excel sayısı).
+  try { wb = XLSX.read(input, { type: typeof input === 'string' ? 'base64' : 'array', cellDates: true }); }
   catch { return { ok: false, error: 'Excel dosyası okunamadı.' }; }
 
   const sheetName = wb.SheetNames[0];

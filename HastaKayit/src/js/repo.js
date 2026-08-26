@@ -874,7 +874,10 @@ async function chunkInsertIgnore(x, table, cols, rows) {
 // children's patient_uuid. A child whose parent is missing, or a payment whose
 // amount is not a finite integer > 0, is skipped and counted (never throws the
 // whole import, never writes fractional/negative money).
-const PAT_COLS = ['uuid', 'name', 'mother_name', 'diagnosis', 'phone', 'start_date', 'status', 'photo', 'created_at', 'updated_at'];
+// residence / birth_date / notes toplu içe aktarmada UZUN SÜRE eksikti: HTS
+// Excel'inde "İKAMET", "DOĞUM TARİHİ" ve yaş bilgisi dolu olduğu hâlde bu üç
+// sütun yazılmadığı için sessizce kayboluyordu.
+const PAT_COLS = ['uuid', 'name', 'mother_name', 'diagnosis', 'phone', 'residence', 'birth_date', 'notes', 'start_date', 'status', 'photo', 'created_at', 'updated_at'];
 const PAY_COLS = ['uuid', 'patient_id', 'pay_date', 'amount', 'description', 'status', 'receipt', 'created_at', 'updated_at'];
 const DEL_COLS = ['uuid', 'patient_id', 'method', 'tracking_no', 'planned_date', 'delivered', 'delivered_date', 'planned_time', 'remind_min', 'created_at', 'updated_at'];
 
@@ -897,7 +900,9 @@ export async function bulkImport(x, { patients = [], payments = [], deliveries =
       const ts = nowIso();
       // HTS/Excel-imported patients carry no photo (NULL); keep any that a
       // caller happens to supply.
-      return [p.uuid, p.name, p.mother_name || '', p.diagnosis || '', p.phone || '', p.start_date, 'active', p.photo ?? null, ts, ts];
+      return [p.uuid, p.name, p.mother_name || '', p.diagnosis || '', p.phone || '',
+        p.residence || '', p.birth_date ?? null, p.notes || '',
+        p.start_date, 'active', p.photo ?? null, ts, ts];
     });
     await withTx(x, () => chunkInsertIgnore(x, 'patients', PAT_COLS, rows));
     done += slice.length;

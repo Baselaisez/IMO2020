@@ -125,9 +125,21 @@ açık olduğunda önerilen kelimeler menünün en üstünde görünür.
 - Pencere boyutu ve konumu hatırlanır.
 - Pencere kapanınca uygulama çıkmaz (macOS geleneği); Dock simgesine
   tıklayınca yeniden açılır.
-- **Pencere odaktan çıkınca ekran kilitlenir.** iPhone'da uygulama arka plana
-  alındığında olan şeyin Mac karşılığıdır; PIN'in ne kadar sonra sorulacağı
-  Ayarlar → "PIN ne zaman sorulsun?" ile belirlenir.
+- **Pencere odaktan çıkınca ne olacağı Ayarlar'a bağlıdır** (Ayarlar → "PIN ne
+  zaman sorulsun?"):
+
+  | Ayar | Safari'ye/Finder'a geçince |
+  |---|---|
+  | Her uygulama değişiminde | hemen kilitlenir |
+  | 2 / 5 / 10 dakika sonra | kilitlenmez; o süre dolarsa kendiliğinden kilitlenir |
+  | Sadece uygulama kapanınca | kilitlenmez |
+
+  Eskiden masaüstünde **her** blur'da koşulsuz kilitleniyor, geri dönüşte ayara
+  bakılıp otomatik açılıyordu — yani seçilen süre işe yaramıyor ve her sekme
+  değişiminde kilit ekranı bir anlığına çakıp kayboluyordu. iPhone/Android'de
+  davranış değişmedi: orada uygulama değiştirici, uygulamanın son görüntüsünün
+  küçük resmini gösterir ve hasta adları o küçük resimde okunur, bu yüzden ekran
+  ayar ne olursa olsun anında karartılır.
 - Kapatırken bekleyen veritabanı yazması diske inmeden pencere kapanmaz.
   Renderer 3 saniye içinde yanıt vermezse yine de kapanır (kilitlenmiş bir
   pencere uygulamayı rehin alamaz).

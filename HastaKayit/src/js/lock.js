@@ -14,6 +14,37 @@ let onUnlockCb = null;
 let bioAvailable = false;
 let bgAt = 0;
 let lockedFrom = null;
+let bgTimer = null;
+
+function clearBgTimer() { clearTimeout(bgTimer); bgTimer = null; }
+
+/**
+ * Uygulama arka plana geçtiğinde ne yapılacağı. Saf — testi var.
+ *
+ * 'lock'  → ekranı hemen kilitle
+ * 'timer' → şimdilik kilitleme, süre dolarsa kilitle
+ * 'none'  → hiç kilitleme (yalnızca uygulama kapanınca sorulur)
+ *
+ * iPhone/Android'de sonuç HER ZAMAN 'lock': uygulama değiştirici, uygulamanın
+ * son görüntüsünün küçük resmini gösterir ve hasta adları orada okunur.
+ * Masaüstünde böyle bir küçük resim yok ama blur çok sık olur (Safari'ye
+ * geçmek, Finder'a tıklamak); orada her blur'da kilitlemek kullanıcının seçtiği
+ * süreyi anlamsız kılıyor ve kilit ekranı her sekme değişiminde bir anlığına
+ * çakıp kayboluyordu.
+ */
+export function blurAction(policy, native) {
+  if (native) return 'lock';
+  const p = policy || '2';
+  if (p === 'switch') return 'lock';
+  if (p === 'close') return 'none';
+  return 'timer';
+}
+
+// Kilit ayarı okunamazsa varsayılan '2' — yani daha SIKI olan taraf, kilitsiz
+// kalmak değil.
+async function readLockPolicy() {
+  try { return (await getMeta(state.exec, 'lock_policy')) || '2'; } catch { return '2'; }
+}
 
 async function getFailState() {
   const fc = Number((await getMeta(state.exec, 'fail_count')) || '0');
@@ -350,11 +381,21 @@ export async function initLock(onUnlock) {
     tryBiometric(); // prompt immediately on open
   }
 
-  // Arka plana geçişte kilitle. iPhone/Android'de Capacitor'ın appStateChange'i,
-  // Mac'te pencerenin blur/focus olayları aynı işi görür: uygulama öne gelmediği
-  // sürece hasta listesi ekranda durmaz. (iOS'ta ayrıca uygulama değiştirici
-  // önizlemesinde hasta adı görünmesin diye ekran her hâlükârda karartılır.)
-  const onBackground = () => {
+  // Arka plana geçişte ne olacağı PLATFORMA GÖRE değişir.
+  //
+  // iPhone/Android: ekran HER ZAMAN anında karartılır. Sebebi gizlilik değil
+  // tercih değil, zorunluluk: uygulama değiştirici, uygulamanın son görüntüsünün
+  // küçük resmini gösterir ve hasta adları o küçük resimde okunur.
+  //
+  // Mac/Windows: böyle bir küçük resim YOK, ama blur ÇOK sık olur — Safari'ye
+  // geçmek, Finder'a tıklamak, bildirime bakmak. Orada her blur'da kilitlemek
+  // kullanıcının seçtiği süreyi anlamsız kılıyor ve her uygulama değişiminde
+  // kilit ekranı bir anlığına çakıp hemen kayboluyordu. Artık masaüstünde kilit
+  // AYARA UYAR:
+  //   'switch'         → hemen kilitle (kullanıcı bunu bilerek seçtiyse)
+  //   '2' / '5' / '10' → arka planda o kadar dakika geçerse kilitle
+  //   'close'          → blur'da hiç kilitleme (yalnızca uygulama kapanınca)
+  const onBackground = async () => {
     // Fold WAL into the main DB file so the platform's own backup (iCloud on
     // iOS, Google Auto Backup on Android) captures a coherent single file.
     // Fire-and-forget: must never block backgrounding.
@@ -362,10 +403,24 @@ export async function initLock(onUnlock) {
     state.exec.query('PRAGMA wal_checkpoint(TRUNCATE)').catch(() => {});
     flushSnapshot();
     // Remember where we were (to restore on unlock) only if we were actually
-    // unlocked and PIN setup is done. Always blank the screen for the thumbnail.
+    // unlocked and PIN setup is done.
     const setUp = document.getElementById('btn-pin-ok').textContent === 'Aç';
-    if (state.screen !== 'lock' && setUp) { lockedFrom = state.screen; bgAt = Date.now(); }
-    lockNow();
+    if (state.screen === 'lock' || !setUp) { if (isNative()) lockNow(); return; }
+    lockedFrom = state.screen;
+    bgAt = Date.now();
+    if (isNative()) { lockNow(); return; }
+
+    const policy = await readLockPolicy();
+    const action = blurAction(policy, false);
+    if (action === 'lock') { lockNow(); return; }
+    if (action === 'none') return; // sadece uygulama kapanınca — sayaç da yok
+    // Sayaç arka plandayken işler. Kullanıcı geri dönerse onResume iptal eder,
+    // dönmezse süre dolduğunda ekran kendiliğinden kilitlenir.
+    clearBgTimer();
+    bgTimer = setTimeout(() => {
+      bgTimer = null;
+      if (state.screen !== 'lock') lockNow();
+    }, (Number(policy) || 2) * 60000);
   };
 
   if (isNative()) {
@@ -379,11 +434,17 @@ export async function initLock(onUnlock) {
 }
 
 async function onResume() {
+  // Geri dönüldü: arka plan sayacı artık geçersiz.
+  clearBgTimer();
   // Only when we're on the lock screen after a real background (PIN setup done).
-  if (state.screen !== 'lock' || document.getElementById('btn-pin-ok').textContent !== 'Aç') return;
+  if (state.screen !== 'lock' || document.getElementById('btn-pin-ok').textContent !== 'Aç') {
+    // Masaüstünde kilitlemeden döndük — "nereden kilitlendik" bilgisi bayat
+    // kalmasın, yoksa sonraki gerçek açılışta ekran beklenmedik yere zıplar.
+    lockedFrom = null;
+    return;
+  }
   if (!lockedFrom) { if (bioAvailable) tryBiometric(); return; } // never was unlocked this session
-  let policy = '2';
-  try { policy = (await getMeta(state.exec, 'lock_policy')) || '2'; } catch {}
+  const policy = await readLockPolicy();
   if (!shouldRequirePin(policy, Date.now() - bgAt)) {
     // Auto-unlock: reveal the prior screen, no PIN, no heavy refresh (DOM intact).
     showScreen(lockedFrom); lockedFrom = null;

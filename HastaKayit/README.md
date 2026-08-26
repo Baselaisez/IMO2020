@@ -80,6 +80,11 @@ npm test
 Her iki platformda da Ayarlar ekranının altında gerçek konum yazar; Mac'te
 "📂 Finder'da Göster" düğmesi klasörü doğrudan açar.
 
+## Eski defterin (HTS Excel) içe aktarılması
+
+53.096 satırlık defter içe aktarıldığında yalnızca 15.727 kayıt girmesinin
+sebebi ve düzeltmesi: [docs/HTS-ICE-AKTARMA.md](docs/HTS-ICE-AKTARMA.md)
+
 ## Cihazlar arası eşitleme
 
 Mac ve iPhone aynı kayıtları görebilir: iki cihaz da paylaşılan bir bulut
