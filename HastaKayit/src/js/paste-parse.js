@@ -438,8 +438,50 @@ function parseBareLines(lines, maxYear) {
 
 // --- Entry point ------------------------------------------------------------
 
-export function parsePatientText(text, todayIso) {
-  if (!text || typeof text !== 'string' || !text.trim()) return emptyResult();
+// WhatsApp sohbetinden kopyalanan metnin başındaki damga ve gönderen adı.
+// Üç yaygın biçim:
+//   [26.08.2026 20:41] Ali Şahin: Adı Soyadı: ...
+//   26/08/2026, 20:41 - Ali Şahin: ...
+//   20:41, 26 Ağu - Ali Şahin: ...
+const CHAT_PREFIX_RE =
+  /^\s*(?:\[[^\]]{4,40}\]\s*)?(?:\d{1,2}[./]\d{1,2}[./]\d{2,4},?\s+\d{1,2}[:.]\d{2}(?::\d{2})?(?:\s*[APap][Mm])?\s*[-–—]\s*)?(?:[^:\n]{1,40}?:\s)?/;
+// Damganın kendisi (köşeli parantezli biçim) — gönderen adı ayrı yakalanır.
+const CHAT_BRACKET_RE = /^\s*\[[^\]]{4,40}\]\s*(?:[^:\n]{1,40}?:\s*)?/;
+const CHAT_DASH_RE = /^\s*\d{1,2}[./]\d{1,2}[./]\d{2,4},?\s+\d{1,2}[:.]\d{2}(?::\d{2})?(?:\s*[APap][Mm])?\s*[-–—]\s*(?:[^:\n]{1,40}?:\s*)?/;
+// Doktorun gönderdiği şablonun ilk satırı — bir cevap değil, talimat.
+// DİKKAT: bu kontrol trLower'dan GEÇİRİLMİŞ metne uygulanır. JS'in /i bayrağı
+// burada işe yaramaz: "İ" (U+0130) Unicode'da "i" değil "i̇" (i + birleşen
+// nokta) olarak küçülür, yani /kişinin/i "KİŞİNİN" ile eşleşmez.
+const TEMPLATE_NOISE_RE = /^kişinin\s+.*resm/;
+// Görünmez işaretler: WhatsApp kopyalarında sıkça bulunur ve ad karşılaştırmasını bozar.
+const INVISIBLE_RE = /[\u200B-\u200F\u202A-\u202E\u2066-\u2069\uFEFF]/g;
+
+/**
+ * WhatsApp süslemesini temizler. Saf — testi var.
+ *
+ * NEDEN: sohbetten kopyalanan metinde her satırın başında tarih damgası ve
+ * GÖNDERENİN ADI vardır. Ayrıştırıcı bunları temizlemeden çalıştığında iki
+ * somut hata yapıyordu: damgadaki tarihi doğum tarihi sanıyor, gönderenin
+ * adını da hastanın adı olarak alıyordu — yani WhatsApp'tan yapıştırılan her
+ * hasta yanlış isimle açılıyordu.
+ */
+export function stripChatDecoration(text) {
+  return String(text ?? '')
+    .replace(INVISIBLE_RE, '')
+    .split(/\r\n|\r|\n/)
+    .map((line) => {
+      let l = line;
+      if (CHAT_BRACKET_RE.test(l)) l = l.replace(CHAT_BRACKET_RE, '');
+      else if (CHAT_DASH_RE.test(l)) l = l.replace(CHAT_DASH_RE, '');
+      return l.trim();
+    })
+    .filter((l) => l && !TEMPLATE_NOISE_RE.test(trLower(l)))
+    .join('\n');
+}
+
+export function parsePatientText(rawText, todayIso) {
+  const text = stripChatDecoration(rawText);
+  if (!text || !text.trim()) return emptyResult();
 
   const maxYear = todayIso ? Number(String(todayIso).slice(0, 4)) : new Date().getFullYear();
   const lines = text.split(/\r\n|\r|\n/).map((l) => l.trim()).filter(Boolean);

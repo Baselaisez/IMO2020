@@ -180,3 +180,24 @@ html[data-platform="ios"] .fab-mini { bottom: calc(92px + env(safe-area-inset-bo
   html[data-platform="macos"] #sel-toolbar { max-width: 744px; margin-left: auto; margin-right: auto; }
   html[data-platform="macos"] .fab-mini { right: calc(50% - 380px + 8px); }
 }
+
+/* Otomatik kayıt satırı: formun üstünde, dikkat çeken ama yolu kesmeyen bir
+   şerit. Doktor yazmaya devam ederken kaymasın diye sabit yükseklikte değil,
+   gizliyken hiç yer kaplamıyor. */
+.autosave-line {
+  margin: 0;
+  padding: 6px 14px;
+  font-size: 14px;
+  color: #14532d;
+  background: #dcfce7;
+  border-bottom: 1px solid #bbf7d0;
+}
+.linkbtn {
+  background: none;
+  border: 0;
+  padding: 0 0 0 6px;
+  font: inherit;
+  color: var(--blue, #2563eb);
+  text-decoration: underline;
+  cursor: pointer;
+}

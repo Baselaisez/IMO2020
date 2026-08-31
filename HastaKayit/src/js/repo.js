@@ -55,6 +55,14 @@ export const SCHEMA = [
   `CREATE INDEX IF NOT EXISTS idx_deliveries_patient ON deliveries(patient_id)`,
   `CREATE TABLE IF NOT EXISTS meta (key TEXT PRIMARY KEY, value TEXT)`,
   `CREATE TABLE IF NOT EXISTS deletions (uuid TEXT PRIMARY KEY, entity TEXT NOT NULL, deleted_at TEXT NOT NULL)`,
+  // "Bugün" şeridi ve bildirim zamanlaması artık tüm hastaları taramak yerine
+  // yalnızca randevusu olanları sorguluyor; bu indeks o sorguları 45.000
+  // kayıtta bile tarama yapmadan çözer.
+  `CREATE INDEX IF NOT EXISTS idx_patients_next_appt ON patients(next_appt)`,
+  // Liste her sayfada "ORDER BY name COLLATE NOCASE" ile sıralanıyor.
+  `CREATE INDEX IF NOT EXISTS idx_patients_name ON patients(name COLLATE NOCASE)`,
+  // Teslimat hatırlatmaları planned_date'e göre süzülüyor.
+  `CREATE INDEX IF NOT EXISTS idx_deliveries_planned ON deliveries(planned_date)`,
 ];
 
 // uuid is the sync identity; a collision (e.g. a hand-built backup, or a
@@ -578,6 +586,70 @@ export async function listDeliveries(x) {
   return x.query('SELECT * FROM deliveries ORDER BY id');
 }
 
+/**
+ * "Bugün" şeridi için SADECE bugün randevusu olan aktif hastalar.
+ *
+ * Eskiden bu şerit listPatients() ile TÜM hastaları (ve tüm ödemeleri) belleğe
+ * alıyordu. 45.000 kayıtta ölçülen maliyet 1.474 ms idi ve refreshHome() her
+ * kayıt sonrası, her kilit açılışında, her eşitleme turunda çalıştığı için
+ * doktor her hasta kaydettiğinde bu bedeli ödüyordu. Aynı bilgi indeksli tek
+ * bir sorguyla ~1 ms'de geliyor.
+ */
+export async function listTodayAppointments(x, todayIso) {
+  return x.query(
+    `SELECT id, name, next_appt FROM patients
+      WHERE status = 'active' AND next_appt IS NOT NULL AND next_appt <> ''
+        AND substr(next_appt, 1, 10) = ?
+      ORDER BY next_appt`,
+    [todayIso]
+  );
+}
+
+/**
+ * Bildirim zamanlaması için SADECE gelecekteki işler.
+ *
+ * buildSchedule geçmiş randevuları zaten atıyordu, ama girdisini hazırlamak
+ * için allData() ile 45.000 hasta + tüm ödemeler belleğe alınıyordu (ölçülen:
+ * 962 ms, hem kilit açılışında hem her yedek anlık görüntüsünde). Süzme artık
+ * SQL tarafında: buildSchedule'a yalnızca ilgili satırlar gidiyor.
+ *
+ * `fromIso` = 'YYYY-MM-DD' (bugün). Bugünün erken saatlerindeki bir randevu
+ * geçmişte kalmış olabilir; onu buildSchedule zaten eliyor.
+ */
+export async function listUpcoming(x, fromIso) {
+  const patients = await x.query(
+    `SELECT id, name, status, next_appt, appt_remind_min FROM patients
+      WHERE status = 'active' AND next_appt IS NOT NULL AND next_appt <> ''
+        AND substr(next_appt, 1, 10) >= ?`,
+    [fromIso]
+  );
+  const deliveries = await x.query(
+    `SELECT id, patient_id, method, planned_date, planned_time, remind_min, delivered FROM deliveries
+      WHERE delivered = 0 AND planned_date IS NOT NULL AND planned_date >= ?`,
+    [fromIso]
+  );
+  const payments = await x.query(
+    `SELECT id, patient_id, pay_date, status FROM payments
+      WHERE status = 'pending' AND pay_date IS NOT NULL AND pay_date >= ?`,
+    [fromIso]
+  );
+  // buildSchedule teslimat/ödeme bildiriminde hasta ADINI kullanıyor; adları
+  // yalnızca gerçekten gereken hastalar için çekiyoruz.
+  const needed = new Set([...deliveries, ...payments].map(r => r.patient_id));
+  for (const p of patients) needed.delete(p.id);
+  if (needed.size) {
+    const ids = [...needed];
+    const rows = await x.query(
+      `SELECT id, name, status, next_appt, appt_remind_min FROM patients WHERE id IN (${ids.map(() => '?').join(',')})`,
+      ids
+    );
+    // next_appt'ı boşaltıyoruz: bu satırlar yalnızca isim taşımak için var,
+    // randevuları zaten yukarıdaki sorguda yoksa geçmişte demektir.
+    for (const r of rows) patients.push({ ...r, next_appt: null });
+  }
+  return { patients, deliveries, payments };
+}
+
 export async function allData(x) {
   return {
     patients: await x.query('SELECT * FROM patients ORDER BY id'),
@@ -1000,8 +1072,13 @@ export async function listPatientsPage(x, { limit = 100, offset = 0, search = ''
   // Ad, anne adı, tanı ve telefon birlikte taranır.
   const digits = String(search).replace(/[^0-9]/g, '');
   const dlike = digits ? `%${digits}%` : 'x';
+  // photo BİLEREK seçilmiyor: liste satırı fotoğraf göstermiyor ama `SELECT *`
+  // her sayfada 100 hastanın base64 fotoğrafını da belleğe taşıyordu.
   const patients = await x.query(
-    `SELECT * FROM patients
+    `SELECT id, uuid, name, phone, diagnosis, referral, notes, mother_name, planned_sessions,
+            residence, birth_date, appt_remind_min, appt_cal_id, start_date, end_date,
+            next_appt, status, created_at, updated_at
+       FROM patients
        WHERE ? = ''
           OR name LIKE ?
           OR IFNULL(mother_name,'') LIKE ?

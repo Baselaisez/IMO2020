@@ -45,14 +45,81 @@ export function classifyFiles(files) {
   return { images, docs, unknown };
 }
 
-// Sürüklenen şey GERÇEKTEN dosya mı? (Uygulama içinde seçili metni
-// sürüklemek kaplamayı açmasın.) types bazı tarayıcılarda DOMStringList.
-function dragHasFiles(e) {
-  const t = e && e.dataTransfer && e.dataTransfer.types;
-  if (!t) return false;
-  for (let i = 0; i < t.length; i++) if (t[i] === 'Files') return true;
-  return false;
+/**
+ * Bu sürüklemeyle ilgileniyor muyuz? Saf — testi var.
+ *
+ * 'Files' → dosya sürükleniyor. 'text/uri-list' → tarayıcıdan bir görsel/bağlantı
+ * sürükleniyor (WhatsApp Web bu yolu kullanır). Uygulama içinde SEÇİLİ METİN
+ * sürüklemek yalnızca 'text/plain' üretir, o yüzden kaplama açılmaz.
+ */
+export function dragIsInteresting(types) {
+  const list = Array.from(types || []);
+  return list.includes('Files') || list.includes('text/uri-list');
 }
+
+function dragWanted(e) {
+  return dragIsInteresting((e && e.dataTransfer && e.dataTransfer.types) || []);
+}
+
+function typeList(dt) {
+  const t = (dt && dt.types) || [];
+  const out = [];
+  for (let i = 0; i < t.length; i++) out.push(t[i]);
+  return out;
+}
+
+const DATA_IMG_RE = /(data:image\/[a-z+]+;base64,[A-Za-z0-9+/=]+)/i;
+const IMG_URL_RE = /^(https?:|blob:)\S+/i;
+
+/**
+ * Bir sürükleme/yapıştırma yükünde ne var? Saf — testi var.
+ *
+ * NEDEN GEREKLİ: WhatsApp'tan görsel taşımanın iki yolu var ve ikisi taban
+ * tabana zıt veri gönderiyor.
+ *   • WhatsApp masaüstü uygulaması → gerçek bir DOSYA (dataTransfer.files).
+ *   • WhatsApp Web (Safari/Chrome) → dosya YOK; yalnızca `text/uri-list` ya da
+ *     içinde <img src> geçen `text/html`.
+ * Eski kod yalnızca ilkine bakıyordu; ikinci durumda sürükleme kaplaması bile
+ * açılmıyor, bırakma HİÇBİR ŞEY yapmıyordu — kullanıcıya "olmadı" bile
+ * denmiyordu.
+ *
+ * `data:` ile gelen görseli yerel olarak çözebiliyoruz (CSP `img-src data:`
+ * izinli). `http(s):`/`blob:` bağlantısını İNDİREMEYİZ: uygulama hiçbir yere
+ * bağlanmaz (CSP `connect-src 'self'`) ve bu söz hasta verisi için kasıtlıdır.
+ * O durumda kullanıcıya ne yapacağını söylüyoruz — sessiz kalmıyoruz.
+ *
+ * @returns {{kind:'file',file:File}|{kind:'dataurl',dataUrl:string}|{kind:'remote',url:string}|{kind:'none'}}
+ */
+export function extractDroppedImage(dt) {
+  if (!dt) return { kind: 'none' };
+  const files = Array.from(dt.files || []);
+  const img = files.find(f => isImageFile(f));
+  if (img) return { kind: 'file', file: img };
+
+  const types = typeList(dt);
+  const read = (t) => { try { return types.includes(t) ? String(dt.getData(t) || '') : ''; } catch { return ''; } };
+
+  const html = read('text/html');
+  const inHtml = html.match(DATA_IMG_RE);
+  if (inHtml) return { kind: 'dataurl', dataUrl: inHtml[1] };
+
+  const uri = (read('text/uri-list') || read('text/plain')).split(/[\r\n]+/).find(Boolean) || '';
+  const inUri = uri.match(DATA_IMG_RE);
+  if (inUri) return { kind: 'dataurl', dataUrl: inUri[1] };
+
+  const htmlSrc = html.match(/<img[^>]+src\s*=\s*["']([^"']+)["']/i);
+  const candidate = htmlSrc ? htmlSrc[1] : uri;
+  if (candidate && IMG_URL_RE.test(candidate)) return { kind: 'remote', url: candidate };
+  return { kind: 'none' };
+}
+
+// Bağlantı olarak gelen görsel için kullanıcıya söylenecek şey. Saf.
+// Suçlayıcı değil, YAPILACAK İŞİ söylüyor.
+export const REMOTE_IMAGE_HELP =
+  'Bu fotoğraf bir bağlantı olarak geldi (WhatsApp Web / tarayıcı). Uygulama '
+  + 'hiçbir yere bağlanmadığı için bağlantıyı indiremez. Şunu yapın: WhatsApp\'ta '
+  + 'fotoğrafa sağ tıklayıp “Resmi Kopyala” deyin, sonra bu formda ⌘V ile '
+  + 'yapıştırın. (Ya da fotoğrafı bilgisayara indirip buraya sürükleyin.)';
 
 function buildOverlay() {
   const el = document.createElement('div');
@@ -71,7 +138,7 @@ function buildOverlay() {
  * @param {{ onFiles: (files: File[]) => any }} opts
  * @returns {() => void} dinleyicileri kaldıran fonksiyon
  */
-export function initDragDrop({ onFiles } = {}) {
+export function initDragDrop({ onFiles, onImage } = {}) {
   if (typeof window === 'undefined' || typeof document === 'undefined') return () => {};
 
   let overlay = null;
@@ -90,33 +157,43 @@ export function initDragDrop({ onFiles } = {}) {
   }
 
   function onDragEnter(e) {
-    if (!dragHasFiles(e)) return;
+    if (!dragWanted(e)) return;
     e.preventDefault();
     depth++;
     show();
   }
   function onDragOver(e) {
-    if (!dragHasFiles(e)) return;
+    if (!dragWanted(e)) return;
     e.preventDefault(); // ŞART: bu olmadan drop hiç tetiklenmez ve tarayıcı dosyaya gider
     try { e.dataTransfer.dropEffect = 'copy'; } catch { /* bazı ortamlar salt-okunur */ }
     if (depth === 0) { depth = 1; show(); } // dragenter kaçtıysa kurtar
   }
   function onDragLeave(e) {
-    if (!dragHasFiles(e)) return;
+    if (!dragWanted(e)) return;
     depth--;
     if (depth <= 0) hide();
   }
   function onDrop(e) {
-    if (!dragHasFiles(e)) { hide(); return; }
+    if (!dragWanted(e)) { hide(); return; }
     e.preventDefault(); // ŞART: navigasyonu engelle
     hide();
-    const list = (e.dataTransfer && e.dataTransfer.files) || [];
-    const files = Array.from(list);
-    if (!files.length) return;
-    if (typeof onFiles === 'function') {
+    const files = Array.from((e.dataTransfer && e.dataTransfer.files) || []);
+    if (files.length) {
+      if (typeof onFiles === 'function') {
+        Promise.resolve()
+          .then(() => onFiles(files))
+          .catch(err => console.error('Sürükle-bırak işlenemedi:', err));
+      }
+      return;
+    }
+    // Dosya yok ama görsel olabilir: WhatsApp Web / tarayıcı sürüklemesi.
+    // Eskiden buradan sessizce çıkılıyordu.
+    const payload = extractDroppedImage(e.dataTransfer);
+    if (payload.kind === 'none') return;
+    if (typeof onImage === 'function') {
       Promise.resolve()
-        .then(() => onFiles(files))
-        .catch(err => console.error('Sürükle-bırak işlenemedi:', err));
+        .then(() => onImage(payload))
+        .catch(err => console.error('Sürüklenen görsel işlenemedi:', err));
     }
   }
   // Sürükleme pencere dışında biterse (ESC, iptal) kaplama takılı kalmasın.
@@ -145,12 +222,12 @@ export function attachDropZone(el) {
   if (!el) return;
   let depth = 0;
   el.addEventListener('dragenter', e => {
-    if (!dragHasFiles(e)) return;
+    if (!dragWanted(e)) return;
     depth++;
     el.classList.add('over');
   });
   el.addEventListener('dragleave', e => {
-    if (!dragHasFiles(e)) return;
+    if (!dragWanted(e)) return;
     depth--;
     if (depth <= 0) { depth = 0; el.classList.remove('over'); }
   });

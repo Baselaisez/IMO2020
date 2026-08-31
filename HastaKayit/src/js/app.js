@@ -1,9 +1,9 @@
-import { initSchema, allData, getMeta } from './repo.js';
+import { initSchema, listUpcoming, getMeta } from './repo.js';
 import { isDesktop, isNative, platform } from './platform.js';
 import { openNativeDb } from './db-capacitor.js';
 import { openWebDb } from './db-web.js';
 import { openDesktopDb } from './db-desktop.js';
-import { state, showScreen, banner, initHomeButtons } from './ui.js';
+import { state, showScreen, banner, initHomeButtons, todayIso } from './ui.js';
 import { initLock } from './lock.js';
 import { initHome, refreshHome } from './ui-home.js';
 import { initForm } from './ui-form.js';
@@ -64,8 +64,11 @@ async function main() {
       await requestNotifyPermission();
       await ensureChannels();
       setNotifSound((await getMeta(state.exec, 'notif_sound')) !== 'off');
-      const d = await allData(state.exec);
-      await rescheduleNotifications(d.patients, d.deliveries, d.payments);
+      // Bildirimler için TÜM veriyi yüklemeye gerek yok: buildSchedule zaten
+      // yalnızca gelecekteki işleri planlıyor. allData() burada 45.000 kayıtta
+      // 962 ms sürüyordu ve kilit açılışını o kadar geciktiriyordu.
+      const up = await listUpcoming(state.exec, todayIso());
+      await rescheduleNotifications(up.patients, up.deliveries, up.payments);
       await dailyBackupIfDue();
       scheduleMidnight();
       // Cihazlar arası eşitleme: kilit açıldıktan ~3 sn sonra bir kez, sonra her

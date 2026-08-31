@@ -17,6 +17,7 @@ src/                 uygulama (tek kaynak — üç platform da bunu çalıştır
   js/db-desktop.js   Mac / Windows     → sql.js + kalıcı dosya
   js/db-web.js       tarayıcı önizleme → bellek içi (kalıcı DEĞİL)
   js/desktop.js      Electron köprüsü (dosya işlemleri IPC üzerinden)
+  js/autosave.js     form otomatik kaydı (sayaç, mükerrer kayıt koruması)
   js/sync-file.js    cihazlar arası eşitleme — taşıma katmanı (5.2.2)
   js/sync-merge.js   cihazlar arası eşitleme — saf birleştirme (LWW)
 ios/                 Xcode projesi (iPhone + iPad)
@@ -79,6 +80,11 @@ npm test
 
 Her iki platformda da Ayarlar ekranının altında gerçek konum yazar; Mac'te
 "📂 Finder'da Göster" düğmesi klasörü doğrudan açar.
+
+## Hız ve hasta kaydı
+
+Ölçülen darboğazlar, otomatik kayıt (✅'e basmadan) ve WhatsApp'tan fotoğraf/
+metin alma: [docs/HIZ-VE-KAYIT.md](docs/HIZ-VE-KAYIT.md)
 
 ## Eski defterin (HTS Excel) içe aktarılması
 

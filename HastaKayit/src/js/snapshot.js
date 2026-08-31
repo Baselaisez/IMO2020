@@ -6,12 +6,39 @@ import { state, banner } from './ui.js';
 import { rescheduleNotifications } from './notify.js';
 
 let timer = null;
+let lastSnapshotAt = 0;
+
+// Kayıt sonrası anlık görüntü artık HER kayıtta değil, en fazla bu aralıkta bir
+// alınır.
+//
+// NEDEN: anlık görüntü tüm veriyi JSON'a çevirip diske yazar. Doktorun
+// defterinde (45.000 kayıt) ölçülen maliyet, HER kayıttan 5 sn sonra:
+// allData 814 ms + makeBackup 348 ms + JSON.stringify 316 ms = ~1,5 sn donan
+// arayüz, üstüne 19,1 MB dosya yazımı. Hasta eklemeyi yavaşlatan şey buydu.
+//
+// Bunu seyrekleştirmek veri güvenliğini DÜŞÜRMEZ, çünkü asıl kayıt zaten her
+// mutasyonda SQLite dosyasına yazılıyor (db-desktop/db-capacitor). Anlık
+// görüntü bir emniyet kopyasıdır, işlem günlüğü değil. Ayrıca uygulama arka
+// plana alınırken (flushSnapshot) ve günlük yedekte her hâlükârda alınıyor.
+export const SNAPSHOT_MIN_INTERVAL_MS = 10 * 60 * 1000;
+
+/** Anlık görüntü şimdi alınmalı mı? Saf — testi var. */
+export function snapshotDue(lastAtMs, nowMs, minIntervalMs = SNAPSHOT_MIN_INTERVAL_MS) {
+  if (!lastAtMs) return true;              // bu oturumda hiç alınmadı
+  const elapsed = nowMs - lastAtMs;
+  if (!Number.isFinite(elapsed) || elapsed < 0) return true; // saat geri alınmış: emniyetli taraf
+  return elapsed >= minIntervalMs;
+}
 
 export function scheduleSnapshot() {
   clearTimeout(timer);
   // banner already shown inside takeSnapshot; catch only silences the
   // unhandled rejection in the timer context.
-  timer = setTimeout(() => { timer = null; takeSnapshot().catch(() => {}); }, 5000);
+  timer = setTimeout(() => {
+    timer = null;
+    if (!snapshotDue(lastSnapshotAt, Date.now())) return;
+    takeSnapshot().catch(() => {});
+  }, 5000);
 }
 
 // Called on app background: fire the pending debounced snapshot immediately
@@ -21,6 +48,7 @@ export function flushSnapshot() {
 }
 
 export async function takeSnapshot() {
+  lastSnapshotAt = Date.now();
   try {
     const data = await allData(state.exec);
     const backup = makeBackup(data.patients, data.payments, new Date().toISOString(), data.deliveries, data.deletions);
@@ -97,7 +125,10 @@ export async function initSnapshots() {
     if (String(verdict ?? 'ok').toLowerCase() !== 'ok') throw new Error(`Bütünlük kontrolü: ${verdict}`);
     const last = JSON.parse((await getMeta(state.exec, 'last_snapshot')) || 'null');
     if (last && (isNative() || isDesktop())) {
-      const d = await allData(state.exec);
+      // Sadece SAYILAR karşılaştırılıyor; bunun için tüm veriyi belleğe almak
+      // gereksizdi (45.000 kayıtta 814 ms, üstelik her açılışta).
+      const n = async (t) => (await state.exec.query(`SELECT COUNT(*) c FROM ${t}`))[0].c;
+      const d = { patients: { length: await n('patients') }, payments: { length: await n('payments') } };
       if (d.patients.length < last.patients || d.payments.length < last.payments) {
         banner(`DİKKAT: Veritabanında son yedekten daha az kayıt var (beklenen ${last.patients} hasta / ${last.payments} ödeme). Ayarlar → Yedekten Geri Yükle ile kontrol edin. (Az önce kayıt sildiyseniz bu normal olabilir.)`, 'error', 0);
       }

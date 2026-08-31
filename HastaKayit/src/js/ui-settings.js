@@ -11,8 +11,8 @@ import { getSyncSettings, syncIfConfigured, ANDROID_SYNC_LABEL } from './sync-fi
 import { state, showScreen, guarded, banner, openSheet, closeSheet, todayIso, esc } from './ui.js';
 import { monthlySummary, fmtTL } from './compute.js';
 import { refreshHome } from './ui-home.js';
-import { openForm, setFormPhotoFromFile } from './ui-form.js';
-import { initDragDrop, classifyFiles, attachDropZone } from './ui-dnd.js';
+import { openForm, setFormPhotoFromFile, setFormPhotoFromDataUrl } from './ui-form.js';
+import { initDragDrop, classifyFiles, attachDropZone, REMOTE_IMAGE_HELP } from './ui-dnd.js';
 import { generateBlankForm, parseForm } from './pdf-form.js';
 import { generateBlankDocx, parseDocx } from './docx-form.js';
 import { takeSnapshot } from './snapshot.js';
@@ -197,6 +197,8 @@ export async function openSettings() {
         : '<p class="muted">Henüz ödeme kaydı yok.</p>';
     }
     document.getElementById('lock-policy').value = (await getMeta(state.exec, 'lock_policy')) || '2';
+    const asEl = document.getElementById('autosave-delay');
+    if (asEl) asEl.value = (await getMeta(state.exec, 'autosave_delay')) || '8';
     document.getElementById('default-remind').value = (await getMeta(state.exec, 'default_remind_min')) || '60';
     document.getElementById('notif-sound').value = (await getMeta(state.exec, 'notif_sound')) || 'on';
     await refreshRecoveryStatus();
@@ -383,6 +385,11 @@ export function initSettings() {
   });
 
   document.getElementById('btn-change-pin').addEventListener('click', () => changePinFlow());
+
+  document.getElementById('autosave-delay')?.addEventListener('change', async e => {
+    const r = await guarded(() => setMeta(state.exec, 'autosave_delay', e.target.value));
+    if (r.ok) banner(e.target.value === 'off' ? 'Otomatik kayıt kapatıldı ✓' : 'Otomatik kayıt ayarı kaydedildi ✓', 'ok');
+  });
 
   document.getElementById('lock-policy').addEventListener('change', async e => {
     const r = await guarded(() => setMeta(state.exec, 'lock_policy', e.target.value));
@@ -678,6 +685,18 @@ function initDropHandling() {
       if (docs.length) { await handleImportFiles(docs); return; }
       if (images.length) { banner('Fotoğrafı eklemek için önce bir hasta formunu açın.', 'error', 0); return; }
       banner('Desteklenmeyen dosya türü.', 'error', 0);
+    },
+    // Dosya taşımayan görsel sürüklemeleri (WhatsApp Web / tarayıcı). Eskiden
+    // bunlar sessizce yok sayılıyordu — kullanıcı bıraktığında hiçbir şey olmuyordu.
+    onImage: async payload => {
+      if (state.screen === 'lock') return;
+      if (state.screen !== 'form') { banner('Fotoğrafı eklemek için önce bir hasta formunu açın.', 'error', 0); return; }
+      if (payload.kind === 'dataurl') {
+        const ok = await setFormPhotoFromDataUrl(payload.dataUrl);
+        if (ok) banner('Fotoğraf eklendi ✓', 'ok');
+        return;
+      }
+      if (payload.kind === 'remote') banner(REMOTE_IMAGE_HELP, 'error', 0);
     },
   });
   attachDropZone(document.getElementById('dnd-zone'));

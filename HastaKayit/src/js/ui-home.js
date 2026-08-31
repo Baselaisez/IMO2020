@@ -1,4 +1,4 @@
-import { listPatients, listPatientsPage, countPatients, bulkDeletePatients } from './repo.js';
+import { listTodayAppointments, listPatientsPage, countPatients, bulkDeletePatients } from './repo.js';
 import { state, showScreen, guarded, banner, openSheet, closeSheet, todayIso, esc, toggleSelected, selectAllInto } from './ui.js';
 import { fmtTL, todaysAppointments } from './compute.js';
 import { openCard } from './ui-card.js';
@@ -31,17 +31,16 @@ export async function refreshHome() {
   await resetAndLoadFirstPage();
 }
 
-// Renders the "Bugün" strip. Deliberately still uses listPatients (full scan)
-// rather than the paginated query: today's appointments can be on ANY page,
-// and repo.js has no lightweight "active patients with an appt today" query
-// to page against (repo.js is out of scope for this feature). This is a
-// pre-existing cost (refreshHome always did a full listPatients scan before
-// this change) — unchanged by pagination, and it only affects a DB read, not
-// DOM node count, so it does not reproduce the freeze this feature fixes.
+// "Bugün" şeridi. Artık indeksli DAR bir sorgu kullanıyor.
+//
+// Eskiden burada listPatients() vardı: TÜM hastalar + TÜM ödemeler belleğe
+// alınıyordu. 45.000 kayıtta ölçülen 1.474 ms, ve refreshHome() her kayıttan
+// sonra çalıştığı için doktor her hasta eklediğinde bu bedeli ödüyordu.
+// listTodayAppointments aynı bilgiyi ~1 ms'de veriyor.
 async function renderToday() {
-  const all = await listPatients(state.exec);
   const el = document.getElementById('today-strip');
-  const appts = todaysAppointments(all.filter(p => p.status === 'active'), todayIso());
+  const rows = await listTodayAppointments(state.exec, todayIso());
+  const appts = todaysAppointments(rows, todayIso());
   if (!appts.length) { el.classList.add('hidden'); return; }
   el.classList.remove('hidden');
   el.innerHTML = '<b>Bugün:</b> ' + appts

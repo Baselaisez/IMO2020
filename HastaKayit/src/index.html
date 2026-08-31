@@ -50,6 +50,7 @@
     <span id="form-title" class="bar-title">Yeni Hasta</span>
     <div class="bar-right"></div>
   </header>
+  <p id="form-autosave" class="autosave-line hidden"></p>
   <form id="patient-form" class="form">
     <div class="photo-row" style="display:flex;align-items:center;gap:12px;margin-bottom:4px">
       <img id="photo-preview" alt="Fotoğraf" style="width:72px;height:72px;border-radius:12px;object-fit:cover;background:#eee;border:1px solid var(--line)">
@@ -107,6 +108,13 @@
     <button id="btn-change-pin">🔑 PIN Değiştir</button>
     <button id="btn-recovery-setup">🔐 Kurtarma Ayarları</button>
     <p id="recovery-status" class="muted"></p>
+    <label>Otomatik kayıt<select id="autosave-delay">
+      <option value="5">5 saniye sonra</option>
+      <option value="8">8 saniye sonra (varsayılan)</option>
+      <option value="15">15 saniye sonra</option>
+      <option value="off">Kapalı — sadece ✅ ile kaydet</option>
+    </select></label>
+    <p class="muted">Yeni hasta formunda ad yazıldıktan sonra bu süre boyunca bir şey yazılmazsa kayıt kendiliğinden yapılır. Kaydedildiğinde formda görünür ve tek dokunuşla geri alınabilir.</p>
     <label>PIN ne zaman sorulsun?<select id="lock-policy">
       <option value="switch">Her uygulama değişiminde</option>
       <option value="close">Sadece uygulama kapanınca</option>
