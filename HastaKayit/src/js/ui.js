@@ -7,6 +7,7 @@ export const state = {
   currentId: null,     // open patient id
   editing: false,
   onMutate: null,      // set by snapshot.js → debounced snapshot hook
+  flushForm: null,     // set by ui-form.js → arka plana geçerken bekleyen otomatik kaydı yazar
 };
 
 export function todayIso() {

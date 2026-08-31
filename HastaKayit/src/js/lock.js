@@ -400,6 +400,11 @@ export async function initLock(onUnlock) {
     // iOS, Google Auto Backup on Android) captures a coherent single file.
     // Fire-and-forget: must never block backgrounding.
     // query, not run: this PRAGMA returns a result row (busy/log/checkpointed).
+    // Bekleyen otomatik kayıt VARSA önce onu yaz. iPhone'da bu şart: uygulama
+    // arka plana alınır alınmaz ekran kilitleniyor, kilitlenince de otomatik
+    // kayıt "form kapalı" sayılıp iptal olurdu — doktor WhatsApp'a bakmak için
+    // çıktığında yazdığı hasta kaybolurdu.
+    try { await state.flushForm?.(); } catch (e) { console.error('form flush', e); }
     state.exec.query('PRAGMA wal_checkpoint(TRUNCATE)').catch(() => {});
     flushSnapshot();
     // Remember where we were (to restore on unlock) only if we were actually

@@ -105,3 +105,45 @@ oluştu, form kapanmadı, ikinci otomatik kayıt mükerrer hasta yaratmadı
 (*Toplam 1 hasta*), WhatsApp damgalı metin doğru adı buldu, dolu alanın üzerine
 yazılmadı, gömülü görsel fotoğraf olarak eklendi, indirilemeyen bağlantıda
 kullanıcıya ne yapacağı söylendi.
+
+## iPhone tarafı
+
+Uygulama mantığı tek kaynaktan (`src/`) derlenir ve `npx cap sync ios` ile
+aynı `www/` paketi iOS projesine kopyalanır — yani yukarıdaki hız
+iyileştirmelerinin, otomatik kaydın ve WhatsApp metin ayrıştırmasının hepsi
+iPhone'da da aynen geçerlidir. Ama iki şey iPhone'a özgüdür ve ayrıca ele
+alındı.
+
+### 1. ⌘V yok — "📋 Panodan Yapıştır" düğmesi
+
+iPhone'da klavye kısayolu yoktur ve `paste` olayı **yalnızca imleç bir yazı
+kutusundayken** tetiklenir. Panodaki bir fotoğraf hiçbir zaman yazı kutusuna
+yapışmaz, dolayısıyla Mac'teki ⌘V yolu iPhone'da fotoğraf için çalışmaz.
+
+Bu yüzden forma **📋 Panodan Yapıştır** düğmesi eklendi. Düğme
+`navigator.clipboard.read()` çağırır; iOS bir dokunuşla gelen bu isteğe kendi
+"Yapıştır" onayını gösterip panoyu verir. Panoda fotoğraf varsa fotoğraf
+eklenir, hasta bilgisi metni varsa alanlar doldurulur.
+
+Doktorun akışı: WhatsApp'ta fotoğrafa **basılı tut → Kopyala** → Hasta Kayıt'ta
+forma dön → **📋 Panodan Yapıştır**.
+
+(Fotoğraf zaten telefona kaydedilmişse eski yol da duruyor: **📷 Fotoğraf
+Ekle/Değiştir** → Fotoğraflar.)
+
+### 2. Arka plana geçerken bekleyen kayıt
+
+iPhone'da uygulama arka plana alınır alınmaz ekran kilitlenir (uygulama
+değiştiricinin küçük resminde hasta adı görünmesin diye — bkz. `blurAction`).
+Kilitlenince otomatik kayıt "form kapalı" sayılıp iptal olurdu: doktor adı
+yazıp WhatsApp'a bakmak için çıktığında **yazdığı hasta kaybolurdu**.
+
+Artık arka plana geçiş sırasında, ekran kilitlenmeden **önce** bekleyen
+otomatik kayıt yazılıyor (`state.flushForm` kancası, `lock.js` → `onBackground`).
+
+### 3. `data:` görselini `fetch` ile çözmeme
+
+Sürüklenen/yapıştırılan gömülü görsel önce `fetch(dataUrl)` ile çözülüyordu.
+CSP'de `connect-src 'self'` var ve tarayıcılar `data:` URL'ine yapılan fetch'i
+de bu yönergeye tabi tutuyor — iPhone'un WKWebView'inde bu engellenebilirdi.
+Artık `atob` ile elle çözülüyor: CSP'den bağımsız, her iki kabukta da aynı.

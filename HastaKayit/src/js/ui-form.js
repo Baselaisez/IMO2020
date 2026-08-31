@@ -57,9 +57,17 @@ export async function setFormPhotoFromFile(file) {
  */
 export async function setFormPhotoFromDataUrl(dataUrl) {
   try {
-    const res = await fetch(dataUrl); // data: URL — ağ isteği DEĞİL, CSP'ye takılmaz
-    const blob = await res.blob();
-    return await setFormPhotoFromFile(new File([blob], 'whatsapp.jpg', { type: blob.type || 'image/jpeg' }));
+    // fetch(dataUrl) DEĞİL: CSP'de `connect-src 'self'` var ve tarayıcılar
+    // data: URL'ine yapılan fetch'i de bu yönergeye tabi tutuyor — iPhone'un
+    // WKWebView'inde bu yol engellenirdi. Elle çözmek hem CSP'den bağımsız hem
+    // daha az iş.
+    const m = /^data:([^;,]+)?(;base64)?,(.*)$/s.exec(String(dataUrl || ''));
+    if (!m) throw new Error('Geçersiz görsel verisi.');
+    const type = m[1] || 'image/jpeg';
+    const raw = m[2] ? atob(m[3]) : decodeURIComponent(m[3]);
+    const bytes = new Uint8Array(raw.length);
+    for (let i = 0; i < raw.length; i++) bytes[i] = raw.charCodeAt(i);
+    return await setFormPhotoFromFile(new File([bytes], 'whatsapp.jpg', { type }));
   } catch (err) {
     banner('Fotoğraf okunamadı — ' + (err.message || err), 'error', 0);
     return false;
@@ -214,6 +222,9 @@ function applyParsedText(text) {
 
 export function initForm() {
   const f = document.getElementById('patient-form');
+  // Arka plana geçerken (iPhone'da uygulama değiştirici, Mac'te odak kaybı)
+  // bekleyen otomatik kayıt yazılsın diye kanca. lock.js bunu çağırır.
+  state.flushForm = () => autosave.flush();
   // Başlıktaki yeşil ✅ = KAYDET kısayolu (evin yanında). Formu normal yoldan
   // gönderir: `requestSubmit` zorunlu alan doğrulamasını çalıştırır — plain
   // `submit()` onu ATLAR ve adsız hasta kaydedilebilirdi. Yeni kayıtta da,
@@ -251,6 +262,37 @@ export function initForm() {
     await setFormPhotoFromFile(file);
   });
   document.getElementById('btn-photo-remove').addEventListener('click', () => { formPhoto = null; renderPhotoPreview(); });
+
+  // 📋 Panodan Yapıştır — iPhone'un ⌘V karşılığı.
+  //
+  // NEDEN AYRI BİR DÜĞME: iPhone'da klavye kısayolu yok ve `paste` olayı
+  // yalnızca imleç bir yazı kutusundayken tetikleniyor; panodaki bir FOTOĞRAF
+  // hiçbir zaman yazı kutusuna yapışmaz, yani Mac'teki ⌘V yolu iPhone'da
+  // fotoğraf için çalışmaz. navigator.clipboard.read() ise bir kullanıcı
+  // dokunuşuyla çağrıldığında iOS'un "Yapıştır" onayını gösterip panoyu
+  // veriyor. Aynı düğme Mac'te de çalışır (ikinci bir yol olarak).
+  document.getElementById('btn-clip-paste')?.addEventListener('click', async () => {
+    try {
+      if (navigator.clipboard?.read) {
+        const items = await navigator.clipboard.read();
+        for (const it of items) {
+          const type = (it.types || []).find(t => String(t).startsWith('image/'));
+          if (!type) continue;
+          const blob = await it.getType(type);
+          const ok = await setFormPhotoFromFile(new File([blob], 'pano.jpg', { type }));
+          if (ok) { banner('Fotoğraf panodan eklendi ✓', 'ok'); autosave.bump(); }
+          return;
+        }
+      }
+      // Görsel yok: metin olabilir.
+      const text = navigator.clipboard?.readText ? await navigator.clipboard.readText() : '';
+      if (looksLikePatientText(text)) { applyParsedText(text); return; }
+      banner('Panoda fotoğraf ya da hasta bilgisi bulunamadı. WhatsApp\'ta fotoğrafa basılı tutup "Kopyala" deyin, sonra buraya dönüp tekrar deneyin.', 'error', 0);
+    } catch (e) {
+      // iOS izni reddedilirse ya da pano okunamazsa: yolu göster, suçlama.
+      banner(`Pano okunamadı — ${e?.message || e}. 📷 düğmesiyle Fotoğraflar'dan da seçebilirsiniz.`, 'error', 0);
+    }
+  });
 
   // ⌘V / Ctrl+V — WhatsApp'tan gelen içeriğin ASIL yolu.
   //
