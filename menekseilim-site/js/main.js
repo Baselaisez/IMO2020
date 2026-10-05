@@ -105,7 +105,12 @@
         method: "POST",
         body: new FormData(form),
         headers: { "Accept": "application/json" }
-      }).then(function (r) { return r.json(); }).then(function (veri) {
+      }).then(function (r) {
+        // PHP betiği ve Formspree JSON döner; Netlify Forms HTML döner (200 = başarılı)
+        var tur = r.headers.get("content-type") || "";
+        if (tur.indexOf("application/json") !== -1) { return r.json(); }
+        return { ok: r.ok };
+      }).then(function (veri) {
         if (veri && veri.ok) {
           sonuc.textContent = veri.mesaj || "Mesajınız alındı. En kısa sürede size dönüş yapacağız.";
           sonuc.className = "form-sonuc basari";
