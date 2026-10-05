@@ -70,7 +70,38 @@ değiştirebilirsiniz (aynı dosya adıyla kaydedin, PNG kullanacaksanız HTML'd
 
 ## A yolu – Hosting satın alıp dosyaları yüklemek (önerilen)
 
-### A1. Hosting paketi alın
+### A0. Turhost'a özel notlar (05.10.2026 itibarıyla durum)
+
+Satın alınan hizmetler (Turhost → Hizmet Yönetimi):
+
+| Hizmet | Alan adı | Ne işe yarar |
+|---|---|---|
+| **cPanel Giriş Plus** (yıllık) | menekseilim.com.tr | Web sitesi burada barınır. **Site bu pakete yüklenecek.** E-posta hesabı açma özelliği de içinde gelir. |
+| Kurumsal 1 Mail Hosting (aylık) | menekseilim.com.tr | Ayrı bir e-posta servisi. cPanel zaten e-posta verdiği için zorunlu değil. |
+| Kurumsal 1 Mail Hosting (aylık) | xn--menekeilim-i9b.com | Yalnızca yönlendirme için kullanılacak bir alan adına e-posta servisi gerekmez. |
+
+DNS kontrolünün sonucu:
+
+* `menekseilim.com.tr` → isim sunucuları `cpns1.turhost.com` / `cpns2.turhost.com`,
+  A kaydı `94.199.205.80` (Turhost cPanel sunucusu `srvc77.trwww.com`),
+  `www` kök adrese yönlenmiş. **Web için DNS hazır; dosyalar yüklenince site
+  hemen açılır, ek DNS ayarı gerekmez.**
+* E-posta (MX) kaydı şu an cPanel sunucusunu gösteriyor. Yani e-postayı cPanel
+  üzerinden kullanacaksanız hiçbir şey yapmanız gerekmez. Kurumsal Mail
+  Hosting'i kullanmak isterseniz MX kayıtlarının Turhost'un mail sunucularına
+  çevrilmesi gerekir; bunu Turhost desteğinden ((0212) 227 74 74 veya panelden
+  destek talebi) isteyin. **Öneri:** cPanel e-postası yeterliyse aylık mail
+  hosting paketlerini yenilemeyin.
+* `xn--menekeilim-i9b.com` (menekşeilim.com) şu an hiç çözümlenmiyor. cPanel'de
+  alias olarak eklenince (A6) DNS bölgesi oluşur. 2-3 saat sonra hâlâ
+  açılmıyorsa Alan Adı Yönetimi → bu alan adı → Yönetim → Name Server
+  bölümünde `cpns1.turhost.com` / `cpns2.turhost.com` yazdığından emin olun.
+
+cPanel'e giriş: Hizmet Yönetimi → **cPanel Giriş Plus** satırı → **Yönetim** →
+"cPanel'e Giriş" düğmesi; ya da tarayıcıdan `https://menekseilim.com.tr:2083`
+(kullanıcı adı ve şifre Turhost'un gönderdiği "hosting bilgileri" e-postasında).
+
+### A1. Hosting paketi alın (tamamlandı)
 
 1. Alan adlarınızı aldığınız panele girin. Üst menüde **Hosting Yönetimi**
    sekmesine tıklayın ve yeni bir hosting siparişi verin.
@@ -146,7 +177,8 @@ port 21, uzak klasör `/public_html`.
 
 ### A5. Alan adı başka yerdeyse: DNS ayarı
 
-Alan adı ile hosting aynı firmadaysa bu adımı atlayın.
+Alan adı ile hosting aynı firmadaysa bu adımı atlayın. (Turhost kurulumunda
+atlayın; A0'daki kontrole göre DNS zaten doğru.)
 
 Değilse panelde **Alan Adı Yönetimi → menekseilim.com.tr → Yönetim** sayfasını
 açın ve iki yoldan birini uygulayın:
