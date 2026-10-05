@@ -1,0 +1,40 @@
+# menekseilim-site/ klasörünü GitHub Pages'a yayınlar.
+# Kullanım: Depo → Settings → Pages → Source: "GitHub Actions" seçin.
+# Sonra master dalına her gönderimde (veya Actions sekmesinden "Run workflow" ile) site güncellenir.
+name: Menekşe İlim sitesini yayınla
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - "menekseilim-site/**"
+      - ".github/workflows/menekseilim-pages.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Depoyu al
+        uses: actions/checkout@v4
+      - name: Pages ayarlarını hazırla
+        uses: actions/configure-pages@v5
+      - name: Site klasörünü paketle
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: menekseilim-site
+      - name: Yayınla
+        id: deployment
+        uses: actions/deploy-pages@v4

@@ -12,9 +12,21 @@ Ekran görüntünüzde iki alan adınız görünüyor:
 | `menekseilim.com.tr` | menekseilim.com.tr | **Ana adres** (site burada yayınlanır) |
 | `xn--menekeilim-i9b.com` | menekşeilim.com (Türkçe karakterli alan adının teknik yazımı) | Ana adrese yönlendirilir |
 
-Aşağıda iki yol anlatılıyor. Teknik bilginiz azsa **A yolu** (hosting satın alıp
-dosyaları yüklemek) en sorunsuzudur. Hiç para harcamak istemiyorsanız **B yolu**
-(GitHub Pages) ücretsizdir ama iletişim formu için ek bir ayar gerekir.
+## Hangi yolu seçmeliyim?
+
+| | A) Hosting + cPanel | B) GitHub Pages | C) Netlify Drop |
+|---|---|---|---|
+| Ücret | Yıllık hosting ücreti | **Ücretsiz** | **Ücretsiz** |
+| cPanel / sunucu bilgisi | Gerekir | Gerekmez | Gerekmez |
+| Kurulum | ZIP yükle | Dosyaları GitHub'a yükle (zaten orada) | Klasörü tarayıcıya sürükle |
+| SSL (https) | AutoSSL ile | Otomatik | Otomatik |
+| İletişim formu | Hazır PHP betiği | Formspree (ücretsiz, 1 satır değişiklik) | Netlify Forms (ücretsiz, 2 satır değişiklik) |
+| İkinci alan adı (menekşeilim.com) | `.htaccess` yönlendirir | Alan adı panelinden yönlendirme | Netlify alias olarak ekleyin, otomatik yönlenir |
+| Güncelleme | Dosyayı tekrar yükle | GitHub'da düzenle → kaydet | Klasörü tekrar sürükle |
+
+**cPanel ve hosting istemiyorsanız B veya C yolunu izleyin; ikisi de tamamen
+ücretsizdir ve sitenin bütün özellikleri çalışır.** Hangisini seçerseniz seçin,
+önce **0. bölümdeki** yer tutucuları doldurun.
 
 ---
 
@@ -190,29 +202,50 @@ sunucuda düzenleyin.
 
 ---
 
-## B yolu – GitHub Pages ile ücretsiz yayın
+## B yolu – GitHub Pages ile ücretsiz yayın (cPanel'siz, hosting'siz)
 
-Hosting ücreti ödemeden, yalnızca alan adıyla yayın yapmak isterseniz:
+GitHub Pages, statik siteleri ücretsiz ve süresiz barındırır; kendi alan
+adınızı bağlayabilir, SSL'i otomatik alır. İki şekilde kurabilirsiniz:
 
-### B1. Depo oluşturun ve dosyaları yükleyin
+* **B-1: Yeni, ayrı bir depo** (`menekseilim` adlı) → en temiz ve önerilen yol.
+* **B-2: Bu depo (IMO2020)** → dosyalar zaten burada; hazır bir otomasyon
+  (`.github/workflows/menekseilim-pages.yml`) `menekseilim-site/` klasörünü
+  yayınlar. Ders notlarıyla aynı depoda durması dışında bir sakıncası yok.
+
+### B1. Dosyaları GitHub'a koyun
+
+**B-1 (yeni depo):**
 
 1. [github.com](https://github.com) hesabınızla giriş yapın → sağ üstte
    **+** → **New repository**. Ad: `menekseilim`, **Public** seçin → Create.
-2. Açılan sayfada **uploading an existing file** bağlantısına tıklayın.
-3. Bu klasörün içindeki tüm dosyaları (`index.html`, `css`, `js`, `img`,
-   `CNAME` vb.) sürükleyip bırakın → **Commit changes**.
+2. Dosyaları edinin: bu deponun
+   [`claude/beautiful-goodall-4ej8xr` dalını ZIP olarak indirin](https://github.com/Baselaisez/IMO2020/archive/refs/heads/claude/beautiful-goodall-4ej8xr.zip),
+   açın, içindeki `menekseilim-site` klasörüne girin.
+3. Yeni deponun sayfasında **uploading an existing file** bağlantısına
+   tıklayın; `menekseilim-site` klasörünün **içindeki** her şeyi (`index.html`,
+   `css`, `js`, `img`, `CNAME` vb.) sürükleyip bırakın → **Commit changes**.
    * `CNAME` dosyası hazırdır ve içinde `menekseilim.com.tr` yazar; GitHub bu
      dosyaya bakarak alan adını tanır.
    * `.htaccess` ve `iletisim-gonder.php` GitHub Pages'ta çalışmaz;
      yüklemeniz zarar vermez, görmezden gelinir.
+4. **Settings → Pages → Source:** "Deploy from a branch", **Branch:** `main`,
+   klasör `/ (root)` → Save.
 
-### B2. Pages'ı açın ve alan adını bağlayın
+**B-2 (bu depo):**
 
-1. Depoda **Settings → Pages**.
-2. **Source:** "Deploy from a branch", **Branch:** `main`, klasör `/ (root)`
-   → Save.
-3. **Custom domain** kutusuna `menekseilim.com.tr` yazın → Save.
-4. Alan adı panelinizde **Alan Adı Yönetimi → menekseilim.com.tr → Yönetim →
+1. `claude/beautiful-goodall-4ej8xr` dalını `master` ile birleştirin
+   (Pull request → Merge).
+2. **Settings → Pages → Source:** "GitHub Actions" seçin.
+3. **Actions** sekmesi → soldan "Menekşe İlim sitesini yayınla" → **Run
+   workflow**. Bir dakika içinde site `baselaisez.github.io/IMO2020` adresinde
+   açılır. Bundan sonra `menekseilim-site/` içinde yapılan her değişiklik
+   `master`'a gidince otomatik yayınlanır.
+
+### B2. Alan adını bağlayın
+
+1. Depoda **Settings → Pages → Custom domain** kutusuna `menekseilim.com.tr`
+   yazın → Save.
+2. Alan adı panelinizde **Alan Adı Yönetimi → menekseilim.com.tr → Yönetim →
    DNS Yönetimi** bölümüne şu kayıtları ekleyin:
 
    | Tür | Ad / Host | Değer |
@@ -223,19 +256,25 @@ Hosting ücreti ödemeden, yalnızca alan adıyla yayın yapmak isterseniz:
    | A | `@` | `185.199.111.153` |
    | CNAME | `www` | `KULLANICIADINIZ.github.io` |
 
-   (Eski A kayıtları varsa silin. Güncel IP'ler için
-   [GitHub Pages belgelerine](https://docs.github.com/pages/configuring-a-custom-domain-for-your-github-pages-site/managing-a-custom-domain-for-your-github-pages-site) bakın.)
-5. DNS yayıldıktan sonra (genellikle 1 saat içinde) Settings → Pages
+   (Eski A kayıtları ve varsa "park sayfası" CNAME'i silin. Güncel IP'ler için
+   [GitHub Pages belgelerine](https://docs.github.com/pages/configuring-a-custom-domain-for-your-github-pages-site/managing-a-custom-domain-for-your-github-pages-site) bakın.
+   `KULLANICIADINIZ` yerine GitHub kullanıcı adınızı küçük harfle yazın, örn.
+   `baselaisez.github.io`.)
+3. DNS yayıldıktan sonra (genellikle 1 saat içinde) Settings → Pages
    sayfasında "DNS check successful" yazar. **Enforce HTTPS** kutusunu
-   işaretleyin; GitHub ücretsiz SSL sertifikasını otomatik kurar.
-6. `menekşeilim.com` için de aynı DNS kayıtlarını girin; GitHub Pages tek bir
-   özel alan adı kabul ettiği için bu adresi alan adı panelinizin
-   **Yönlendirme (URL Forwarding)** özelliğiyle `https://menekseilim.com.tr`
-   adresine yönlendirin.
+   işaretleyin; GitHub ücretsiz SSL sertifikasını otomatik kurar. Kutu gri
+   görünüyorsa 10-15 dakika bekleyip sayfayı yenileyin; sertifika
+   hazırlanıyordur.
+4. `menekşeilim.com` (`xn--menekeilim-i9b.com`) için: GitHub Pages tek bir
+   özel alan adı kabul ettiğinden bu adresi alan adı panelinizin
+   **Yönlendirme / URL Forwarding** özelliğiyle `https://menekseilim.com.tr`
+   adresine (301, kalıcı) yönlendirin. Çoğu Türk sağlayıcıda bu özellik
+   ücretsizdir ve Alan Adı Yönetimi → Yönetim altındadır.
 
 ### B3. İletişim formu (Formspree)
 
-GitHub Pages PHP çalıştırmadığı için formun gideceği yeri değiştirmeniz gerekir:
+GitHub Pages PHP çalıştırmadığı için formun gideceği yeri değiştirmeniz gerekir.
+(Sitenin JavaScript'i Formspree'nin JSON yanıtını tanır; başka değişiklik gerekmez.)
 
 1. [formspree.io](https://formspree.io) adresinde ücretsiz hesap açın
    (ayda 50 mesaj ücretsiz) → **New form** → e-posta olarak
@@ -254,21 +293,54 @@ GitHub Pages PHP çalıştırmadığı için formun gideceği yeri değiştirmen
 ### B4. Güncelleme
 
 GitHub'da ilgili dosyayı açın → kalem simgesi (**Edit**) → değişikliği yapın
-→ **Commit changes**. 1-2 dakika içinde site güncellenir.
+→ **Commit changes**. 1-2 dakika içinde site güncellenir. Fotoğraf eklemek
+için `img` klasörüne girip **Add file → Upload files** kullanın.
 
 ---
 
-## C yolu – Diğer ücretsiz seçenekler (kısaca)
+## C yolu – Netlify Drop (en az adımlı ücretsiz yol)
 
-* **Netlify Drop** ([app.netlify.com/drop](https://app.netlify.com/drop)):
-  Klasörü tarayıcıya sürükleyin, site anında yayında. Site settings → Domain
-  management → Add custom domain → ekranda gösterilen DNS kayıtlarını alan
-  adı panelinize girin. Netlify'ın kendi ücretsiz form servisi vardır: form
-  etiketine `data-netlify="true"` ekleyip `action` özniteliğini silmeniz
-  yeterli.
-* **Cloudflare Pages:** Benzer şekilde ücretsizdir; alan adının NS kayıtlarını
-  Cloudflare'a taşımanız gerekir, karşılığında ücretsiz SSL ve hızlandırma
-  gelir.
+GitHub ile uğraşmak istemeyenler için; kayıt dâhil 10 dakika sürer.
+
+1. [app.netlify.com/drop](https://app.netlify.com/drop) adresini açın,
+   ücretsiz hesap oluşturun (e-posta ile).
+2. Bilgisayarınızdaki `menekseilim-site` klasörünü sayfadaki kutuya
+   sürükleyip bırakın. Site hemen `rastgele-ad.netlify.app` gibi bir adreste
+   yayına girer.
+3. **Site configuration → Domain management → Add a domain** →
+   `menekseilim.com.tr` → Netlify size DNS kayıtlarını gösterir. Genellikle:
+
+   | Tür | Ad / Host | Değer |
+   |---|---|---|
+   | A | `@` | `75.2.60.5` (Netlify'ın gösterdiği değeri esas alın) |
+   | CNAME | `www` | `rastgele-ad.netlify.app` |
+
+   Bu kayıtları alan adı panelinizde **Alan Adı Yönetimi → Yönetim → DNS
+   Yönetimi** bölümüne girin.
+4. Aynı ekrandan `xn--menekeilim-i9b.com` adresini de **domain alias** olarak
+   ekleyin ve ona da aynı DNS kayıtlarını verin; Netlify tüm alias'ları ana
+   alan adına otomatik yönlendirir.
+5. DNS yayılınca Netlify **HTTPS** bölümünde "Let's Encrypt certificate"
+   otomatik kurulur (gerekirse **Verify DNS configuration** düğmesine basın).
+6. **İletişim formu:** `iletisim.html` içinde form etiketini şöyle değiştirin:
+
+   ```html
+   <form class="form" id="iletisim-formu" name="iletisim" method="post"
+         action="/iletisim.html?durum=ok" data-netlify="true"
+         netlify-honeypot="website" data-eposta="menekseilim@gmail.com" novalidate>
+     <input type="hidden" name="form-name" value="iletisim">
+   ```
+
+   Gelen mesajlar Netlify panelinde **Forms** altında görünür; **Form
+   notifications** ile e-postanıza iletilmesini ayarlayın. Aylık 100 mesaj
+   ücretsizdir.
+7. **Güncelleme:** Netlify'da sitenizin **Deploys** sayfasına girip klasörü
+   tekrar sürükleyin.
+
+**Cloudflare Pages** de benzer şekilde ücretsizdir (Direct Upload), ancak
+alan adının isim sunucularını (NS) Cloudflare'a taşımanız gerekir; karşılığında
+ücretsiz SSL, hızlandırma ve her iki alan adı için kolay yönlendirme kuralları
+gelir. Teknik bir yakınınız varsa iyi bir seçenektir.
 
 ---
 
@@ -292,7 +364,10 @@ GitHub'da ilgili dosyayı açın → kalem simgesi (**Edit**) → değişikliği
 | Türkçe karakterler bozuk (Ã§, Ä± gibi) | Dosya UTF-8 dışında kaydedilmiş. Not Defteri'nde "Farklı Kaydet → Kodlama: UTF-8" seçin. |
 | CSS yüklenmiyor, sayfa çıplak görünüyor | `css` klasörü yüklenmemiş ya da büyük/küçük harf farklı (`CSS/Style.css`). Linux sunucular harfe duyarlıdır. |
 | "Çok fazla yönlendirme" hatası | `.htaccess` HTTPS satırlarını SSL kurulmadan açtınız veya Cloudflare'de SSL modu "Flexible". Satırları tekrar `#` ile kapatın ya da Cloudflare'de "Full" seçin. |
-| Form "Mesaj şu an gönderilemiyor" diyor | PHP yok (GitHub Pages) ya da `mail()` kapalı → B3 Formspree. |
+| Form "Mesaj şu an gönderilemiyor" diyor | PHP yok (GitHub Pages / Netlify) ya da `mail()` kapalı → B3 Formspree veya C-6 Netlify Forms. |
+| GitHub Pages: "DNS check unsuccessful" | A kayıtları henüz yayılmadı ya da eski bir A/CNAME kaydı duruyor. Alan adı panelinde yalnızca 4 GitHub A kaydı ve `www` CNAME kalsın; 1 saat sonra tekrar deneyin. |
+| GitHub Pages: site `github.io` adresinde açılıyor ama alan adında açılmıyor | Custom domain kutusu boş kalmış ya da `CNAME` dosyası silinmiş. Settings → Pages'ta alan adını tekrar yazın. |
+| Netlify: "Domain already registered to another site" | Alan adı başka bir Netlify hesabına bağlı; Netlify destekten alan adı doğrulaması isteyin (TXT kaydı). |
 | Site güncelledim ama eski hâli görünüyor | Tarayıcı önbelleği. Ctrl+F5 ile yenileyin. |
 | 403 Forbidden | Dosya izinleri: dosyalar 644, klasörler 755 olmalı (Dosya Yöneticisi → sağ tık → Permissions). |
 
