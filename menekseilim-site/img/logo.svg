@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Menekşe İlim logosu">
+  <circle cx="32" cy="32" r="31" fill="#4B2A6F"/>
+  <circle cx="32" cy="32" r="28.5" fill="none" stroke="#C19A4B" stroke-width="1.2" opacity=".7"/>
+  <!-- menekşe -->
+  <g transform="translate(32 24)">
+    <g fill="#C19A4B">
+      <ellipse cx="0" cy="-7.2" rx="4" ry="6.6"/>
+      <ellipse cx="0" cy="-7.2" rx="4" ry="6.6" transform="rotate(72)"/>
+      <ellipse cx="0" cy="-7.2" rx="4" ry="6.6" transform="rotate(144)"/>
+      <ellipse cx="0" cy="-7.2" rx="4" ry="6.6" transform="rotate(216)"/>
+      <ellipse cx="0" cy="-7.2" rx="4" ry="6.6" transform="rotate(288)"/>
+    </g>
+    <circle r="3" fill="#F3E9D2"/>
+    <circle r="1.3" fill="#4B2A6F"/>
+  </g>
+  <!-- açık kitap -->
+  <path d="M14 44c6-2.4 12-2.4 18 1 6-3.4 12-3.4 18-1V34c-6-2.4-12-2.4-18 1-6-3.4-12-3.4-18-1z" fill="#F7F5FA"/>
+  <path d="M32 35v10" stroke="#4B2A6F" stroke-width="1.4"/>
+  <path d="M18 38.5c4-1.2 8-1.2 11 .6M18 41.5c4-1.2 8-1.2 11 .6M46 38.5c-4-1.2-8-1.2-11 .6M46 41.5c-4-1.2-8-1.2-11 .6" stroke="#4B2A6F" stroke-width=".9" fill="none" opacity=".75"/>
+</svg>
