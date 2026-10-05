@@ -88,6 +88,13 @@ değiştirebilirsiniz (aynı dosya adıyla kaydedin, PNG kullanacaksanız HTML'd
 
 ### A2. Dosyaları hazırlayın
 
+**Hazır paket:** Deponun kökündeki `menekseilim-site.zip` dosyası doğrudan
+`public_html` içine açılmak üzere hazırlanmıştır (rehber ve README hariç tüm
+site dosyaları, `index.html` ZIP'in kökünde). İndirme bağlantısı:
+<https://github.com/Baselaisez/IMO2020/raw/claude/beautiful-goodall-4ej8xr/menekseilim-site.zip>
+
+Dosyaları kendiniz düzenledikten sonra yeni ZIP yapmak isterseniz:
+
 1. Bu klasörün (`menekseilim-site`) **içindeki** tüm dosyaları seçin
    (`index.html`, `css`, `js`, `img`, `.htaccess` vb.).
 2. Sağ tık → **Sıkıştır / ZIP**. Dosya adı önemli değil (örn. `site.zip`).
