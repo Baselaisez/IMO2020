@@ -1,0 +1,42 @@
+# Menekşe İlim – Apache ayarları (cPanel / Plesk Linux hosting)
+AddDefaultCharset UTF-8
+Options -Indexes
+DirectoryIndex index.html index.php
+ErrorDocument 404 /404.html
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # --- 1) HTTPS'e yönlendir ---------------------------------------------
+  # SSL sertifikası KURULDUKTAN SONRA aşağıdaki iki satırın başındaki # işaretini kaldırın.
+  # RewriteCond %{HTTPS} off
+  # RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L]
+
+  # --- 2) www'suz adrese yönlendir (www.menekseilim.com.tr -> menekseilim.com.tr)
+  RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
+  RewriteRule ^ %{REQUEST_SCHEME}://%1%{REQUEST_URI} [R=301,L]
+
+  # --- 3) İkinci alan adını (menekşeilim.com) ana adrese yönlendir -------
+  # Bu kuralın çalışması için menekşeilim.com (xn--menekeilim-i9b.com) hosting
+  # panelinde "Alias / Park Domain" olarak bu hesaba eklenmiş olmalıdır.
+  RewriteCond %{HTTP_HOST} ^(www\.)?xn--menekeilim-i9b\.com$ [NC]
+  RewriteRule ^ https://menekseilim.com.tr%{REQUEST_URI} [R=301,L]
+</IfModule>
+
+# --- Önbellekleme ---------------------------------------------------------
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType text/css "access plus 7 days"
+  ExpiresByType application/javascript "access plus 7 days"
+  ExpiresByType image/svg+xml "access plus 30 days"
+  ExpiresByType image/jpeg "access plus 30 days"
+  ExpiresByType image/png "access plus 30 days"
+  ExpiresByType image/webp "access plus 30 days"
+</IfModule>
+
+# --- Güvenlik başlıkları ---------------------------------------------------
+<IfModule mod_headers.c>
+  Header set X-Content-Type-Options "nosniff"
+  Header set X-Frame-Options "SAMEORIGIN"
+  Header set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>

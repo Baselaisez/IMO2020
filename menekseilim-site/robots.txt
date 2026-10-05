@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+Disallow: /iletisim-gonder.php
+Sitemap: https://menekseilim.com.tr/sitemap.xml
