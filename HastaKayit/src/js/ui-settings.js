@@ -1,5 +1,5 @@
 import * as XLSX from 'xlsx';
-import { allData, restoreAll, getMeta, setMeta, mergeImport, bulkImport } from './repo.js';
+import { allData, restoreAll, getMeta, setMeta, mergeImport, bulkImport, countJunkPatients, deleteJunkPatients, monthlyAggregates } from './repo.js';
 import { makeBackup, parseBackup } from './backup.js';
 import { buildWorkbook, workbookToBase64, parseWorkbook } from './excel.js';
 import { parseGeneralWorkbook } from './general-excel.js';
@@ -9,7 +9,7 @@ import { isNative, isDesktop, platform, platformLabel } from './platform.js';
 import { desktop } from './desktop.js';
 import { getSyncSettings, syncIfConfigured, ANDROID_SYNC_LABEL } from './sync-file.js';
 import { state, showScreen, guarded, banner, openSheet, closeSheet, todayIso, esc } from './ui.js';
-import { monthlySummary, fmtTL } from './compute.js';
+import { monthlySummaryFrom, fmtTL } from './compute.js';
 import { refreshHome } from './ui-home.js';
 import { openForm, setFormPhotoFromFile, setFormPhotoFromDataUrl } from './ui-form.js';
 import { initDragDrop, classifyFiles, attachDropZone, REMOTE_IMAGE_HELP } from './ui-dnd.js';
@@ -185,7 +185,9 @@ export async function openSettings() {
     await showDataLocation();
     let rows;
     try {
-      rows = monthlySummary(d.patients, d.payments);
+      // SQL tarafında toplanıyor (5.8): eskiden bunun için tüm hastalar ve
+      // ödemeler belleğe alınıyordu — 45.000 kayıtta 814 ms, her açılışta.
+      rows = monthlySummaryFrom(await monthlyAggregates(state.exec));
     } catch (e) {
       document.getElementById('monthly-table').innerHTML = `<p class="muted">Aylık özet hesaplanamadı: ${esc(e.message || String(e))}</p>`;
       rows = null;
@@ -385,6 +387,34 @@ export function initSettings() {
   });
 
   document.getElementById('btn-change-pin').addEventListener('click', () => changePinFlow());
+
+  // 🧹 Çöp Kayıtları Temizle (5.8). Önce SAYAR ve onay ister; parayla ilişkili
+  // hiçbir kayda dokunmaz (bkz. repo.js → JUNK_WHERE).
+  document.getElementById('btn-clean-junk')?.addEventListener('click', async () => {
+    const c = await guarded(() => countJunkPatients(state.exec));
+    if (!c.ok) return;
+    if (!c.value) { banner('Temizlenecek çöp kayıt bulunamadı ✓', 'ok'); return; }
+    openSheet(`
+      <h4>Çöp Kayıtları Temizle</h4>
+      <p class="muted"><b>${c.value}</b> kayıt silinecek. Bunların adında tek bir harf bile yok ve
+      hiçbirinin ödemesi ya da teslimatı bulunmuyor. Ödemesi olan hiçbir kayda dokunulmaz.<br><br>
+      Bu işlem geri alınamaz. Önce <b>💾 Yedek Al</b> demeniz önerilir.</p>
+      <div class="form" style="padding:0">
+        <button id="junk-go" class="primary" style="background:var(--red)">Evet, Sil</button>
+        <button id="junk-cancel" type="button" class="ghost">Vazgeç</button>
+      </div>
+    `);
+    document.getElementById('junk-cancel').addEventListener('click', closeSheet);
+    document.getElementById('junk-go').addEventListener('click', async ev => {
+      ev.currentTarget.disabled = true;
+      const r = await guarded(() => deleteJunkPatients(state.exec));
+      if (!r.ok) { ev.currentTarget.disabled = false; return; }
+      closeSheet();
+      banner(`${r.value} çöp kayıt silindi ✓`, 'ok', 4000);
+      await refreshHome();
+      await openSettings();
+    });
+  });
 
   document.getElementById('autosave-delay')?.addEventListener('change', async e => {
     const r = await guarded(() => setMeta(state.exec, 'autosave_delay', e.target.value));

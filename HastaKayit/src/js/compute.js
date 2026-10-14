@@ -115,3 +115,46 @@ export function shouldRequirePin(policy, elapsedMs) {
   if (!Number.isFinite(e) || e < 0) return true;
   return e >= (Number(p) || 2) * 60000;
 }
+
+/**
+ * monthlyAggregates()'in SQL çıktısını aylık özet satırlarına çevirir. Saf.
+ *
+ * monthlySummary ile aynı sonucu verir ama girdisi tüm hastalar/ödemeler değil,
+ * SQLite'ın yaptığı toplama. Ayarlar ekranı 45.000 kayıtta allData() için
+ * 814 ms harcıyordu; artık harcamıyor.
+ *
+ * activePatients: o ayda "açık" olan hasta sayısı = başlangıcı o aya kadar olan
+ * hastalar eksi bitişi o aydan ÖNCE olanlar. İki sıralı dizide ikili arama ile
+ * hesaplanıyor (her ay için tüm hastaları taramak yerine).
+ */
+export function monthlySummaryFrom({ payments = [], spans = [] } = {}) {
+  const starts = spans.map(s => String(s.sm ?? '')).sort();
+  const ends = spans.map(s => s.em).filter(v => v != null && v !== '').map(String).sort();
+  const countLE = (arr, value) => {
+    let lo = 0, hi = arr.length;
+    while (lo < hi) { const mid = (lo + hi) >> 1; if (arr[mid] <= value) lo = mid + 1; else hi = mid; }
+    return lo;
+  };
+  const countLT = (arr, value) => {
+    let lo = 0, hi = arr.length;
+    while (lo < hi) { const mid = (lo + hi) >> 1; if (arr[mid] < value) lo = mid + 1; else hi = mid; }
+    return lo;
+  };
+  const out = payments.map(p => ({
+    month: String(p.month) === '__gecersiz__' ? INVALID_MONTH : String(p.month),
+    total: Number(p.kurus || 0) / 100,
+    count: Number(p.count || 0),
+    activePatients: 0,
+  }));
+  out.sort((a, b) => {
+    if (a.month === INVALID_MONTH) return 1;
+    if (b.month === INVALID_MONTH) return -1;
+    return b.month.localeCompare(a.month);
+  });
+  for (const row of out) {
+    row.activePatients = row.month === INVALID_MONTH
+      ? 0
+      : countLE(starts, row.month) - countLT(ends, row.month);
+  }
+  return out;
+}

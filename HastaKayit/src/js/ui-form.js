@@ -1,5 +1,5 @@
-import { addPatient, updatePatient, getPatient, deletePatient, getMeta } from './repo.js';
-import { state, showScreen, guarded, banner, todayIso, esc } from './ui.js';
+import { addPatient, updatePatient, getPatient, deletePatient, getMeta, findDuplicatePatient } from './repo.js';
+import { state, showScreen, guarded, banner, todayIso, esc, openSheet, closeSheet } from './ui.js';
 import { refreshHome } from './ui-home.js';
 import { openCard } from './ui-card.js';
 import { fileToResizedDataUrl } from './ui-photo.js';
@@ -141,8 +141,54 @@ async function saveFormValues(v) {
     await updatePatient(state.exec, state.currentId, v);
     return { id: state.currentId, created: false };
   }
+  // 5.8 ile gelen mükerrer koruması: aynı kişi zaten kayıtlıysa SESSİZCE ikinci
+  // bir kayıt açmıyoruz. Otomatik kayıt bunu `duplicate` olarak geri alır ve
+  // formda uyarı gösterir; elle kaydetmede doktora seçenek sunulur.
+  const dup = await findDuplicatePatient(state.exec, v);
+  if (dup) return { duplicate: dup };
   const id = await addPatient(state.exec, v);
   return { id, created: true };
+}
+
+/**
+ * "Bu hasta zaten kayıtlı" paneli. Uygulama KENDİ BAŞINA birleştirme ya da
+ * üzerine yazma yapmaz: iki farklı hastayı birleştirmek, mükerrer bir kayıttan
+ * çok daha kötü ve geri dönüşü zor bir hatadır. Karar doktorundur.
+ */
+function askDuplicate(dup, v) {
+  const bits = [dup.mother_name && `anne: ${dup.mother_name}`, dup.phone && `tel: ${dup.phone}`, dup.birth_date && `doğum: ${dup.birth_date}`]
+    .filter(Boolean).join(' · ');
+  openSheet(`
+    <h4>Bu hasta zaten kayıtlı</h4>
+    <p class="muted"><b>${esc(dup.name)}</b>${bits ? `<br><span class="muted">${esc(bits)}</span>` : ''}</p>
+    <p class="muted">Ne yapmak istersiniz?</p>
+    <div class="form" style="padding:0">
+      <button id="dup-open" class="primary">Mevcut Kaydı Aç</button>
+      <button id="dup-update" type="button">Mevcut Kaydı Bu Bilgilerle Güncelle</button>
+      <button id="dup-new" type="button" class="ghost">Yine de Yeni Kayıt Oluştur</button>
+      <button id="dup-cancel" type="button" class="ghost">Vazgeç</button>
+    </div>
+  `);
+  document.getElementById('dup-cancel').addEventListener('click', closeSheet);
+  document.getElementById('dup-open').addEventListener('click', async () => {
+    closeSheet(); await refreshHome(); await openCard(dup.id);
+  });
+  document.getElementById('dup-update').addEventListener('click', async () => {
+    const r = await guarded(() => updatePatient(state.exec, dup.id, v));
+    if (!r.ok) return;
+    closeSheet();
+    banner('Mevcut kayıt güncellendi ✓', 'ok');
+    await refreshHome(); await openCard(dup.id);
+  });
+  document.getElementById('dup-new').addEventListener('click', async () => {
+    const r = await guarded(() => addPatient(state.exec, v));
+    if (!r.ok) return;
+    closeSheet();
+    state.editing = true; state.currentId = r.value;
+    autoCreatedId = null;
+    banner('Yeni kayıt oluşturuldu ✓', 'ok');
+    await refreshHome(); await openCard(r.value);
+  });
 }
 
 const autosave = createAutosave({
@@ -150,7 +196,16 @@ const autosave = createAutosave({
   getDelayMs: () => autosaveDelay,
   isActive: () => state.screen === 'form',
   save: saveFormValues,
-  onSaved: ({ id, created }) => {
+  onSaved: (info) => {
+    const { id, created, duplicate } = info || {};
+    if (duplicate) {
+      // Otomatik kayıt mükerrer kayıt AÇMAZ ve mevcut kaydı EZMEZ (form yarım
+      // yazılmış olabilir). Sadece haber verir; karar ✅'e basıldığında verilir.
+      setAutoStatus(`Bu hasta zaten kayıtlı (${esc(duplicate.name)}) — otomatik kayıt yapılmadı`);
+      document.getElementById('form-autosave')?.classList.add('warn');
+      return;
+    }
+    document.getElementById('form-autosave')?.classList.remove('warn');
     // Kritik: ilk otomatik kayıttan sonra form artık MEVCUT kaydı düzenliyor.
     // Bu satır olmasaydı her otomatik kayıt yeni bir hasta yaratırdı.
     state.currentId = id;
@@ -241,6 +296,7 @@ export function initForm() {
     // formValues() tuttuğumuz data-url'i ekler (kaldırıldıysa null).
     const v = formValues();
     const r = await guarded(() => saveFormValues(v));
+    if (r.ok && r.value.duplicate) { askDuplicate(r.value.duplicate, v); return; }
     if (r.ok) {
       state.currentId = r.value.id;
       autoCreatedId = null; // artık doktorun bilerek kaydettiği bir kayıt

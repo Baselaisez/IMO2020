@@ -1,4 +1,4 @@
-import { listTodayAppointments, listPatientsPage, countPatients, bulkDeletePatients } from './repo.js';
+import { listTodayAppointments, listPatientsPage, countPatients, bulkDeletePatients, listRecentPatients } from './repo.js';
 import { state, showScreen, guarded, banner, openSheet, closeSheet, todayIso, esc, toggleSelected, selectAllInto } from './ui.js';
 import { fmtTL, todaysAppointments } from './compute.js';
 import { openCard } from './ui-card.js';
@@ -28,7 +28,26 @@ let selected = new Set();
 
 export async function refreshHome() {
   await renderToday();
+  await renderRecent();
   await resetAndLoadFirstPage();
+}
+
+// "Son açılanlar" (5.8). 45.000 kayıtlık listede doktorun gün içinde döndüğü
+// birkaç hastaya tek dokunuşla ulaşması için. Yalnızca id listesi saklanır,
+// isimler her seferinde DB'den taze gelir (adı değişen eski adıyla görünmesin,
+// silinen listede kalmasın).
+async function renderRecent() {
+  const el = document.getElementById('recent-strip');
+  if (!el) return;
+  let rows = [];
+  try { rows = await listRecentPatients(state.exec); } catch { rows = []; }
+  if (!rows.length) { el.classList.add('hidden'); el.innerHTML = ''; return; }
+  el.classList.remove('hidden');
+  el.innerHTML = '<b>Son açılanlar:</b> '
+    + rows.map(r => `<button type="button" class="recent-chip" data-id="${r.id}">${esc(r.name)}</button>`).join(' ');
+  for (const b of el.querySelectorAll('.recent-chip')) {
+    b.addEventListener('click', () => openCard(Number(b.dataset.id)));
+  }
 }
 
 // "Bugün" şeridi. Artık indeksli DAR bir sorgu kullanıyor.

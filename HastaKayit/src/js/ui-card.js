@@ -1,4 +1,4 @@
-import { getPatient, addPayment, updatePayment, deletePayment, completeTreatment, deletePatient, updatePatient, getMeta, setMeta, setStatus, addDelivery, updateDelivery, deleteDelivery, setApptCalId, setDeliveryCalId } from './repo.js';
+import { getPatient, addPayment, updatePayment, deletePayment, completeTreatment, deletePatient, updatePatient, getMeta, setMeta, setStatus, addDelivery, updateDelivery, deleteDelivery, setApptCalId, setDeliveryCalId, noteRecentPatient } from './repo.js';
 import { state, showScreen, guarded, banner, openSheet, closeSheet, todayIso, esc } from './ui.js';
 import { fmtTL, fmtDate, fmtDateTime, durationMonths, sessionLabel, ageFrom } from './compute.js';
 import { refreshHome } from './ui-home.js';
@@ -40,6 +40,10 @@ export async function openCard(id) {
     banner(`Hasta kartı yüklenemedi — ${e.message || e}`, 'error', 0);
     return;
   }
+  // "Son açılanlar" şeridini besler (5.8). Kart AÇILDIKTAN sonra yazılıyor:
+  // açılamayan bir kayıt listeye girmemeli. Hata şeridi bozsa bile kartı
+  // düşürmemeli, o yüzden yutuluyor.
+  noteRecentPatient(state.exec, id).catch(e => console.error('son açılanlar', e));
   showScreen('card');
 }
 

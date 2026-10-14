@@ -201,3 +201,25 @@ html[data-platform="ios"] .fab-mini { bottom: calc(92px + env(safe-area-inset-bo
   text-decoration: underline;
   cursor: pointer;
 }
+
+/* "Son açılanlar" şeridindeki hasta düğmeleri (5.8). Şeridin kendisi .today
+   stilini paylaşır; buradakiler yalnızca tıklanabilir adlar. */
+.recent-chip {
+  background: #fff;
+  border: 1px solid var(--line, #d7dee8);
+  border-radius: 999px;
+  padding: 3px 11px;
+  margin: 2px 2px 0 0;
+  font: inherit;
+  font-size: 14px;
+  color: var(--blue, #2563eb);
+  cursor: pointer;
+}
+.recent-chip:hover { background: #eff6ff; }
+
+/* Otomatik kayıt satırı mükerrer uyarısı verdiğinde: yeşil değil, sarı. */
+.autosave-line.warn {
+  color: #92400e;
+  background: #fef3c7;
+  border-bottom-color: #fcd34d;
+}

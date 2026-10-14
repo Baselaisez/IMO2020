@@ -1117,3 +1117,118 @@ export async function setApptCalId(x, id, calId) {
 export async function setDeliveryCalId(x, id, calId) {
   return withTx(x, async () => { await x.run('UPDATE deliveries SET cal_id=? WHERE id=?', [calId || null, id]); });
 }
+
+// ---------------------------------------------------------------------------
+// 5.8 ile gelenler. Üçü de yukarı akıştan alındı; buradaki tek fark, sorguların
+// bu depodaki indeksler ve `residence/birth_date/notes` sütunlarıyla uyumlu
+// olması.
+// ---------------------------------------------------------------------------
+
+// Karşılaştırma Türkçe I ailesi katlanarak yapılır (İSİM/isim/İsim aynı sayılır).
+// SQLite'ın COLLATE NOCASE'i yalnızca ASCII katlar — "ALİ ŞAHİN" ile "Ali Şahin"
+// onun gözünde farklıdır. Bu yüzden iki tarafı da AYNI dönüşümden geçiriyoruz;
+// foldTr ile FOLD_SQL birebir aynı işi yapmak zorunda.
+const TR_MAP = [['İ', 'i'], ['I', 'i'], ['ı', 'i'], ['Ş', 's'], ['ş', 's'], ['Ğ', 'g'], ['ğ', 'g'], ['Ü', 'u'], ['ü', 'u'], ['Ö', 'o'], ['ö', 'o'], ['Ç', 'c'], ['ç', 'c']];
+function foldTr(v) {
+  let s = String(v ?? '');
+  for (const [a, b] of TR_MAP) s = s.split(a).join(b);
+  return s.toLowerCase().replace(/\s+/g, ' ').trim();
+}
+const FOLD_SQL = (col) => 'LOWER(' + TR_MAP.reduce((acc, [a, b]) => `REPLACE(${acc},'${a}','${b}')`, `IFNULL(${col},'')`) + ')';
+
+/**
+ * Bu kişi zaten kayıtlı mı? Aynı ad TEK BAŞINA yeterli değildir — ikinci bir
+ * kanıt aranır (anne adı, doğum tarihi) ya da telefon birebir tutmalıdır.
+ * Telefon tek başına yeterlidir: aynı numara aynı kişidir.
+ * @returns eşleşen hasta satırı, yoksa null
+ */
+export async function findDuplicatePatient(x, fields = {}, excludeId = null) {
+  const name = foldTr(fields.name);
+  if (!name) return null;
+  const mother = foldTr(fields.mother_name);
+  const birth = String(fields.birth_date ?? '').trim();
+  const digits = String(fields.phone ?? '').replace(/[^0-9]/g, '');
+  const rows = await x.query(
+    `SELECT id, name, mother_name, phone, birth_date FROM patients
+       WHERE (? <> '' AND REPLACE(REPLACE(REPLACE(REPLACE(IFNULL(phone,''),' ',''),'-',''),'(',''),')','') = ?)
+          OR ${FOLD_SQL('name')} = ?`,
+    [digits, digits, name]
+  );
+  for (const r of rows) {
+    if (excludeId != null && String(r.id) === String(excludeId)) continue;
+    const rDigits = String(r.phone ?? '').replace(/[^0-9]/g, '');
+    if (digits && rDigits && digits === rDigits) return r;
+    if (foldTr(r.name) !== name) continue;
+    if (mother && foldTr(r.mother_name) === mother) return r;
+    if (birth && String(r.birth_date ?? '').trim() === birth) return r;
+  }
+  return null;
+}
+
+// Çöp kayıt: eski Excel aktarımından kalan, adında TEK BİR HARF bile olmayan
+// (tırnak, virgül, boşluk…) ve hiç ödemesi/teslimatı bulunmayan satırlar.
+// Parayla ilişkili hiçbir şey silinmez. "İsimsiz — 12.03.2024" kayıtları bu
+// kapsamda DEĞİLDİR: onların adında harf vardır ve tarihi/tanısı olan gerçek
+// ziyaretlerden gelirler.
+const JUNK_WHERE = `
+  name NOT GLOB '*[A-Za-zÇĞİIÖŞÜçğıöşü]*'
+  AND id NOT IN (SELECT DISTINCT patient_id FROM payments WHERE patient_id IS NOT NULL)
+  AND id NOT IN (SELECT DISTINCT patient_id FROM deliveries WHERE patient_id IS NOT NULL)`;
+
+export async function countJunkPatients(x) {
+  const r = await x.query(`SELECT COUNT(*) c FROM patients WHERE ${JUNK_WHERE}`);
+  return r[0].c;
+}
+
+// bulkDeletePatients yeniden kullanılıyor: eşitleme mezar taşı (tombstone) ve
+// silme doğrulaması zaten orada. Kendi transaction'ını kendi açtığı için
+// buradaki SELECT dışarıda kalmalı — withTx içinde withTx iç içe BEGIN demektir.
+export async function deleteJunkPatients(x) {
+  const rows = await x.query(`SELECT id FROM patients WHERE ${JUNK_WHERE}`);
+  if (!rows.length) return 0;
+  const { deleted } = await bulkDeletePatients(x, rows.map(r => r.id));
+  return deleted;
+}
+
+// "Son açılanlar": 45.000 kayıtlık listede doktorun gün içinde döndüğü birkaç
+// hastaya tek dokunuşla ulaşması için. meta'da yalnızca kısa bir id listesi
+// tutulur; isimler her açılışta DB'den taze çekilir, böylece adı değişen hasta
+// eski adıyla görünmez ve silinen hasta listede kalmaz.
+const RECENT_MAX = 8;
+
+export async function noteRecentPatient(x, id) {
+  if (id == null) return;
+  let cur = [];
+  try { cur = JSON.parse((await getMeta(x, 'recent_ids')) || '[]'); } catch { cur = []; }
+  const next = [Number(id), ...cur.filter(v => Number(v) !== Number(id))].slice(0, RECENT_MAX);
+  await setMeta(x, 'recent_ids', JSON.stringify(next));
+}
+
+export async function listRecentPatients(x) {
+  let ids = [];
+  try { ids = JSON.parse((await getMeta(x, 'recent_ids')) || '[]').map(Number).filter(Number.isFinite); } catch { ids = []; }
+  if (!ids.length) return [];
+  const rows = await x.query(`SELECT id, name FROM patients WHERE id IN (${ids.map(() => '?').join(',')})`, ids);
+  const byId = new Map(rows.map(r => [Number(r.id), r]));
+  return ids.map(i => byId.get(i)).filter(Boolean); // sıra: en son açılan önce
+}
+
+/**
+ * Aylık özetin SQL tarafı. Ayarlar ekranı bunun için allData() çağırıyordu —
+ * 45.000 kayıtta ölçülen 814 ms, üstelik her açılışta. Toplama artık SQLite'ta.
+ */
+export async function monthlyAggregates(x) {
+  const payments = await x.query(
+    `SELECT CASE WHEN pay_date GLOB '[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]*'
+                 THEN substr(pay_date, 1, 7) ELSE '__gecersiz__' END AS month,
+            SUM(CAST(ROUND(amount * 100) AS INTEGER)) AS kurus,
+            COUNT(*) AS count
+       FROM payments
+      GROUP BY month`);
+  const spans = await x.query(
+    `SELECT substr(IFNULL(start_date,''), 1, 7) AS sm,
+            CASE WHEN end_date IS NULL OR end_date = '' THEN NULL
+                 ELSE substr(end_date, 1, 7) END AS em
+       FROM patients`);
+  return { payments, spans };
+}

@@ -81,6 +81,11 @@ npm test
 Her iki platformda da Ayarlar ekranının altında gerçek konum yazar; Mac'te
 "📂 Finder'da Göster" düğmesi klasörü doğrudan açar.
 
+## Yukarı akış 5.8'in birleştirilmesi
+
+5.8'in yeni özellikleri (mükerrer koruması, çöp temizleme, son açılanlar) ve
+5.8 olduğu gibi alınmadığı için: [docs/V58-BIRLESTIRME.md](docs/V58-BIRLESTIRME.md)
+
 ## Hız ve hasta kaydı
 
 Ölçülen darboğazlar, otomatik kayıt (✅'e basmadan) ve WhatsApp'tan fotoğraf/
