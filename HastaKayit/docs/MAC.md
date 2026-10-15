@@ -73,6 +73,27 @@ klasörü açar; menüden **Dosya ▸ Veri Klasörünü Göster** de aynı işi 
 Windows sürümünün konumu değişmedi (`%USERPROFILE%\HastaKayit`), böylece
 mevcut Windows kurulumları etkilenmez.
 
+## Masaüstüne / Dock'a kısayol
+
+```bash
+npm run mac:shortcut            # Masaüstü kısayolu
+bash scripts/mac-desktop-shortcut.sh --dock   # Masaüstü + Dock'a sabitle
+```
+
+Betik uygulamayı `/Applications` içinde arar, varsa eski kısayolu siler ve
+**Finder'ın kendi "diğer ad" (alias) dosyasını** oluşturur.
+
+Neden düz `ln -s` değil: sembolik bağ da çalışır ama Finder onu çoğu zaman düz
+beyaz bir belge simgesiyle gösterir ve kullanıcı uygulamanın bozulduğunu sanır.
+Doğru simgeyi yalnızca Finder'ın alias'ı verir, onu da yalnızca Finder
+üretebilir — bu yüzden AppleScript gerekiyor. AppleScript ilk çalıştırmada
+"Terminal, Finder'ı yönetsin mi?" izni isteyebilir; izin verilmezse betik
+sembolik bağa düşer (simge çirkin, kısayol çalışır) ve bunu ekranda söyler.
+
+`--dock` seçeneği uygulamayı Dock'un kalıcı listesine ekler ve Dock'u yeniden
+başlatır (bir anlık görsel kesinti, başka etkisi yok). Zaten ekliyse tekrar
+eklemez.
+
 ## Cihazlar arası eşitleme
 
 Ayarlar ekranındaki **🔄 Cihazlar Arası Eşitleme** bölümü Mac ile iPhone'un

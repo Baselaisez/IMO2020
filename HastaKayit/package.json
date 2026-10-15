@@ -25,7 +25,8 @@
     "ios:reset": "node scripts/ios-reset-packages.mjs",
     "postinstall": "node scripts/patch-capacitor-spm.mjs",
     "ios:build": "node scripts/ios-build.mjs",
-    "mac:release": "npm run build && node scripts/mac-release.mjs"
+    "mac:release": "npm run build && node scripts/mac-release.mjs",
+    "mac:shortcut": "bash scripts/mac-desktop-shortcut.sh"
   },
   "dependencies": {
     "@aparajita/capacitor-biometric-auth": "^10.0.0",
