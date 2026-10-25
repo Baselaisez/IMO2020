@@ -78,7 +78,26 @@ export async function setFormPhotoFromDataUrl(dataUrl) {
 // values to pre-populate, e.g. from the "Metinden Hasta Ekle" paste-parse flow
 // (see ui-home.js). The doctor still reviews/edits every field before Kaydet —
 // this only saves typing, it never saves on its own.
+/**
+ * Hasta formunu açar.
+ *
+ * ASLA SESSİZCE BAŞARISIZ OLMAZ. Altı çağıran da bunu `await` etmeden ve
+ * `catch` koymadan çağırıyor (menü, kalem düğmesi, + düğmesi, metinden ekle,
+ * PDF/Word içe aktarma). İçeride bir şey fırlarsa sonuç "hiçbir şey olmadı"
+ * oluyordu: açılan panel kapanıyor, kullanıcı listeye dönüyor ve ekranda tek
+ * bir açıklama bile çıkmıyordu — yapıştırdığı hasta bilgisi de kayboluyordu.
+ * Bu yüzden gövdenin tamamı sarmalanmış durumda: hata varsa görünür.
+ */
 export async function openForm(patientId, prefill) {
+  try {
+    return await openFormInner(patientId, prefill);
+  } catch (e) {
+    console.error('openForm', e);
+    banner(`Form açılamadı — ${e.message || e}`, 'error', 0);
+  }
+}
+
+async function openFormInner(patientId, prefill) {
   state.editing = !!patientId;
   state.currentId = patientId;
   // Yeni bir form: önceki formun otomatik kayıt sayacı ve "geri al" hedefi

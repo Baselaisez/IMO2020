@@ -316,9 +316,19 @@ function openPasteModal() {
     </div>
   `);
   document.getElementById('paste-cancel').addEventListener('click', closeSheet);
-  document.getElementById('paste-go').addEventListener('click', () => {
+  document.getElementById('paste-go').addEventListener('click', async () => {
     const text = document.getElementById('paste-text').value;
-    const p = parsePatientText(text, todayIso());
+    // Boş kutuyla "Ayrıştır" demek, boş bir form açıp kullanıcıyı şaşırtmaktı.
+    if (!text.trim()) { banner('Önce hasta bilgisini kutuya yapıştırın.', 'error', 3000); return; }
+    let p;
+    try {
+      p = parsePatientText(text, todayIso());
+    } catch (e) {
+      console.error('parsePatientText', e);
+      // Ayrıştırıcı patlasa bile metin KAYBOLMAZ: forma not olarak gider.
+      banner(`Metin okunamadı — ${e.message || e}. Bilgi Notlar alanına aktarıldı.`, 'error', 6000);
+      p = { name: '', mother_name: '', residence: '', birth_date: '', phone: '', diagnosis: '' };
+    }
     closeSheet();
     // CRITICAL zero-loss: the full original pasted text always goes into
     // Notlar too, regardless of what the heuristic parser managed to pull
@@ -326,7 +336,14 @@ function openPasteModal() {
     // anything is saved; nothing pasted is ever silently dropped.
     // phone DAHİL: ayrıştırıcı telefonu buluyordu ama burada aktarılmadığı için
     // Telefon alanı boş kalıyordu.
-    openForm(null, { name: p.name, mother_name: p.mother_name, residence: p.residence, birth_date: p.birth_date, phone: p.phone, diagnosis: p.diagnosis, notes: text });
+    await openForm(null, { name: p.name, mother_name: p.mother_name, residence: p.residence, birth_date: p.birth_date, phone: p.phone, diagnosis: p.diagnosis, notes: text });
+    // Görünür geri bildirim: "bastım ama bir şey olmadı" duygusu kalmasın ve
+    // sessiz bir başarısızlık yanlış tuşa basmaktan ayırt edilebilsin.
+    if (state.screen === 'form') {
+      const dolu = ['name', 'mother_name', 'residence', 'birth_date', 'phone', 'diagnosis'].filter(k => p[k]).length;
+      banner(dolu ? `${dolu} alan dolduruldu — kontrol edip kaydedin ✓`
+                  : 'Alanlar okunamadı; metin Notlar’a aktarıldı.', 'ok', 4000);
+    }
   });
 }
 
