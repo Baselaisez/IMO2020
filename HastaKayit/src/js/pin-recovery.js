@@ -2,7 +2,7 @@
 // All crypto reuses pin.js's PBKDF2 (hashPin) so answers/codes are stored ONLY as
 // salted hashes — never plaintext. No network; everything lives in the meta table.
 import { genSaltHex, hashPin, lockoutMs } from './pin.js';
-import { getMeta, setMeta, withTx } from './repo.js';
+import { getMeta, setMeta, setMetaIn, withTx } from './repo.js';
 
 // --- normalization ----------------------------------------------------------
 
@@ -73,9 +73,9 @@ export async function setSecurityQuestions(x, pairs) {
   return withTx(x, async () => {
     for (let i = 0; i < prepared.length; i++) {
       const n = i + 1;
-      await setMeta(x, `sq${n}_q`, prepared[i].q);
-      await setMeta(x, `sq${n}_salt`, prepared[i].salt);
-      await setMeta(x, `sq${n}_hash`, hashes[i]);
+      await setMetaIn(x, `sq${n}_q`, prepared[i].q);
+      await setMetaIn(x, `sq${n}_salt`, prepared[i].salt);
+      await setMetaIn(x, `sq${n}_hash`, hashes[i]);
     }
   });
 }
@@ -102,8 +102,8 @@ export async function setRecoveryCode(x) {
   const salt = genSaltHex();
   const hash = await hashCode(code, salt);
   await withTx(x, async () => {
-    await setMeta(x, 'rc_salt', salt);
-    await setMeta(x, 'rc_hash', hash);
+    await setMetaIn(x, 'rc_salt', salt);
+    await setMetaIn(x, 'rc_hash', hash);
   });
   return code;
 }
@@ -165,11 +165,11 @@ export async function resetPinAfterRecovery(x, newPin) {
   const salt = genSaltHex();
   const hash = await hashPin(newPin, salt);
   return withTx(x, async () => {
-    await setMeta(x, 'pin_salt', salt);
-    await setMeta(x, 'pin_hash', hash);
-    await setMeta(x, 'fail_count', '0');
-    await setMeta(x, 'locked_until', '0');
-    await setMeta(x, 'recovery_fail', '0');
-    await setMeta(x, 'recovery_locked_until', '0');
+    await setMetaIn(x, 'pin_salt', salt);
+    await setMetaIn(x, 'pin_hash', hash);
+    await setMetaIn(x, 'fail_count', '0');
+    await setMetaIn(x, 'locked_until', '0');
+    await setMetaIn(x, 'recovery_fail', '0');
+    await setMetaIn(x, 'recovery_locked_until', '0');
   });
 }

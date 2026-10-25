@@ -1,5 +1,5 @@
 import { App } from '@capacitor/app';
-import { getMeta, setMeta } from './repo.js';
+import { getMeta, setMeta, checkpointWal } from './repo.js';
 import { genSaltHex, hashPin, verifyPin, lockoutMs } from './pin.js';
 import {
   hasRecoverySetup, getRecoveryStatus, verifySecurityAnswers, verifyRecoveryCode,
@@ -135,11 +135,23 @@ async function submitPin() {
       catch (e) { banner(`Açılış hatası — ${e.message || e}`, 'error', 0); }
       return;
     }
+    // YANLIŞ PIN. Deneme sayacını yazmak bir DEFTER işidir; kullanıcıya
+    // söylenecek şey "Yanlış PIN"dir. Sayaç yazılamazsa (disk dolu, kilitli
+    // veritabanı) kullanıcıya veritabanı hatası göstermek hem yanıltıcı hem
+    // korkutucuydu: ekranda "PIN doğrulama hatası — database is locked" yazıp
+    // asıl bilgiyi (PIN'in yanlış olduğunu) gizliyordu.
+    //
+    // Sayacın yazılamaması güvenliği zayıflatır (kilitlenme gecikebilir), o
+    // yüzden sessizce yutulmuyor: konsola düşüyor ve mesajda küçük bir not
+    // çıkıyor.
     const fc = failCount + 1;
     const ms = lockoutMs(fc);
-    await setFailState(fc, ms ? now + ms : 0);
+    let counted = true;
+    try { await setFailState(fc, ms ? now + ms : 0); }
+    catch (e) { counted = false; console.error('deneme sayacı yazılamadı', e); }
     document.getElementById('pin-input').value = '';
-    banner(ms ? `Yanlış PIN. ${ms / 1000} sn kilitlendi.` : 'Yanlış PIN.', 'error', 2500);
+    const base = ms && counted ? `Yanlış PIN. ${ms / 1000} sn kilitlendi.` : 'Yanlış PIN.';
+    banner(counted ? base : `${base} (deneme sayacı kaydedilemedi)`, 'error', 2500);
   } catch (e) {
     banner(`PIN doğrulama hatası — ${e.message || e}`, 'error', 0);
   }
@@ -405,7 +417,9 @@ export async function initLock(onUnlock) {
     // kayıt "form kapalı" sayılıp iptal olurdu — doktor WhatsApp'a bakmak için
     // çıktığında yazdığı hasta kaybolurdu.
     try { await state.flushForm?.(); } catch (e) { console.error('form flush', e); }
-    state.exec.query('PRAGMA wal_checkpoint(TRUNCATE)').catch(() => {});
+    // Kuyruğa alınmış: bu bir YAZMADIR ve açık bir transaction'ın ortasına
+    // girerse "database is locked" verir (bkz. repo.checkpointWal).
+    checkpointWal(state.exec).catch(() => {});
     flushSnapshot();
     // Remember where we were (to restore on unlock) only if we were actually
     // unlocked and PIN setup is done.

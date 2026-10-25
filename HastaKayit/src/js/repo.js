@@ -231,9 +231,29 @@ export async function getMeta(x, key) {
   return r.length ? r[0].value : null;
 }
 
+const META_UPSERT = 'INSERT INTO meta (key,value) VALUES (?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value';
+
+/**
+ * Meta yazar. Transaction'ın DIŞINDAN çağrılır ve kuyruğa girer — açık bir
+ * transaction varken çıplak yazma Android'de SQLITE_BUSY veriyordu (bkz.
+ * runQueued).
+ *
+ * Bir withTx geri çağrısının İÇİNDEN ÇAĞIRMAYIN: kuyruk zaten o transaction'da
+ * olduğu için sonsuza kadar beklersiniz. İçeride setMetaIn kullanın.
+ * (test/db-lock.test.mjs bu kuralı kaynak üzerinde denetliyor.)
+ */
 export async function setMeta(x, key, value) {
   if (value == null) throw new Error('Meta değeri boş olamaz: ' + key);
-  await x.run('INSERT INTO meta (key,value) VALUES (?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value', [key, String(value)]);
+  await runQueued(x, META_UPSERT, [key, String(value)]);
+}
+
+/**
+ * setMeta'nın transaction İÇİ sürümü: kuyruğa GİRMEZ, çünkü kuyruk hâlihazırda
+ * çağıranın transaction'ında. Yazma zaten o transaction'ın parçası olur.
+ */
+export async function setMetaIn(x, key, value) {
+  if (value == null) throw new Error('Meta değeri boş olamaz: ' + key);
+  await x.run(META_UPSERT, [key, String(value)]);
 }
 
 export function nowIso() {
@@ -243,6 +263,49 @@ export function nowIso() {
 // Per-executor promise queue: serializes concurrent withTx calls (e.g. a UI
 // double-tap) so BEGIN never runs inside an open transaction.
 const txQueues = new WeakMap();
+
+/**
+ * TEK bir yazmayı transaction kuyruğuna alır.
+ *
+ * NEDEN: withTx yalnızca TRANSACTION'LARI sıraya sokuyordu. Transaction'ın
+ * DIŞINDA kalan çıplak bir `x.run(...)` bu kuyruğu hiç görmüyordu; açık bir
+ * transaction varken çalıştığında Android/iOS'ta SQLite şunu fırlatıyor:
+ *
+ *     Run: database is locked (code 5)        (SQLITE_BUSY)
+ *
+ * Samsung'da PIN ekranında tam olarak bu oluyordu: yanlış PIN girildiğinde
+ * başarısız deneme sayacı yazılıyor (setMeta → çıplak run), o sırada arka
+ * planda bir eşitleme/otomatik kayıt/yedek transaction'ı açıksa yazma
+ * patlıyor ve ekrana "PIN doğrulama hatası" düşüyordu.
+ *
+ * Masaüstünde (sql.js) görünmüyordu çünkü orada her çağrı senkron: bir
+ * transaction'ın ortasına başka bir iş araya giremiyor. Yerli köprüde her
+ * çağrı gerçek bir async sınırı olduğu için araya girme KAÇINILMAZ.
+ *
+ * DİKKAT: Bunu bir withTx geri çağrısının İÇİNDEN çağırmak kilitlenme olur —
+ * kuyruk zaten o transaction'da. İçeride çıplak x.run kullanın (tombstone ve
+ * chunkInsertIgnore öyle yapıyor).
+ */
+export function runQueued(x, sql, params = []) {
+  const prev = txQueues.get(x) || Promise.resolve();
+  const run = prev.catch(() => {}).then(() => x.run(sql, params));
+  txQueues.set(x, run);
+  return run;
+}
+
+/**
+ * WAL dosyasını ana veritabanına katlar. Kuyruğa alınır: bu da bir YAZMADIR ve
+ * açık bir transaction'ın ortasına girerse aynı "database is locked" hatasını
+ * üretir. (lock.js bunu uygulama arka plana geçerken çağırıyor — yani tam da
+ * otomatik kayıt/eşitleme yazmalarının olabileceği an.)
+ */
+export function checkpointWal(x) {
+  const prev = txQueues.get(x) || Promise.resolve();
+  // query: bu PRAGMA satır döndürür, Android'in execSQL'i satır dönen ifadeyi reddeder.
+  const run = prev.catch(() => {}).then(() => x.query('PRAGMA wal_checkpoint(TRUNCATE)'));
+  txQueues.set(x, run);
+  return run;
+}
 
 export function withTx(x, fn) {
   const prev = txQueues.get(x) || Promise.resolve();

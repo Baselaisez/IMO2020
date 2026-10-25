@@ -81,6 +81,11 @@ npm test
 Her iki platformda da Ayarlar ekranının altında gerçek konum yazar; Mac'te
 "📂 Finder'da Göster" düğmesi klasörü doğrudan açar.
 
+## "database is locked" hatası
+
+PIN ekranındaki SQLITE_BUSY hatasının sebebi ve düzeltmesi:
+[docs/VERITABANI-KILIDI.md](docs/VERITABANI-KILIDI.md)
+
 ## Yukarı akış 5.8'in birleştirilmesi
 
 5.8'in yeni özellikleri (mükerrer koruması, çöp temizleme, son açılanlar) ve
