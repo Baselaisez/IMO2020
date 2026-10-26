@@ -44,11 +44,12 @@ Herhangi bir metin editörüyle (Windows'ta **Not Defteri**, daha rahatı
 | IBAN ve banka | `index.html` ve `bagis.html` | `TR00 0000 ...` ve `[Banka Adı]` |
 | Dernek kütük numarası | Tüm sayfaların en altında `[000-000-000]` | Dernekler Bilgi Sistemi'ndeki numaranız |
 | Yönetim kurulu isimleri | `hakkimizda.html` | `[Ad Soyad]` ve baş harfler (`AS`) |
-| Instagram / YouTube | Tüm sayfalarda `href="#"` | Hesabınız yoksa o satırı silin |
+| Sosyal medya | Facebook ve Instagram (`instagram.com/menekseilim`) bağlı | YouTube hesabı açarsanız bana iletin, simgesini geri ekleyelim |
 | Haftalık program | `index.html` → "Ders ve etkinlik takvimi" tablosu | Örnek saatler yazdım |
 | Duyurular | `index.html` ve `duyurular.html` | Örnek 4 duyuru var; birini kopyalayıp çoğaltın |
 | Faaliyet metinleri | `faaliyetler.html` | Yapmadığınız bir faaliyet varsa o bölümü silin |
-| Fotoğraflar | `img/yer-tutucu.svg` yazan her yer | Aşağıya bakın |
+| Fotoğraflar | Öğrenci portreleri ve merasim videoları eklendi; `faaliyetler.html` sayfasında hâlâ `img/yer-tutucu.svg` var | Aşağıya bakın |
+| Veli izni | `galeri.html` altındaki "velilerinden yazılı izin alınmıştır" cümlesi | Yalnızca 14 öğrencinin hepsinin velisinden izin aldıysanız yayınlayın |
 | Google Haritası | `iletisim.html` içindeki `HARİTA:` açıklaması | Google Haritalar → Paylaş → Harita yerleştir → kodu yapıştır |
 | Tüzük PDF | `hakkimizda.html` → "buraya tıklayın (PDF)" | PDF'i `belgeler/tuzuk.pdf` gibi yükleyip bağlantıyı verin |
 
@@ -62,9 +63,20 @@ sayfasında her fotoğraf için bir satır var:
 <a href="img/kurs-1.jpg"><img src="img/kurs-1.jpg" alt="Kur'an dersi" loading="lazy"><figcaption>Kur'an-ı Kerim dersimizden</figcaption></a>
 ```
 
-**Logo:** `img/logo.svg` ve `favicon.svg` dosyalarını kendi logonuzla
-değiştirebilirsiniz (aynı dosya adıyla kaydedin, PNG kullanacaksanız HTML'deki
-`logo.svg` yazan yerleri `logo.png` yapın).
+**Öğrenci fotoğrafları ve videolar:** `img/ogrenciler/` klasöründe her
+fotoğrafın iki boyutu var: `ogrenci-01.jpg` (büyütülmüş görünüm, 900 px) ve
+`ogrenci-01-k.jpg` (küçük kare, 450 px). Yeni fotoğraf eklerken aynı adlandırmayı
+kullanın ve `galeri.html` içinde bir satırı kopyalayıp numarasını değiştirin.
+Merasim videoları `video/` klasöründe; her videonun bir `.mp4` dosyası ve bir
+`.jpg` kapak resmi var. Videolar web için sıkıştırıldı (toplam yaklaşık 12 MB).
+
+**Amblem:** `img/logo.svg` (başlık ve alt bilgi), `img/amblem.svg` (anasayfa
+büyük görsel), `favicon.svg` (tarayıcı sekmesi) ve `img/og-gorsel.png`
+(WhatsApp/Facebook paylaşım görseli) derneğin bayrağındaki amblemden
+**fotoğraflara bakılarak yeniden çizildi**. Amblemin sağ alt kısmı tüm
+fotoğraflarda kadrajın dışında kaldığı için birebir aynı değildir. Matbaaya
+veya tasarımcıya ait orijinal dosya (SVG, PDF, AI ya da yüksek çözünürlüklü PNG)
+varsa aynı dosya adlarıyla değiştirin ya da bana gönderin, ben yerleştireyim.
 
 ---
 
@@ -413,7 +425,14 @@ gelir. Teknik bir yakınınız varsa iyi bir seçenektir.
 ## Yasal hatırlatmalar
 
 * **KVKK:** `kvkk.html` sayfası genel bir aydınlatma metnidir; adres ve iletişim
-  bilgilerini doldurun. Fotoğraflarda çocuklar varsa velilerden yazılı izin alın.
+  bilgilerini doldurun.
+* **Çocukların fotoğrafları:** Galeride yüzü açıkça görünen 14 öğrenci ve
+  videolarda çok sayıda çocuk var. Bunlar KVKK kapsamında kişisel veridir.
+  Yayına almadan önce her velinin yazılı (imzalı) iznini alın ve izinleri dernek
+  dosyasında saklayın. İzin vermeyen velinin çocuğunun fotoğrafını
+  `img/ogrenciler/` klasöründen ve `galeri.html` içinden silin. Galeri
+  sayfasındaki "velilerinden yazılı izin alınmıştır" cümlesi ancak bu izinler
+  alındıysa doğrudur.
 * **Bağış:** Dernekler, bağışları alındı belgesi (makbuz) karşılığında kabul
   eder. Kamuya açık yardım kampanyası (SMS, kumbara, geniş çaplı çağrı) 2860
   sayılı Yardım Toplama Kanunu kapsamında valilik izni gerektirebilir; web
@@ -432,7 +451,7 @@ menekseilim-site/
 ├── hakkimizda.html       Hakkımızda, misyon-vizyon, yönetim kurulu
 ├── faaliyetler.html      Faaliyet detayları
 ├── duyurular.html        Duyurular
-├── galeri.html           Fotoğraf galerisi
+├── galeri.html           Merasim videoları ve öğrenci fotoğrafları
 ├── bagis.html            Bağış bilgileri ve SSS
 ├── iletisim.html         İletişim bilgileri ve form
 ├── kvkk.html             KVKK aydınlatma metni
@@ -444,9 +463,11 @@ menekseilim-site/
 ├── favicon.svg
 ├── css/style.css         Tüm stil
 ├── js/main.js            Menü, galeri, form, IBAN kopyalama
-└── img/                  logo.svg, hero.svg, desen.svg, yer-tutucu.svg (+ fotoğraflarınız)
+├── img/                  logo.svg, amblem.svg, isaret.svg, og-gorsel.png, desen.svg, yer-tutucu.svg
+│   └── ogrenciler/       Öğrenci portreleri (büyük ve küçük boyut)
+└── video/                Yıl sonu merasimi videoları (.mp4) ve kapak resimleri (.jpg)
 ```
 
-Renkleri değiştirmek isterseniz `css/style.css` dosyasının en üstündeki
-`:root { --mor: ...; --altin: ...; }` değerlerini düzenlemeniz yeterlidir;
-tüm site bu değişkenleri kullanır.
+Renkler amblemden alınmıştır: koyu yeşil, bej ve beyaz. Değiştirmek isterseniz
+`css/style.css` dosyasının en üstündeki `:root { --yesil: ...; --bej: ...; --kum: ...; }`
+değerlerini düzenlemeniz yeterlidir; tüm site bu değişkenleri kullanır.
