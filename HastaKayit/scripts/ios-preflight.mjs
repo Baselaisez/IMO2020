@@ -15,7 +15,7 @@
 //
 // Çalıştırma:  npm run ios:check   (npm run ios bunu kendiliğinden çağırır)
 import { execFileSync } from 'node:child_process';
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
@@ -69,6 +69,30 @@ export function hasIosSdk(out) {
 const ok = m => console.log(`  ✅ ${m}`);
 const warn = m => console.log(`  ⚠️  ${m}`);
 const bad = m => console.log(`  ❌ ${m}`);
+
+/**
+ * iCloud eşitlemesinin iOS tarafı eksiksiz bağlanmış mı? Saf — testi var.
+ *
+ * Üç parça da olmadan eşitleme SESSİZCE çalışmaz: eklenti köprüye kayıtlı
+ * olmazsa `ICloudSync` çağrıları "not implemented" der; entitlements dosyası
+ * imzaya girmezse `url(forUbiquityContainerIdentifier:)` nil döner. İkisi de
+ * Xcode'da anlaşılmaz görünür, o yüzden burada adıyla söylüyoruz.
+ *
+ * @returns {string[]} boşsa her şey yerinde
+ */
+export function icloudWiringIssues({ classList, entitlementsExists, pbxHasEntitlements }) {
+  const issues = [];
+  if (!Array.isArray(classList) || !classList.includes('ICloudSyncPlugin')) {
+    issues.push('iCloud eklentisi köprüye kayıtlı değil (capacitor.config.json ▸ packageClassList). Çözüm: npm install && npx cap sync ios');
+  }
+  if (!entitlementsExists) {
+    issues.push('ios/App/App/App.entitlements bulunamadı — iCloud izinleri imzaya girmez.');
+  }
+  if (!pbxHasEntitlements) {
+    issues.push('Xcode projesi App.entitlements dosyasını kullanmıyor (CODE_SIGN_ENTITLEMENTS ayarı eksik).');
+  }
+  return issues;
+}
 
 function run(cmd, args) {
   try { return { out: execFileSync(cmd, args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }) }; }
@@ -148,6 +172,22 @@ else {
   blockers.push('npx cap add ios');
 }
 
+// 8) iCloud eşitlemesi (iPhone ↔ Mac) bağlı mı?
+{
+  const cfgPath = path.join(root, 'ios', 'App', 'App', 'capacitor.config.json');
+  let classList = null;
+  try { classList = JSON.parse(readFileSync(cfgPath, 'utf8')).packageClassList; } catch { /* yok/bozuk */ }
+  let pbx = '';
+  try { pbx = readFileSync(path.join(root, 'ios', 'App', 'App.xcodeproj', 'project.pbxproj'), 'utf8'); } catch { /* yok */ }
+  const issues = icloudWiringIssues({
+    classList,
+    entitlementsExists: existsSync(path.join(root, 'ios', 'App', 'App', 'App.entitlements')),
+    pbxHasEntitlements: /CODE_SIGN_ENTITLEMENTS\s*=\s*App\/App\.entitlements/.test(pbx),
+  });
+  if (!issues.length) ok('iCloud eşitlemesi bağlı (iPhone ↔ Mac)');
+  else for (const i of issues) { bad(i); blockers.push('npm install && npx cap sync ios'); }
+}
+
 // --- Sonuç -----------------------------------------------------------------
 if (blockers.length) {
   console.log('\n  Devam etmeden önce şunları çalıştırın:\n');
@@ -166,6 +206,13 @@ console.log(`
        (listede yoksa: Xcode ▸ Settings ▸ Accounts ▸ + ▸ Apple ID)
     4. Üst ortadaki cihaz seçiciden iPhone'unuzu ya da bir simülatör seçin
     5. ▶ (Run) düğmesi — ya da ⌘R
+
+  iCloud eşitlemesi (iPhone ↔ Mac) hakkında:
+    Team'i seçtiğinizde Xcode, "iCloud.com.hastakayit.app" kabını Apple
+    hesabınıza KENDİ kaydeder — ek bir şey yapmanız gerekmez. Ücretli Apple
+    Developer Program üyeliği şarttır; ücretsiz (Personal Team) hesapta iCloud
+    kullanılamaz ve Signing & Capabilities'te kırmızı hata çıkar.
+    Ayrıntılar: docs/ICLOUD-ESITLEME.md
 `);
 }
 

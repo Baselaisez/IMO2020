@@ -40,6 +40,9 @@ contextBridge.exposeInMainWorld('hkDesktop', {
   syncRemove: (dir, name) => ipcRenderer.invoke('hk:sync-remove', dir, name),
   syncValidate: (dir) => ipcRenderer.invoke('hk:sync-validate', dir),
   syncPick: () => ipcRenderer.invoke('hk:sync-pick'),
+  // Aynı iCloud hesabındaki iPhone'un yazdığı klasör; kullanıcı elle bir klasör
+  // seçmediyse eşitleme kendiliğinden burayı kullanır.
+  icloudDir: () => ipcRenderer.invoke('hk:icloud-dir'),
   revealDataDir: () => ipcRenderer.invoke('hk:reveal-data-dir'),
 
   onBeforeQuit: cb => { if (typeof cb === 'function') beforeQuitHandlers.push(cb); },

@@ -7,7 +7,8 @@ import { isHtsWorkbook, parseHtsWorkbook } from './hts-excel.js';
 import { shareFile, textToBase64, bytesToBase64, exportMessage, validateSyncFolder, pickSyncFolder } from './files.js';
 import { isNative, isDesktop, platform, platformLabel } from './platform.js';
 import { desktop } from './desktop.js';
-import { getSyncSettings, syncIfConfigured, ANDROID_SYNC_LABEL } from './sync-file.js';
+import { getSyncSettings, syncIfConfigured, ANDROID_SYNC_LABEL, resetSyncMemory } from './sync-file.js';
+import { resetICloudStatus } from './icloud.js';
 import { state, showScreen, guarded, banner, openSheet, closeSheet, todayIso, esc } from './ui.js';
 import { monthlySummaryFrom, fmtTL } from './compute.js';
 import { refreshHome } from './ui-home.js';
@@ -491,20 +492,52 @@ export async function refreshSyncUi() {
     const inp = document.getElementById('sync-folder');
     if (inp) inp.value = s.folder || '';
   } else if (note) {
-    note.textContent = s.platform === 'mobile'
-      ? `Bu telefonda eşitleme dosyası şuraya yazılır: ${ANDROID_SYNC_LABEL}. `
-        + 'DİKKAT: Google Drive ve OneDrive’ın Android uygulamaları telefondaki bir klasörü kendiliğinden eşitlemez — '
-        + 'bu klasörün bilgisayara ulaşması için klasör eşitleyen bir uygulama (Syncthing, FolderSync vb.) kurmanız ya da '
-        + 'yukarıdaki “Yedek Al (JSON)” / “İçe Aktar” adımlarını elle kullanmanız gerekir.'
-      : 'Eşitleme yalnızca masaüstü uygulamasında (Mac/Windows) ve telefonda çalışır (tarayıcı önizlemesinde kapalıdır).';
+    note.textContent = syncNoteText(s);
   }
   if (nowBtn) nowBtn.disabled = !s.active;
   const st = document.getElementById('sync-status');
-  if (st) {
-    st.textContent = s.active
-      ? `Son eşitleme: ${fmtSyncTime(s.last)}`
-      : (s.enabled ? 'Eşitleme açık ama klasör seçilmedi — henüz çalışmıyor.' : `Eşitleme kapalı. Son eşitleme: ${fmtSyncTime(s.last)}`);
+  if (st) st.textContent = syncStatusText(s, fmtSyncTime(s.last));
+}
+
+/**
+ * Mobil (iPhone/Android) açıklama metni. Saf — testi var.
+ * iPhone'da iCloud açıkken doktorun hiçbir şey ayarlaması gerekmiyor; bunu
+ * açıkça söylemek, "klasör seçmem mi lazım?" sorusunu baştan kesiyor.
+ */
+export function syncNoteText(s, androidLabel = ANDROID_SYNC_LABEL) {
+  if (s.platform !== 'mobile') {
+    return 'Eşitleme yalnızca masaüstü uygulamasında (Mac/Windows) ve telefonda çalışır (tarayıcı önizlemesinde kapalıdır).';
   }
+  if (s.icloud) {
+    return 'Bu telefon, aynı Apple Kimliğiyle giriş yapılmış Mac ile iCloud üzerinden KENDİLİĞİNDEN eşitleniyor. '
+      + 'Klasör seçmenize gerek yok: kayıtlar iCloud Drive içindeki “Hasta Kayıt” klasöründe durur ve '
+      + 'iki cihazda da birkaç saniye içinde görünür.';
+  }
+  return `iCloud eşitlemesi kullanılamıyor — ${s.icloudReason || 'sebep bilinmiyor.'} `
+    + `Şimdilik eşitleme dosyası yalnızca bu cihazda, şuraya yazılıyor: ${androidLabel}. `
+    + 'DİKKAT: Google Drive ve OneDrive’ın Android uygulamaları telefondaki bir klasörü kendiliğinden eşitlemez — '
+    + 'bu klasörün bilgisayara ulaşması için klasör eşitleyen bir uygulama (Syncthing, FolderSync vb.) kurmanız ya da '
+    + 'yukarıdaki “Yedek Al (JSON)” / “İçe Aktar” adımlarını elle kullanmanız gerekir.';
+}
+
+/**
+ * Durum satırı. Saf — testi var.
+ * "Nerede eşitleniyor" sorusunu da yanıtlar: doktor Mac'te bir klasör seçmediği
+ * hâlde eşitleme çalışıyorsa, bunun iCloud olduğunu görmeli.
+ */
+export function syncStatusText(s, lastText) {
+  if (s.active) {
+    return s.targetLabel
+      ? `Son eşitleme: ${lastText} — ${s.targetLabel}`
+      : `Son eşitleme: ${lastText}`;
+  }
+  if (s.enabled) {
+    if (s.platform === 'desktop' && !s.target) {
+      return `Eşitleme açık ama hedef yok — ${s.icloudReason || 'bir klasör seçin.'}`;
+    }
+    return 'Eşitleme açık ama klasör seçilmedi — henüz çalışmıyor.';
+  }
+  return `Eşitleme kapalı. Son eşitleme: ${lastText}`;
 }
 
 async function runManualSync() {
@@ -513,7 +546,10 @@ async function runManualSync() {
   if (btn) btn.disabled = true;
   if (st) st.textContent = 'Eşitleniyor…';
   try {
-    const r = await syncIfConfigured(state.exec, { onProgress: (p) => { if (st) st.textContent = `Eşitleniyor… (${p})`; } });
+    // force: elle basılan düğme "değişmedi" kısa yolunu ATLAR. Kullanıcı
+    // bir sonuç bekliyor; "atlandı" demek burada doğru ama yararsız olurdu.
+    resetICloudStatus(); // iCloud'u yeni açtıysa bu tur görsün
+    const r = await syncIfConfigured(state.exec, { force: true, onProgress: (p) => { if (st) st.textContent = `Eşitleniyor… (${p})`; } });
     if (r.error) banner(`EŞİTLEME BAŞARISIZ — ${r.error} (kayıtlarınıza dokunulmadı)`, 'error', 0);
     else if (r.skipped) banner(r.reason === 'busy' ? 'Eşitleme zaten sürüyor.' : 'Eşitleme kapalı.', 'ok');
     else banner(`Eşitlendi ✓ (${r.applied.patientsUpserted} hasta, ${r.applied.paymentsUpserted} ödeme, ${r.applied.deliveriesUpserted} teslimat güncellendi)`, 'ok');
@@ -530,6 +566,9 @@ function initSyncUi() {
   sel.addEventListener('change', async e => {
     const v = e.target.value === 'on' ? 'on' : 'off';
     const r = await guarded(() => setMeta(state.exec, 'sync_enabled', v));
+    // Hedef/ayar değişti: "değişmedi" hafızası artık geçersiz, yoksa ilk tur
+    // yanlışlıkla atlanabilir.
+    resetSyncMemory();
     if (r.ok) banner(v === 'on' ? 'Eşitleme açıldı ✓' : 'Eşitleme kapatıldı ✓', 'ok');
     await refreshSyncUi();
   });
@@ -568,6 +607,7 @@ function initSyncUi() {
     const v = await validateSyncFolder(dir);
     if (!v.ok) { banner(`KLASÖR KAYDEDİLEMEDİ — ${v.error}`, 'error', 0); return; }
     const r = await guarded(() => setMeta(state.exec, 'sync_folder', v.path));
+    resetSyncMemory(); // başka bir klasör = başka bir uzak durum
     if (r.ok) banner('Eşitleme klasörü kaydedildi ✓', 'ok');
     await refreshSyncUi();
   });

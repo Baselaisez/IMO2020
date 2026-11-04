@@ -10,7 +10,13 @@
 // bir renderer bile bu kapıyı kullanıcının belgelerini okumak için kullanamaz.
 const path = require('path');
 
-const SYNC_NAMES = new Set(['hastakayit-sync.json', 'hastakayit-sync.json.tmp']);
+// Üçüncü ad (5.9): küçük "başlık" dosyası. Tur başında yalnızca bu okunuyor;
+// değişmemişse 40 MB'lık asıl dosyaya hiç dokunulmuyor (bkz. sync-file.js).
+const SYNC_NAMES = new Set([
+  'hastakayit-sync.json',
+  'hastakayit-sync.json.tmp',
+  'hastakayit-sync-head.json',
+]);
 
 /**
  * Eşitleme klasöründeki izinli bir dosyanın mutlak yolu.

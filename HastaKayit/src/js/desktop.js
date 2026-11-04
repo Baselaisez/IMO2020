@@ -102,8 +102,8 @@ function legacy() {
   };
 }
 
-// Eşitlemenin yazabileceği TEK iki dosya adı (electron/sync-path.cjs ile aynı).
-const SYNC_NAMES = ['hastakayit-sync.json', 'hastakayit-sync.json.tmp'];
+// Eşitlemenin yazabileceği TEK dosya adları (electron/sync-path.cjs ile aynı).
+const SYNC_NAMES = ['hastakayit-sync.json', 'hastakayit-sync.json.tmp', 'hastakayit-sync-head.json'];
 function syncName(name) {
   const n = String(name);
   if (!SYNC_NAMES.includes(n)) throw new Error(`Eşitleme dosyası değil: ${n}`);
@@ -136,6 +136,12 @@ export const desktop = {
   syncRemove: (dir, name) => api().syncRemove(dir, name),
   syncValidate: dir => api().syncValidate(dir),
   syncPick: () => api().syncPick(),
+  // iCloud klasörü (5.9). Eski bir kabukta bu çağrı YOKTUR: o zaman "yok"
+  // denir ve eşitleme eskisi gibi elle seçilen klasörle çalışır — uygulama
+  // `undefined is not a function` ile düşmez.
+  icloudDir: () => (typeof api().icloudDir === 'function'
+    ? api().icloudDir()
+    : Promise.resolve({ path: null, reason: 'Bu Mac uygulaması sürümünde iCloud desteği yok — güncelleyin.' })),
   onBeforeQuit: cb => api().onBeforeQuit(cb),
   readyToClose: () => api().readyToClose(),
   revealDataDir: () => api().revealDataDir(),

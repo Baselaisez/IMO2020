@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- iCloud Drive üzerinden iPhone ↔ Mac eşitlemesi.
+
+	     Bu üç anahtar olmadan FileManager.url(forUbiquityContainerIdentifier:)
+	     nil döner ve eşitleme sessizce "iCloud kullanılamıyor" der.
+
+	     Container kimliği, uygulama kimliğinin "iCloud." önekli hâlidir ve
+	     ÜÇ YERDE AYNI olmak zorundadır:
+	       1) burada,
+	       2) Info.plist → NSUbiquitousContainers,
+	       3) plugins/icloud/.../ICloudSyncPlugin.swift → containerIdentifier.
+
+	     Xcode'da "Automatically manage signing" açıkken container, ilk
+	     derlemede Apple geliştirici hesabına kendiliğinden kaydedilir;
+	     ücretli Apple Developer Program üyeliği gerekir. -->
+	<key>com.apple.developer.icloud-container-identifiers</key>
+	<array>
+		<string>iCloud.com.hastakayit.app</string>
+	</array>
+	<key>com.apple.developer.icloud-services</key>
+	<array>
+		<string>CloudDocuments</string>
+	</array>
+	<key>com.apple.developer.ubiquity-container-identifiers</key>
+	<array>
+		<string>iCloud.com.hastakayit.app</string>
+	</array>
+</dict>
+</plist>

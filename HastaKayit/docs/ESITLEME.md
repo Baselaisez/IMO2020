@@ -1,5 +1,15 @@
 # Cihazlar arası eşitleme (5.2.2)
 
+> **5.9 ile değişti — önce bunu okuyun:** iPhone ↔ Mac artık **kendiliğinden**,
+> iCloud üzerinden eşitleniyor; klasör seçmek gerekmiyor. Bu belgedeki "klasör
+> seç" adımları yalnızca Dropbox/OneDrive ya da Windows kullananlar için
+> geçerlidir. Aşağıdaki zamanlamalar da güncellendi (5 dk → 60 sn, 15 sn → 3 sn,
+> artı "öne gelince eşitle"). Ayrıntılar: [ICLOUD-ESITLEME.md](ICLOUD-ESITLEME.md)
+>
+> Bu belgede anlatılan **iPhone'daki sabit klasör** (`Belgeler/HastaKayit/sync`)
+> artık yalnızca iCloud kapalıyken kullanılan yedek yoldur; Mac o klasörü
+> göremez ve hiçbir zaman görememişti.
+
 Doktorun Mac'i ile iPhone'u **aynı hasta kayıtlarını** görsün diye eklendi.
 Hesap yok, sunucu yok, OAuth yok: iki cihaz da kullanıcının seçtiği **bir
 klasördeki tek bir dosyayı** okur ve yazar. O klasörü buluta taşıma işini

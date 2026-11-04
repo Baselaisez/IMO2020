@@ -1,4 +1,5 @@
-import { addPatient, updatePatient, getPatient, deletePatient, getMeta, findDuplicatePatient } from './repo.js';
+import { addPatient, updatePatient, getPatient, deletePatient, getMeta, findDuplicatePatient, noteRecentPatient } from './repo.js';
+import { afterSaveDestination } from './after-save.js';
 import { state, showScreen, guarded, banner, todayIso, esc, openSheet, closeSheet } from './ui.js';
 import { refreshHome } from './ui-home.js';
 import { openCard } from './ui-card.js';
@@ -18,6 +19,16 @@ const PHOTO_PLACEHOLDER = 'data:image/svg+xml;utf8,' + encodeURIComponent(
 // to the editing patient's existing photo (so leaving it untouched saves the
 // same value) or null for a new patient. Updated by the Ekle/Kaldır controls.
 let formPhoto = null;
+
+// Bu form YENİ bir hasta için mi açıldı? Kaydettikten sonra nereye gidileceğini
+// bu belirler (bkz. after-save.js).
+//
+// NEDEN state.editing KULLANILMIYOR: otomatik kayıt ilk yazmadan sonra
+// `state.editing`i true yapar (form artık mevcut kaydı düzenliyor). Yani ✅'e
+// basıldığında, 8 saniye beklemiş YENİ bir hasta ile kalemle açılmış MEVCUT bir
+// hasta birbirinden ayırt edilemez. Bu bayrak form açılışında bir kez konur ve
+// otomatik kayıttan etkilenmez.
+let formWasNew = false;
 
 function renderPhotoPreview() {
   const img = document.getElementById('photo-preview');
@@ -100,6 +111,7 @@ export async function openForm(patientId, prefill) {
 async function openFormInner(patientId, prefill) {
   state.editing = !!patientId;
   state.currentId = patientId;
+  formWasNew = !patientId;
   // Yeni bir form: önceki formun otomatik kayıt sayacı ve "geri al" hedefi
   // devretmemeli, yoksa yanlış kaydı silme riski doğar.
   autosave.reset();
@@ -320,9 +332,22 @@ export function initForm() {
       state.currentId = r.value.id;
       autoCreatedId = null; // artık doktorun bilerek kaydettiği bir kayıt
       setAutoStatus('');
-      banner('Kaydedildi ✓', 'ok');
-      await refreshHome();
-      await openCard(state.currentId);
+      if (afterSaveDestination(formWasNew) === 'home') {
+        // Yeni hasta tamamlandı → sıradaki hastaya hazır ol (bkz. after-save.js).
+        // Kart AÇILMADIĞI için "son açılanlar" şeridini burada elle besliyoruz:
+        // normalde bunu openCard yapar. Böylece doktor ödemeyi eklemek
+        // istediğinde hastayı aramak zorunda kalmaz, ana sayfadaki şeritten
+        // TEK DOKUNUŞLA geri döner.
+        try { await noteRecentPatient(state.exec, state.currentId); }
+        catch (e) { console.error('son açılanlar', e); }
+        banner('Kaydedildi ✓ — ana sayfaya dönüldü', 'ok');
+        await refreshHome();
+        showScreen('home');
+      } else {
+        banner('Kaydedildi ✓', 'ok');
+        await refreshHome();
+        await openCard(state.currentId);
+      }
     }
   });
 

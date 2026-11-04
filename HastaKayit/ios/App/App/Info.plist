@@ -33,6 +33,29 @@
 	     App Store Connect aynı soruyu tekrar sorar. -->
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
+	<!-- iPhone ↔ Mac eşitlemesi (5.9). Uygulamanın iCloud klasörünü tanımlar.
+
+	     NSUbiquitousContainerIsDocumentScopePublic = true olmadan klasör
+	     yalnızca uygulamanın içinden görünür; TRUE olunca iCloud Drive'da
+	     "Hasta Kayıt" adıyla belirir ve Mac'te şu düz yoldan okunabilir:
+	         ~/Library/Mobile Documents/iCloud~com~hastakayit~app/Documents
+	     Mac sürümünün (Electron) yerli iCloud koduna ihtiyaç duymamasının
+	     sebebi budur.
+
+	     Container kimliği App.entitlements ve ICloudSyncPlugin.swift ile AYNI
+	     olmalı; biri değişirse eşitleme sessizce durur. -->
+	<key>NSUbiquitousContainers</key>
+	<dict>
+		<key>iCloud.com.hastakayit.app</key>
+		<dict>
+			<key>NSUbiquitousContainerIsDocumentScopePublic</key>
+			<true/>
+			<key>NSUbiquitousContainerName</key>
+			<string>Hasta Kayıt</string>
+			<key>NSUbiquitousContainerSupportedFolderLevels</key>
+			<string>Any</string>
+		</dict>
+	</dict>
 	<!-- Kilit ekranındaki biyometrik açma (Face ID / Touch ID). Bu metin, iOS'un
 	     izin penceresinde AYNEN görünür; boş bırakılırsa uygulama Face ID'ye ilk
 	     erişimde ÇÖKER. -->

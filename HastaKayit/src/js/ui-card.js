@@ -8,6 +8,7 @@ import { parseAmountInput } from './quick-add.js';
 import { fileToResizedDataUrl, fileToDataUrl, validateReceiptFile } from './ui-photo.js';
 import { shareFile } from './files.js';
 import { attachVoice } from './ui-voice.js';
+import { afterSaveDestination } from './after-save.js';
 
 // Best-effort device-calendar sync. Never throws — a calendar failure must
 // never block a DB write or the UI refresh that follows it.
@@ -267,7 +268,17 @@ async function paymentSheet(p, existing) {
       await setMeta(state.exec, 'quick_amounts', JSON.stringify(q));
     });
     if (!r.ok) { btn.disabled = false; return; }
-    closeSheet(); banner('Kaydedildi ✓', 'ok'); await refreshAfterMutation();
+    closeSheet();
+    if (afterSaveDestination(!existing) === 'home') {
+      // Ödeme de girildiyse hastanın işi bitti → ana sayfa (bkz. after-save.js).
+      // Kart yeniden çizilmiyor: zaten terk ediliyor, 100k kayıtta gereksiz iş.
+      banner('Ödeme kaydedildi ✓ — ana sayfaya dönüldü', 'ok');
+      await refreshHome();
+      showScreen('home');
+    } else {
+      banner('Kaydedildi ✓', 'ok');
+      await refreshAfterMutation();
+    }
   });
   document.getElementById('pay-del')?.addEventListener('click', async () => {
     openSheet(`

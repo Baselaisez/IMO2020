@@ -39,6 +39,11 @@ const dbFile = () => path.join(dataDir(), 'hastakayit.sqlite');
 // --- Eşitleme klasörü ------------------------------------------------------
 // Eşitleme klasörünün dar kapısı ayrı bir dosyada (kendi testi var).
 const { syncPath } = require('./sync-path.cjs');
+const { findICloudDir } = require('./icloud.cjs');
+
+// Aynı iCloud hesabındaki iPhone'un yazdığı klasör. Kullanıcı Ayarlar'da elle
+// bir klasör seçmediyse eşitleme kendiliğinden burayı kullanır.
+ipcMain.handle('hk:icloud-dir', async () => findICloudDir());
 
 ipcMain.handle('hk:sync-read', async (_e, dir, name) => {
   try { return await fsp.readFile(syncPath(dir, name), 'utf8'); }

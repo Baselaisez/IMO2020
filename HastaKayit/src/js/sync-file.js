@@ -20,13 +20,18 @@
 // - `syncNow` depolamayı PARAMETRE olarak alır (yol veya {read,write} adaptörü),
 //   böylece dosya sistemi olmadan test edilebilir.
 
-import { buildSyncState, applyMergedState, getMeta, setMeta } from './repo.js';
+import { buildSyncState, applyMergedState, getMeta, setMeta, syncFingerprint } from './repo.js';
 import { mergeStates } from './sync-merge.js';
 import { makeSyncStore, isNative } from './files.js';
 import { isDesktop } from './platform.js';
+import { ICLOUD_TARGET, ICLOUD_LABEL, iCloudStatus } from './icloud.js';
 
 export const SYNC_FILE = 'hastakayit-sync.json';
 export const SYNC_TMP = 'hastakayit-sync.json.tmp';
+// Küçük "başlık" dosyası: yalnızca son yazma damgası + parmak izi + sayılar.
+// Tur başında bu okunur (birkaç yüz bayt); ancak değiştiyse 40 MB'lık asıl
+// dosyaya dokunulur. Bkz. repo.syncFingerprint.
+export const SYNC_HEAD = 'hastakayit-sync-head.json';
 export const SYNC_VERSION = 1;
 
 export const META_ENABLED = 'sync_enabled';
@@ -137,15 +142,60 @@ export async function readRemoteState(dirHandleOrPath) {
 
 // Atomik: .tmp'ye yaz -> geri oku ve doğrula -> rename. Yarım bir dosya asla
 // son ada sahip olmaz, yani karşı cihaz asla yarım dosya okumaz.
-export async function writeRemoteState(dirHandleOrPath, state) {
+//
+// `fingerprint` verilirse asıl dosyadan SONRA küçük başlık dosyası da yazılır.
+// Sıra önemli: başlık en son yazılır, böylece başlık güncelse asıl dosyanın da
+// güncel olduğu garanti edilir. Ters sırada, başlığı görüp asıl dosyayı eski
+// okuyan bir cihaz veriyi kaçırabilirdi.
+export async function writeRemoteState(dirHandleOrPath, state, fingerprint = null) {
   const store = toStore(dirHandleOrPath);
   if (!store) return { skipped: true };
-  const text = JSON.stringify(wrapSyncPayload(state));
+  const writtenAt = new Date().toISOString();
+  const text = JSON.stringify(wrapSyncPayload(state, writtenAt));
   await store.write(SYNC_TMP, text);
   const back = await store.read(SYNC_TMP);
   if (back !== text) throw new Error('Eşitleme dosyası doğrulanamadı (geri okuma).');
   await store.rename(SYNC_TMP, SYNC_FILE);
-  return { ok: true, bytes: text.length };
+  if (fingerprint != null) {
+    // Başlık yazılamazsa tur yine BAŞARILIDIR: başlık sadece bir hızlandırma.
+    // Eksik/eski başlık en kötü ihtimalle karşı tarafın tam tur yapmasına yol
+    // açar — veri kaybına değil.
+    try { await store.write(SYNC_HEAD, JSON.stringify(headPayload(state, writtenAt, fingerprint))); }
+    catch (e) { console.error('eşitleme başlığı yazılamadı', e); }
+  }
+  return { ok: true, bytes: text.length, written_at: writtenAt };
+}
+
+export function headPayload(state, writtenAtIso, fingerprint) {
+  return {
+    app: 'hastakayit-sync-head',
+    version: SYNC_VERSION,
+    written_at: writtenAtIso,
+    fingerprint: String(fingerprint),
+    counts: {
+      patients: state.patients?.length || 0,
+      payments: state.payments?.length || 0,
+      deliveries: state.deliveries?.length || 0,
+      deletions: state.deletions?.length || 0,
+    },
+  };
+}
+
+/**
+ * Başlık dosyasını okur. ASLA fırlatmaz ve asla "değişmedi" yönünde yanılmaz:
+ * okunamayan/bozuk/eski sürüm başlık `null` döner, bu da çağıranı TAM tura
+ * zorlar. Yani bu hızlandırmanın hata modu daima güvenli taraftadır.
+ */
+export async function readRemoteHead(dirHandleOrPath) {
+  const store = toStore(dirHandleOrPath);
+  if (!store) return null;
+  try {
+    const text = await store.read(SYNC_HEAD);
+    if (!text) return null;
+    const h = JSON.parse(text);
+    if (!h || h.app !== 'hastakayit-sync-head' || typeof h.written_at !== 'string') return null;
+    return h;
+  } catch { return null; }
 }
 
 // --- syncNow ---------------------------------------------------------------
@@ -161,13 +211,59 @@ function countOf(s) {
 let inFlight = false;
 export function isSyncBusy() { return inFlight; }
 
-export async function syncNow(x, { folder, nowMs = Date.now(), onProgress } = {}) {
+// --- "Değişmedi" hafızası --------------------------------------------------
+// Son TAM turdan kalan iki değer. İkisi de aynıysa ortada yeni hiçbir şey yok
+// ve 40 MB'lık tur hiç başlamaz (bkz. repo.syncFingerprint ölçümü).
+// Son TAM turdan sonra hem YEREL veritabanı hem UZAK dosya bu özeti anlatıyordu.
+// Biri bile artık farklıysa yapılacak iş var demektir.
+//
+// NEDEN written_at DEĞİL: ilk tasarımda uzak tarafın kimliği olarak başlığın
+// zaman damgası kullanılıyordu. Testte iki yazma AYNI MİLİSANİYEYE düştü,
+// damgalar eşitlendi ve karşı cihazın yazdığı kayıt "değişmedi" sanılıp
+// atlandı. Parmak izi veriyi anlatır, saati değil: aynı parmak izi zaten aynı
+// veri demektir, o yüzden atlamak güvenlidir.
+let lastFingerprint = null;
+let skippedRounds = 0;
+
+/**
+ * Ne kadar atlarsak atlayalım, bu kadar turda bir TAM tur yapılır.
+ * Güvenlik ağı: karşı cihaz asıl dosyayı yazıp başlığı yazamamışsa (disk dolu,
+ * bulut istemcisi yarıda kesilmiş) başlık bayat kalır ve biz sonsuza dek
+ * atlardık. 15 tur ≈ 15 dakika sonra tam tur bunu kendiliğinden düzeltir.
+ */
+export const FULL_SYNC_EVERY = 15;
+
+/** Klasör/hesap değişince hafıza geçersizdir — yoksa yanlışlıkla atlanır. */
+export function resetSyncMemory() {
+  lastFingerprint = null;
+  skippedRounds = 0;
+}
+
+export async function syncNow(x, { folder, nowMs = Date.now(), onProgress, force = false } = {}) {
   const store = toStore(folder);
   if (!store) return { skipped: true, reason: 'disabled' };
   if (inFlight) return { skipped: true, reason: 'busy' };
   inFlight = true;
   const step = (s) => { try { onProgress?.(s); } catch { /* UI hatası eşitlemeyi düşürmesin */ } };
   try {
+    // --- Ucuz tur: gerçekten bir şey değişti mi? --------------------------
+    // Yerel özet + uzak başlık, ikisi de son turdakiyle aynıysa yapılacak iş
+    // yok. 100.722 kayıtta bu kontrol 19 ms; tam tur 5,5 sn + 40 MB yazma.
+    // `force` (açılış, öne gelme, elle "Şimdi Eşitle", kayıt sonrası) bu yolu
+    // atlar — kullanıcı bir şey beklediğinde kısa yol kullanılmaz.
+    if (!force && lastFingerprint != null && skippedRounds < FULL_SYNC_EVERY) {
+      step('check');
+      const fp = await syncFingerprint(x);
+      const head = await readRemoteHead(store);
+      // Yerel değişmemiş VE uzaktaki dosya hâlâ bizim son yazdığımız durumu
+      // anlatıyorsa yapacak iş yok. Başlık okunamazsa (null) tam tur yapılır.
+      if (fp === lastFingerprint && head && head.fingerprint === lastFingerprint) {
+        skippedRounds++;
+        return { skipped: true, reason: 'unchanged' };
+      }
+    }
+    skippedRounds = 0;
+
     step('local');
     const local = await buildSyncState(x);
     step('read');
@@ -176,11 +272,19 @@ export async function syncNow(x, { folder, nowMs = Date.now(), onProgress } = {}
     step('apply');
     const applied = await applyMergedState(x, merged);
     step('write');
-    await writeRemoteState(store, merged);
+    // Parmak izi, birleştirme UYGULANDIKTAN sonra hesaplanır: yazdığımız
+    // dosyanın içeriğiyle yerel veritabanı artık aynı durumu anlatır, bu yüzden
+    // bir sonraki turda ikisi de "değişmedi" diyebilir.
+    const fingerprint = await syncFingerprint(x);
+    await writeRemoteState(store, merged, fingerprint);
+    lastFingerprint = fingerprint;
     step('done');
     return { pulled: countOf(remote), pushed: countOf(merged), applied, at: new Date(nowMs).toISOString() };
   } catch (e) {
     console.error('syncNow', e);
+    // Hatadan sonra hafızaya güvenilmez: yarım kalmış bir tur, atlanmaması
+    // gereken bir değişikliği "değişmedi" gibi gösterebilir.
+    resetSyncMemory();
     return { error: e?.message || String(e) };
   } finally {
     inFlight = false;
@@ -201,14 +305,50 @@ export function syncPlatform() {
   return 'web';
 }
 
+/**
+ * Hedef seçimi (saf — testi var). Girdiler zaten okunmuş olduğu için bu
+ * fonksiyon hiçbir şey sormaz; karar kuralını tek yerde tutar.
+ *
+ * KURAL
+ *  - iPhone: iCloud açıksa ubiquity container. Mac ile paylaşılan TEK yer
+ *    orası; uygulamanın Documents kabı iCloud'a KOPYALANMAZ. iCloud kapalıysa
+ *    eski sabit klasöre düşer (Android'in de kullandığı yol).
+ *  - Mac: kullanıcı bir klasör SEÇTİYSE o kazanır (Dropbox/OneDrive kuranlar
+ *    bozulmasın). Seçmediyse aynı iCloud klasörü — iPhone'unkiyle aynı dosya.
+ *  - Tarayıcı önizlemesi: eşitleme yok.
+ *
+ * `auto`: hedef kullanıcı ayarı olmadan bulunduysa true. Eşitlemenin
+ * VARSAYILAN OLARAK AÇIK olması buna bağlı (aşağıya bakın).
+ */
+export function pickSyncTarget({ platform, folder, icloud, icloudPath }) {
+  if (platform === 'mobile') {
+    if (icloud) return { target: ICLOUD_TARGET, targetLabel: ICLOUD_LABEL, auto: true };
+    return { target: ANDROID_SYNC_DIR, targetLabel: ANDROID_SYNC_LABEL, auto: false };
+  }
+  if (platform === 'desktop') {
+    if (folder) return { target: folder, targetLabel: folder, auto: false };
+    if (icloud && icloudPath) return { target: icloudPath, targetLabel: ICLOUD_LABEL, auto: true };
+  }
+  return { target: '', targetLabel: '', auto: false };
+}
+
 export async function getSyncSettings(x) {
   const platform = syncPlatform();
-  const enabled = (await getMeta(x, META_ENABLED)) === 'on';
+  const raw = await getMeta(x, META_ENABLED);          // 'on' | 'off' | null
   const folder = (await getMeta(x, META_FOLDER)) || '';
   const last = (await getMeta(x, META_LAST)) || '';
-  // Masaüstünde klasör seçilmemişse eşitleme yapılamaz; mobilde klasör sabittir.
-  const target = platform === 'desktop' ? folder : (platform === 'mobile' ? ANDROID_SYNC_DIR : '');
-  return { platform, enabled, folder, last, target, active: enabled && !!target };
+  const cloud = platform === 'web' ? { available: false } : await iCloudStatus();
+  const { target, targetLabel, auto } =
+    pickSyncTarget({ platform, folder, icloud: cloud.available, icloudPath: cloud.path });
+  // VARSAYILAN AÇIK — ama yalnızca hedef kendiliğinden bulunduysa. Doktorun
+  // "aynı iCloud hesabındaki iki cihaz birbirini görsün" isteği için hiçbir
+  // ayar yapması gerekmemeli. Bilerek kapatmışsa ('off') ona dokunulmaz.
+  const enabled = raw == null ? auto : raw === 'on';
+  return {
+    platform, enabled, folder, last, target, targetLabel, auto,
+    icloud: !!cloud.available, icloudReason: cloud.reason || '',
+    active: enabled && !!target,
+  };
 }
 
 export async function resolveSyncStore(x) {
@@ -231,26 +371,43 @@ export async function syncIfConfigured(x, opts = {}) {
 }
 
 // --- Otomatik tetikleyiciler ----------------------------------------------
-// Açılıştan ~3 sn sonra bir kez (başlangıç hızlı kalsın), sonra her ~5 dk.
-// Ayrıca her mutasyondan ~15 sn sonra (debounce — her tuş vuruşunda DEĞİL).
-export const FIRST_SYNC_MS = 3000;
-export const PERIOD_MS = 5 * 60 * 1000;
-export const MUTATION_DEBOUNCE_MS = 15000;
+//
+// ZAMANLAMA NEDEN BÖYLE (ölçümle):
+// Tam bir tur, doktorun 100.722 kayıtlık veritabanında 5,5 sn CPU + 40,6 MB
+// yazma demek. Bu yüzden sık tur, ancak "değişmedi" kısa yolu (19 ms) ile
+// birlikte anlamlı. Kısa yol sayesinde boşta geçen dakikalar neredeyse
+// bedava, gerçek bir değişiklik ise saniyeler içinde karşıya geçiyor.
+//
+//   açılış      → 2 sn sonra (kilit açılışını yavaşlatmasın), TAM tur
+//   kayıt/silme → 3 sn sonra (debounce: yazarken değil, durunca), TAM tur
+//   öne gelme   → hemen (Mac'te pencereye dönünce, iPhone'da uygulamaya
+//                 dönünce) — doktor ekrana baktığı AN taze veri görsün
+//   düzenli tur → her 60 sn, kısa yol açık (iki cihaz da öndeyken gecikmesin)
+export const FIRST_SYNC_MS = 2000;
+export const PERIOD_MS = 60 * 1000;
+export const MUTATION_DEBOUNCE_MS = 3000;
+/** Öne gelme tetikleyicisi için en kısa aralık — pencere odağı gidip gelirken
+ *  arka arkaya tur başlatmayı engeller. */
+export const RESUME_MIN_GAP_MS = 10000;
 
 let firstTimer = null, periodTimer = null, mutationTimer = null;
 let autoCtx = null; // { x, onResult }
+let lastResumeAt = 0;
 
-async function runAuto(reason) {
+async function runAuto(reason, { force = false } = {}) {
   if (!autoCtx) return;
   const { x, onResult } = autoCtx;
-  const r = await syncIfConfigured(x).catch(e => ({ error: e?.message || String(e) }));
+  const r = await syncIfConfigured(x, { force }).catch(e => ({ error: e?.message || String(e) }));
   try { onResult?.(r, reason); } catch (e) { console.error('sync onResult', e); }
 }
 
 export function startAutoSync(x, { onResult } = {}) {
   stopAutoSync();
   autoCtx = { x, onResult };
-  firstTimer = setTimeout(() => { firstTimer = null; runAuto('startup'); }, FIRST_SYNC_MS);
+  // Açılışta hafıza boş olmalı: önceki oturumdan kalan bir parmak izi, bu
+  // oturumda atlanmaması gereken bir turu atlatabilirdi.
+  resetSyncMemory();
+  firstTimer = setTimeout(() => { firstTimer = null; runAuto('startup', { force: true }); }, FIRST_SYNC_MS);
   periodTimer = setInterval(() => runAuto('timer'), PERIOD_MS);
   return stopAutoSync;
 }
@@ -265,5 +422,23 @@ export function stopAutoSync() {
 export function scheduleSyncAfterMutation() {
   if (!autoCtx) return; // otomatik eşitleme başlamadıysa (kilit ekranı) hiçbir şey yapma
   clearTimeout(mutationTimer);
-  mutationTimer = setTimeout(() => { mutationTimer = null; runAuto('mutation'); }, MUTATION_DEBOUNCE_MS);
+  mutationTimer = setTimeout(() => { mutationTimer = null; runAuto('mutation', { force: true }); }, MUTATION_DEBOUNCE_MS);
 }
+
+/**
+ * Uygulama öne geldi (Mac'te pencere odağı, iPhone'da appStateChange).
+ * Doktor diğer cihazda kayıt açtıysa, bu cihaza döndüğü anda görmeli —
+ * bir sonraki dakikalık turu beklemesin.
+ *
+ * `nowMs` dışarıdan verilebilir: kısıtlama mantığının saf testi için.
+ */
+export function syncOnResume(nowMs = Date.now()) {
+  if (!autoCtx) return false;
+  if (nowMs - lastResumeAt < RESUME_MIN_GAP_MS) return false;
+  lastResumeAt = nowMs;
+  runAuto('resume', { force: true });
+  return true;
+}
+
+/** Testler ve klasör değişikliği için: kısıtlama sayacını sıfırla. */
+export function resetResumeThrottle() { lastResumeAt = 0; }

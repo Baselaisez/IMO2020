@@ -2,6 +2,7 @@ import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
 import { Share } from '@capacitor/share';
 import { isNative, isDesktop } from './platform.js';
 import { desktop, toDelete } from './desktop.js';
+import { ICLOUD_TARGET, makeICloudStore } from './icloud.js';
 
 const SNAP_DIR = 'HastaKayit/snapshots';
 const DAILY_DIR = 'HastaKayit/daily';
@@ -135,10 +136,15 @@ export async function readSnapshot(name) {
 // (bkz. electron/main.cjs → syncPath).
 //
 // - Mac/Windows: kullanıcının seçtiği MUTLAK klasör yolu, ana süreç üzerinden.
-// - iPhone/Android: Documents altındaki SABİT alt klasör (Capacitor Filesystem
-//   rastgele bir bulut klasörünü göremez).
+//   iCloud klasörü de burada MUTLAK BİR YOLDUR (~/Library/Mobile Documents/...)
+//   — sync-file.js onu çözüp buraya hazır yol olarak verir.
+// - iPhone: ICLOUD_TARGET → yerli iCloud eklentisi (ubiquity container). Mac ile
+//   paylaşılan TEK yer burasıdır; Documents kabı iCloud'a kopyalanmaz.
+// - Android (ve iCloud'un kapalı olduğu iPhone): Documents altındaki SABİT alt
+//   klasör — Capacitor Filesystem rastgele bir bulut klasörünü göremez.
 // - Tarayıcı önizlemesi: eşitleme yok (null).
 export function makeSyncStore(dir) {
+  if (isNative() && dir === ICLOUD_TARGET) return makeICloudStore();
   if (isDesktop()) {
     return {
       read: (name) => desktop.syncRead(dir, name),

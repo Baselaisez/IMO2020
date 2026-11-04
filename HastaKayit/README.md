@@ -20,6 +20,9 @@ src/                 uygulama (tek kaynak — üç platform da bunu çalıştır
   js/autosave.js     form otomatik kaydı (sayaç, mükerrer kayıt koruması)
   js/sync-file.js    cihazlar arası eşitleme — taşıma katmanı (5.2.2)
   js/sync-merge.js   cihazlar arası eşitleme — saf birleştirme (LWW)
+  js/icloud.js       iPhone ↔ Mac ortak iCloud klasörü (5.9)
+  js/after-save.js   kayıt bitince hangi ekran açılır (5.9)
+plugins/icloud/      yerli Capacitor eklentisi: iOS iCloud kabı (Swift)
 ios/                 Xcode projesi (iPhone + iPad)
 electron/            Mac uygulama kabuğu: pencere, menü, IPC, izinler
 resources/           uygulama simgesi üreteci + üretilmiş simgeler
@@ -103,7 +106,10 @@ sebebi ve düzeltmesi: [docs/HTS-ICE-AKTARMA.md](docs/HTS-ICE-AKTARMA.md)
 
 ## Cihazlar arası eşitleme
 
-Mac ve iPhone aynı kayıtları görebilir: iki cihaz da paylaşılan bir bulut
-klasöründeki tek bir dosyayı okur/yazar (hesap yok, sunucu yok). Mac'te klasör
-gerçek bir Finder paneliyle seçilir. Ayrıntılar ve güvenlik sınırı:
+Aynı Apple Kimliğindeki **iPhone ve Mac kendiliğinden eşitlenir** (iCloud):
+iPhone'da girilen hasta Mac'te, Mac'te girilen hasta iPhone'da belirir. Klasör
+seçmek, hesap açmak gerekmez. 5.8'e kadar bu çalışmıyordu — sebebi ve
+düzeltmesi: [docs/ICLOUD-ESITLEME.md](docs/ICLOUD-ESITLEME.md)
+
+Android/Windows ya da Dropbox–OneDrive ile paylaşılan klasör yolu da duruyor:
 [docs/ESITLEME.md](docs/ESITLEME.md)

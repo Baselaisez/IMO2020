@@ -12,7 +12,7 @@ import { initSettings } from './ui-settings.js';
 import { initSnapshots, dailyBackupIfDue, scheduleMidnight, writePreUpdateBackup } from './snapshot.js';
 import { rescheduleNotifications, requestNotifyPermission, ensureChannels, setNotifSound } from './notify.js';
 import { initDesktopMenu } from './desktop-menu.js';
-import { startAutoSync, scheduleSyncAfterMutation } from './sync-file.js';
+import { startAutoSync, scheduleSyncAfterMutation, syncOnResume } from './sync-file.js';
 
 // Otomatik eşitlemenin tek "gürültü" kuralı: bir hata banner'ı EN FAZLA bir kez
 // gösterilir. Arka plandaki eşitleme kullanıcının işini asla kesmemeli; klasör
@@ -78,6 +78,14 @@ async function main() {
       startAutoSync(state.exec, { onResult: onSyncResult });
       const prevOnMutate = state.onMutate;
       state.onMutate = () => { prevOnMutate?.(); scheduleSyncAfterMutation(); };
+      // Öne gelince hemen eşitle: doktor iPhone'da hasta kaydedip Mac'e
+      // döndüğünde kaydı ORADA, beklemeden görmeli. `visibilitychange` iPhone'da
+      // uygulamaya dönüşü, `focus` ise Mac'te pencereye dönüşü yakalar; ikisi
+      // birden tetiklense bile syncOnResume kendi içinde kısıtlıyor.
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') syncOnResume();
+      });
+      window.addEventListener('focus', () => syncOnResume());
     });
   } catch (e) {
     console.error(e);
