@@ -147,3 +147,38 @@ test('biyometri penceresindeki iki düğmenin yazısı FARKLI', async () => {
   assert.ok(fallback, 'iosFallbackTitle tanımlı olmalı (yoksa İngilizce "Enter Password" çıkar)');
   assert.notEqual(cancel, fallback, `iki düğme de "${cancel}" yazıyor — ayırt edilemez`);
 });
+
+// GERÇEK KİLİTLENME: iOS'ta biyometri penceresi bir SİSTEM katmanı; açılıp
+// kapanması uygulamayı "arka plana gitti / öne geldi" saydırıyor. onResume de
+// biyometriyi yeniden başlatıyordu. Sonuç: pencere kapanır kapanmaz yeniden
+// açılıyor, kullanıcı VAZGEÇEMİYOR ve PIN ekranına hiç ulaşamıyordu.
+import { shouldOpenBiometric } from '../src/js/lock.js';
+
+test('vazgeçildikten sonra pencere KENDİLİĞİNDEN yeniden açılmaz', () => {
+  assert.equal(shouldOpenBiometric({ auto: true, dismissed: true, inFlight: false }), false);
+});
+
+test('vazgeçilse bile DÜĞMEYE basınca açılır', () => {
+  // Vazgeçmek biyometriyi kalıcı olarak kapatmamalı; kullanıcı isterse kullanır.
+  assert.equal(shouldOpenBiometric({ auto: false, dismissed: true, inFlight: false }), true);
+});
+
+test('pencere zaten açıkken ikincisi açılmaz', () => {
+  assert.equal(shouldOpenBiometric({ auto: false, dismissed: false, inFlight: true }), false);
+  assert.equal(shouldOpenBiometric({ auto: true, dismissed: false, inFlight: true }), false);
+});
+
+test('normal durumda kendiliğinden açılır', () => {
+  assert.equal(shouldOpenBiometric({ auto: true, dismissed: false, inFlight: false }), true);
+});
+
+test('otomatik biyometri çağrılarının hepsi auto işaretli', async () => {
+  // Biri işaretsiz kalırsa vazgeçme o yoldan delinir ve döngü geri gelir.
+  const { readFileSync } = await import('node:fs');
+  const src = readFileSync('src/js/lock.js', 'utf8');
+  const calls = [...src.matchAll(/tryBiometric\(([^)]*)\)/g)].map(m => m[1].trim());
+  const bare = calls.filter(a => a === '');          // tryBiometric()
+  const auto = calls.filter(a => a.includes('auto: true'));
+  assert.equal(auto.length, 3, `3 otomatik çağrı bekleniyor, bulunan: ${auto.length}`);
+  assert.equal(bare.length, 1, 'yalnızca düğme çağrısı argümansız olmalı');
+});

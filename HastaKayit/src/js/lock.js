@@ -15,6 +15,23 @@ let onUnlockCb = null;
 let bioAvailable = false;
 /** Düğmede ve açıklama satırında kullanılan ad: "Face ID", "Touch ID"… */
 let bioLabelText = 'Biyometri ile aç';
+/** Biyometri penceresi şu anda açık mı? Üst üste açılmasını engeller. */
+let bioInFlight = false;
+/**
+ * Kullanıcı BU kilit oturumunda biyometriden vazgeçti mi?
+ *
+ * NEDEN GEREKLİ (gerçek kilitlenme): iOS'ta biyometri penceresi bir SİSTEM
+ * katmanıdır; açılıp kapanması uygulamayı "arka plana gitti / öne geldi"
+ * saydırıyor. onResume ise biyometriyi yeniden başlatıyordu. Sonuç: pencere
+ * kapanır kapanmaz yeniden açılıyor, kullanıcı VAZGEÇEMİYOR ve PIN ekranına
+ * hiç ulaşamıyordu. Doktorun "sadece Touch ID kullanıyor" şikâyetinin asıl
+ * sebebi buydu.
+ *
+ * Vazgeçildikten sonra pencere KENDİLİĞİNDEN bir daha açılmaz; kullanıcı
+ * isterse kilit ekranındaki düğmeyle kendi başlatır. Başarılı açılışta
+ * sıfırlanır, yani bir sonraki kilitte yine otomatik sorulur.
+ */
+let bioDismissed = false;
 
 /**
  * Açılışta biyometri penceresi kendiliğinden açılsın mı? (meta: bio_autoprompt)
@@ -132,7 +149,23 @@ function fallBackToPin() {
   try { input?.focus(); } catch { /* odak alınamadıysa önemli değil */ }
 }
 
-async function tryBiometric() {
+/**
+ * Biyometri penceresi açılmalı mı? Saf — testi var.
+ *
+ * `auto`  : çağrı kendiliğinden mi geldi (açılış/öne gelme) yoksa kullanıcı
+ *           düğmeye mi bastı?
+ * Kullanıcının bastığı düğme HER ZAMAN çalışır; vazgeçme yalnızca
+ * KENDİLİĞİNDEN açılmayı durdurur.
+ */
+export function shouldOpenBiometric({ auto, dismissed, inFlight }) {
+  if (inFlight) return false;        // pencere zaten açık
+  if (auto && dismissed) return false; // vazgeçildi: kendiliğinden bir daha açma
+  return true;
+}
+
+async function tryBiometric({ auto = false } = {}) {
+  if (!shouldOpenBiometric({ auto, dismissed: bioDismissed, inFlight: bioInFlight })) return;
+  bioInFlight = true;
   try {
     const { BiometricAuth } = await import('@aparajita/capacitor-biometric-auth');
     await BiometricAuth.authenticate({
@@ -152,15 +185,20 @@ async function tryBiometric() {
   } catch {
     // Kullanıcı iptal etti ya da eşleşmedi. Eskiden burası SESSİZCE dönüyordu:
     // ekranda hiçbir şey değişmediği için doktor "sadece Touch ID çalışıyor"
-    // sanıyordu. Artık PIN'e yönlendiriyoruz.
+    // sanıyordu. Artık hem PIN'e yönlendiriyor hem de pencerenin kendiliğinden
+    // yeniden açılmasını durduruyoruz.
+    bioDismissed = true;
     fallBackToPin();
     return;
+  } finally {
+    bioInFlight = false;
   }
   try { await unlock(); }
   catch (e) { banner(`Açılış hatası — ${e.message || e}`, 'error', 0); }
 }
 
 async function unlock() {
+  bioDismissed = false;
   await setFailState(0, 0).catch(() => {});
   document.getElementById('pin-input').value = '';
   if (onUnlockCb) await onUnlockCb();
@@ -447,12 +485,12 @@ export async function initLock(onUnlock) {
   bioAvailable = await biometricAvailable();
   document.getElementById('btn-bio').classList.toggle('hidden', !bioAvailable);
   if (bioAvailable) {
-    document.getElementById('btn-bio').addEventListener('click', tryBiometric);
+    document.getElementById('btn-bio').addEventListener('click', () => tryBiometric());
     const msg = document.getElementById('lock-msg');
     if (msg) msg.textContent = lockPrompt({ bioAvailable: true, bioLabel: bioLabelText });
     // Ayar kapalıysa pencere AÇILMAZ; doktor doğrudan PIN girer, isterse
     // aşağıdaki düğmeyle biyometriyi kendi başlatır.
-    if (await bioAutoPrompt()) tryBiometric();
+    if (await bioAutoPrompt()) tryBiometric({ auto: true });
   }
 
   // Arka plana geçişte ne olacağı PLATFORMA GÖRE değişir.
@@ -524,12 +562,12 @@ async function onResume() {
     lockedFrom = null;
     return;
   }
-  if (!lockedFrom) { if (bioAvailable && await bioAutoPrompt()) tryBiometric(); return; } // never was unlocked this session
+  if (!lockedFrom) { if (bioAvailable && await bioAutoPrompt()) tryBiometric({ auto: true }); return; } // never was unlocked this session
   const policy = await readLockPolicy();
   if (!shouldRequirePin(policy, Date.now() - bgAt)) {
     // Auto-unlock: reveal the prior screen, no PIN, no heavy refresh (DOM intact).
     showScreen(lockedFrom); lockedFrom = null;
   } else if (bioAvailable && await bioAutoPrompt()) {
-    tryBiometric();
+    tryBiometric({ auto: true });
   }
 }
