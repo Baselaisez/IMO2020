@@ -1,7 +1,10 @@
 import UIKit
 import Capacitor
 
-@UIApplicationMain
+// @UIApplicationMain DEĞİL: Swift 5.3'ten beri kullanımdan kalktı ve Swift 6'da
+// HATA olacak (Xcode 27 bunu uyarı olarak gösteriyor). `@main` aynı işi yapar,
+// iOS 14+ ister — bu projenin hedefi zaten iOS 15.
+@main
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
