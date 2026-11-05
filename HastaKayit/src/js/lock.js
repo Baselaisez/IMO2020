@@ -9,9 +9,26 @@ import { state, banner, showScreen, openSheet, closeSheet, esc } from './ui.js';
 import { isNative, isDesktop } from './platform.js';
 import { flushSnapshot } from './snapshot.js';
 import { shouldRequirePin } from './compute.js';
+import { iconHtml } from './icons.js';
 
 let onUnlockCb = null;
 let bioAvailable = false;
+/** Düğmede ve açıklama satırında kullanılan ad: "Face ID", "Touch ID"… */
+let bioLabelText = 'Biyometri ile aç';
+
+/**
+ * Açılışta biyometri penceresi kendiliğinden açılsın mı? (meta: bio_autoprompt)
+ *
+ * NEDEN AYAR: doktor "sadece Touch ID kullanıyor, PIN de istiyorum" dedi.
+ * PIN hep çalışıyordu, ama biyometri penceresi açılır açılmaz ekranı kapladığı
+ * için PIN bir seçenek gibi görünmüyordu. PIN'i tercih edenler bunu kapatıp
+ * doğrudan PIN ekranına düşer; biyometri düğmesi yine orada durur.
+ * Varsayılan AÇIK — mevcut davranış değişmesin.
+ */
+async function bioAutoPrompt() {
+  try { return (await getMeta(state.exec, 'bio_autoprompt')) !== 'off'; }
+  catch { return true; }
+}
 let bgAt = 0;
 let lockedFrom = null;
 let bgTimer = null;
@@ -64,14 +81,30 @@ async function setFailState(failCount, lockedUntil) {
  * nötr ifade.
  */
 export function biometryLabel(type) {
+  // Emoji YOK: simge artık SVG (bkz. src/js/icons.js). Emoji, doktorun
+  // Mac'inde hiç çizilmemiş ve düğmeler görünmez olmuştu.
   switch (type) {
-    case 'faceId': return '🙂 Face ID ile aç';
-    case 'touchId': return '👆 Touch ID ile aç';
-    case 'fingerprintAuthentication': return '👆 Parmak izi ile aç';
-    case 'faceAuthentication': return '🙂 Yüz tanıma ile aç';
-    case 'irisAuthentication': return '👁️ İris ile aç';
-    default: return '🔓 Biyometri ile aç';
+    case 'faceId': return 'Face ID ile aç';
+    case 'touchId': return 'Touch ID ile aç';
+    case 'fingerprintAuthentication': return 'Parmak izi ile aç';
+    case 'faceAuthentication': return 'Yüz tanıma ile aç';
+    case 'irisAuthentication': return 'İris ile aç';
+    default: return 'Biyometri ile aç';
   }
+}
+
+/**
+ * Kilit ekranındaki açıklama satırı. Saf — testi var.
+ *
+ * NEDEN: doktor "sadece Touch ID kullanıyor, PIN de istiyorum" dedi. PIN alanı
+ * hep oradaydı, ama biyometri penceresi açılışta hemen kapladığı için PIN'in
+ * de bir seçenek olduğu görünmüyordu. Artık yazı bunu açıkça söylüyor.
+ */
+export function lockPrompt({ bioAvailable, bioLabel, cancelled = false }) {
+  if (!bioAvailable) return 'PIN girin';
+  const nice = String(bioLabel || 'Biyometri ile aç').replace(' ile aç', '');
+  if (cancelled) return `PIN girin (ya da aşağıdan ${nice} kullanın)`;
+  return `PIN girin ya da ${nice} kullanın`;
 }
 
 async function biometricAvailable() {
@@ -80,10 +113,23 @@ async function biometricAvailable() {
     const { BiometricAuth } = await import('@aparajita/capacitor-biometric-auth');
     const r = await BiometricAuth.checkBiometry();
     if (!r.isAvailable) return false;
+    bioLabelText = biometryLabel(r.biometryType);
     const btn = document.getElementById('btn-bio');
-    if (btn) btn.textContent = biometryLabel(r.biometryType);
+    // textContent DEĞİL: o, düğmenin içindeki SVG simgeyi de silerdi ve geriye
+    // simgesiz bir düğme kalırdı (emoji'den SVG'ye geçişin sebebi tam da buydu).
+    if (btn) btn.innerHTML = iconHtml('unlock', 18) + `<span>${bioLabelText}</span>`;
     return true;
   } catch { return false; }
+}
+
+/** PIN alanını kullanılabilir hâle getir ve neden burada olduğunu söyle. */
+function fallBackToPin() {
+  const msg = document.getElementById('lock-msg');
+  if (msg) msg.textContent = lockPrompt({ bioAvailable: true, bioLabel: bioLabelText, cancelled: true });
+  const input = document.getElementById('pin-input');
+  // iOS'ta klavye yalnızca kullanıcı dokunuşuyla açılır; focus en azından alanı
+  // işaretler, doktorun tek dokunuşla yazmaya başlamasını sağlar.
+  try { input?.focus(); } catch { /* odak alınamadıysa önemli değil */ }
 }
 
 async function tryBiometric() {
@@ -97,7 +143,13 @@ async function tryBiometric() {
       iosFallbackTitle: 'PIN kullan',
       allowDeviceCredential: false,
     });
-  } catch { return; } // user cancelled / no match — silent, PIN remains
+  } catch {
+    // Kullanıcı iptal etti ya da eşleşmedi. Eskiden burası SESSİZCE dönüyordu:
+    // ekranda hiçbir şey değişmediği için doktor "sadece Touch ID çalışıyor"
+    // sanıyordu. Artık PIN'e yönlendiriyoruz.
+    fallBackToPin();
+    return;
+  }
   try { await unlock(); }
   catch (e) { banner(`Açılış hatası — ${e.message || e}`, 'error', 0); }
 }
@@ -390,7 +442,11 @@ export async function initLock(onUnlock) {
   document.getElementById('btn-bio').classList.toggle('hidden', !bioAvailable);
   if (bioAvailable) {
     document.getElementById('btn-bio').addEventListener('click', tryBiometric);
-    tryBiometric(); // prompt immediately on open
+    const msg = document.getElementById('lock-msg');
+    if (msg) msg.textContent = lockPrompt({ bioAvailable: true, bioLabel: bioLabelText });
+    // Ayar kapalıysa pencere AÇILMAZ; doktor doğrudan PIN girer, isterse
+    // aşağıdaki düğmeyle biyometriyi kendi başlatır.
+    if (await bioAutoPrompt()) tryBiometric();
   }
 
   // Arka plana geçişte ne olacağı PLATFORMA GÖRE değişir.
@@ -462,12 +518,12 @@ async function onResume() {
     lockedFrom = null;
     return;
   }
-  if (!lockedFrom) { if (bioAvailable) tryBiometric(); return; } // never was unlocked this session
+  if (!lockedFrom) { if (bioAvailable && await bioAutoPrompt()) tryBiometric(); return; } // never was unlocked this session
   const policy = await readLockPolicy();
   if (!shouldRequirePin(policy, Date.now() - bgAt)) {
     // Auto-unlock: reveal the prior screen, no PIN, no heavy refresh (DOM intact).
     showScreen(lockedFrom); lockedFrom = null;
-  } else if (bioAvailable) {
+  } else if (bioAvailable && await bioAutoPrompt()) {
     tryBiometric();
   }
 }

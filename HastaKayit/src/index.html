@@ -116,7 +116,7 @@
       <option value="5">5 saniye sonra</option>
       <option value="8">8 saniye sonra (varsayılan)</option>
       <option value="15">15 saniye sonra</option>
-      <option value="off">Kapalı — sadece <svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>ile kaydet</option>
+      <option value="off">Kapalı — sadece Kaydet düğmesiyle kaydet</option>
     </select></label>
     <p class="muted">Yeni hasta formunda ad yazıldıktan sonra bu süre boyunca bir şey yazılmazsa kayıt kendiliğinden yapılır. Kaydedildiğinde formda görünür ve tek dokunuşla geri alınabilir.</p>
     <label>PIN ne zaman sorulsun?<select id="lock-policy">
@@ -126,6 +126,11 @@
       <option value="5">5 dakika sonra</option>
       <option value="10">10 dakika sonra</option>
     </select></label>
+    <label id="bio-autoprompt-row" class="hidden">Açılışta Face ID / Touch ID sorulsun mu?<select id="bio-autoprompt">
+      <option value="on">Evet — açılışta kendiliğinden sorulsun</option>
+      <option value="off">Hayır — önce PIN ekranı gelsin</option>
+    </select></label>
+    <p id="bio-autoprompt-help" class="muted hidden">Hayır derseniz uygulama doğrudan PIN ekranıyla açılır; biyometriyi istediğinizde kilit ekranındaki düğmeyle kendiniz başlatırsınız.</p>
     <label>Varsayılan hatırlatma süresi<select id="default-remind">
       <option value="0">Saatinde</option><option value="15">15 dk önce</option><option value="30">30 dk önce</option>
       <option value="60">1 saat önce</option><option value="120">2 saat önce</option><option value="1440">1 gün önce</option>

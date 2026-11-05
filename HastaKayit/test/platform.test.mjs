@@ -106,3 +106,31 @@ test('hasIosSdk: iOS platformu kurulu mu ayrımı', async () => {
   assert.equal(hasIosSdk('macOS SDKs:\n\tmacOS 15.2\t-sdk macosx15.2'), false);
   assert.equal(hasIosSdk(''), false);
 });
+
+// Doktor: "sadece Touch ID kullanıyor, PIN de istiyorum." PIN alanı hep
+// oradaydı; biyometri penceresi açılışta ekranı kapladığı için PIN'in de bir
+// seçenek olduğu GÖRÜNMÜYORDU. Açıklama satırı artık ikisini de söylüyor.
+import { lockPrompt } from '../src/js/lock.js';
+
+test('lockPrompt: biyometri yoksa sade "PIN girin"', () => {
+  assert.equal(lockPrompt({ bioAvailable: false }), 'PIN girin');
+});
+
+test('lockPrompt: biyometri varsa İKİ seçenek de yazılı', () => {
+  const t = lockPrompt({ bioAvailable: true, bioLabel: 'Touch ID ile aç' });
+  assert.match(t, /PIN girin/);
+  assert.match(t, /Touch ID/);
+  assert.doesNotMatch(t, /ile aç/, '"ile aç" cümleye gömülünce bozuk okunur');
+});
+
+test('lockPrompt: biyometri iptal edilince PIN’e yönlendirir', () => {
+  const t = lockPrompt({ bioAvailable: true, bioLabel: 'Face ID ile aç', cancelled: true });
+  assert.match(t, /PIN girin/);
+  assert.match(t, /Face ID/);
+});
+
+test('biometryLabel: emoji YOK (simge SVG olarak geliyor)', () => {
+  for (const t of ['faceId', 'touchId', 'fingerprintAuthentication', undefined]) {
+    assert.doesNotMatch(biometryLabel(t), /[\u{1F000}-\u{1FAFF}\u{2300}-\u{27BF}]/u);
+  }
+});

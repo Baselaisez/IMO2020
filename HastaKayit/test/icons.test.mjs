@@ -116,3 +116,21 @@ test('her simgenin bir çizimi var ve boş değil', () => {
     assert.match(d, /^<(path|circle|rect)/, `${name} beklenen biçimde değil`);
   }
 });
+
+// GERÇEK HATA: simge değişimi sırasında bir SVG <option> İÇİNE girmişti.
+// <option> yalnızca METİN çizer; sonuç "Kapalı — sadece ile kaydet" gibi
+// yarım bir cümleydi ve ekranda öyle görünüyordu.
+test('hiçbir <option> içinde SVG yok (option sadece metin çizer)', () => {
+  const guilty = [...HTML.matchAll(/<option[^>]*>[\s\S]*?<\/option>/g)]
+    .map(m => m[0]).filter(o => o.includes('<svg'))
+    .map(o => o.replace(/<svg[\s\S]*?<\/svg>/g, '«SVG»'));
+  assert.deepEqual(guilty, [], '<option> içinde SVG görünmez — düz metin yazın');
+});
+
+test('hiçbir <option> boş ya da yarım cümle değil', () => {
+  for (const m of HTML.matchAll(/<option[^>]*>([\s\S]*?)<\/option>/g)) {
+    const text = m[1].replace(/<[^>]+>/g, '').trim();
+    assert.notEqual(text, '', 'boş seçenek');
+    assert.doesNotMatch(text, /\s{2,}|—\s*sadece\s+ile/, `yarım cümle: ${text}`);
+  }
+});

@@ -201,6 +201,13 @@ export async function openSettings() {
         : '<p class="muted">Henüz ödeme kaydı yok.</p>';
     }
     document.getElementById('lock-policy').value = (await getMeta(state.exec, 'lock_policy')) || '2';
+    // Biyometri yalnızca telefonda var; Mac'te çalışmayacak bir seçenek gösterilmez.
+    const bioRow = document.getElementById('bio-autoprompt-row');
+    const bioHelp = document.getElementById('bio-autoprompt-help');
+    const bioSel = document.getElementById('bio-autoprompt');
+    if (bioSel) bioSel.value = (await getMeta(state.exec, 'bio_autoprompt')) || 'on';
+    bioRow?.classList.toggle('hidden', !isNative());
+    bioHelp?.classList.toggle('hidden', !isNative());
     const asEl = document.getElementById('autosave-delay');
     if (asEl) asEl.value = (await getMeta(state.exec, 'autosave_delay')) || '8';
     document.getElementById('default-remind').value = (await getMeta(state.exec, 'default_remind_min')) || '60';
@@ -421,6 +428,12 @@ export function initSettings() {
   document.getElementById('autosave-delay')?.addEventListener('change', async e => {
     const r = await guarded(() => setMeta(state.exec, 'autosave_delay', e.target.value));
     if (r.ok) banner(e.target.value === 'off' ? 'Otomatik kayıt kapatıldı ✓' : 'Otomatik kayıt ayarı kaydedildi ✓', 'ok');
+  });
+
+  document.getElementById('bio-autoprompt')?.addEventListener('change', async e => {
+    const v = e.target.value === 'off' ? 'off' : 'on';
+    const r = await guarded(() => setMeta(state.exec, 'bio_autoprompt', v));
+    if (r.ok) banner(v === 'on' ? 'Açılışta biyometri sorulacak ✓' : 'Açılışta önce PIN ekranı gelecek ✓', 'ok');
   });
 
   document.getElementById('lock-policy').addEventListener('change', async e => {
