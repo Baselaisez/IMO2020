@@ -127,3 +127,26 @@ test('cap sync çalıştırılmışsa üretilen yapılandırma da doğru', (t) =
   assert.ok(cfg.packageClassList?.includes('ICloudSyncPlugin'),
     `eklenti köprüye kayıtlı değil: ${JSON.stringify(cfg.packageClassList)}`);
 });
+
+// KISIR DÖNGÜ: capacitor.config.json ÜRETİLEN bir dosya (.gitignore'da) ve onu
+// `cap sync` yazar. `npm run ios` sırası: ios:check → sync → cap open. Taze bir
+// klonda dosya yoktur; bunu engelleyici saymak, dosyayı yaratacak adımın hiç
+// çalışmamasına yol açıyordu — kullanıcı aynı hatayı sonsuza kadar görüyordu.
+import { icloudSeverity } from '../scripts/ios-preflight.mjs';
+
+test('taze klon: üretilmemiş eklenti listesi ENGELLEMEZ, uyarır', () => {
+  assert.equal(icloudSeverity({ classList: null, entitlementsExists: true, pbxHasEntitlements: true }), 'warn');
+});
+
+test('her şey yerindeyse ok', () => {
+  assert.equal(icloudSeverity({ classList: ['ICloudSyncPlugin'], entitlementsExists: true, pbxHasEntitlements: true }), 'ok');
+});
+
+test('imzalama tarafı eksikse ENGELLER (sync bunu düzeltemez)', () => {
+  assert.equal(icloudSeverity({ classList: null, entitlementsExists: false, pbxHasEntitlements: true }), 'block');
+  assert.equal(icloudSeverity({ classList: null, entitlementsExists: true, pbxHasEntitlements: false }), 'block');
+});
+
+test('sync ÇALIŞMIŞ ama eklenti listede yoksa ENGELLER (gerçek arıza)', () => {
+  assert.equal(icloudSeverity({ classList: ['FilesystemPlugin'], entitlementsExists: true, pbxHasEntitlements: true }), 'block');
+});

@@ -97,6 +97,25 @@ export function icloudWiringIssues({ classList, entitlementsExists, pbxHasEntitl
   return issues;
 }
 
+/**
+ * iCloud bulguları ENGELLEYİCİ mi, yoksa sadece uyarı mı? Saf — testi var.
+ *
+ * KISIR DÖNGÜ: `capacitor.config.json` ÜRETİLEN bir dosyadır (.gitignore'da) ve
+ * onu `cap sync` yazar. `npm run ios` sırası: ios:check → sync → cap open.
+ * Taze bir klonda dosya henüz yoktur; bunu engelleyici saymak, dosyayı
+ * yaratacak adımın HİÇ çalışmamasına yol açıyor ve kullanıcı sonsuza kadar
+ * aynı hatayı görüyordu.
+ *
+ * @returns {'ok'|'warn'|'block'}
+ */
+export function icloudSeverity({ classList, entitlementsExists, pbxHasEntitlements }) {
+  const issues = icloudWiringIssues({ classList, entitlementsExists, pbxHasEntitlements });
+  if (!issues.length) return 'ok';
+  // Tek eksik ÜRETİLEN dosyaysa ve imzalama tarafı yerindeyse: birazdan yazılacak.
+  if (classList === null && entitlementsExists && pbxHasEntitlements) return 'warn';
+  return 'block';
+}
+
 function run(cmd, args) {
   try { return { out: execFileSync(cmd, args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }) }; }
   catch (e) { return { err: e, out: `${e.stdout || ''}${e.stderr || ''}` }; }
@@ -182,13 +201,19 @@ else {
   try { classList = JSON.parse(readFileSync(cfgPath, 'utf8')).packageClassList; } catch { /* yok/bozuk */ }
   let pbx = '';
   try { pbx = readFileSync(path.join(root, 'ios', 'App', 'App.xcodeproj', 'project.pbxproj'), 'utf8'); } catch { /* yok */ }
-  const issues = icloudWiringIssues({
-    classList,
-    entitlementsExists: existsSync(path.join(root, 'ios', 'App', 'App', 'App.entitlements')),
-    pbxHasEntitlements: /CODE_SIGN_ENTITLEMENTS\s*=\s*App\/App\.entitlements/.test(pbx),
-  });
-  if (!issues.length) ok('iCloud eşitlemesi bağlı (iPhone ↔ Mac)');
-  else for (const i of issues) { bad(i); blockers.push('npm install && npx cap sync ios'); }
+  const entitlementsExists = existsSync(path.join(root, 'ios', 'App', 'App', 'App.entitlements'));
+  const pbxHasEntitlements = /CODE_SIGN_ENTITLEMENTS\s*=\s*App\/App\.entitlements/.test(pbx);
+  const severity = icloudSeverity({ classList, entitlementsExists, pbxHasEntitlements });
+  if (severity === 'ok') {
+    ok('iCloud eşitlemesi bağlı (iPhone ↔ Mac)');
+  } else if (severity === 'warn') {
+    warn('iCloud eklenti listesi henüz üretilmemiş — birazdan çalışacak `cap sync` bunu yazacak.');
+  } else {
+    for (const i of icloudWiringIssues({ classList, entitlementsExists, pbxHasEntitlements })) {
+      bad(i);
+      blockers.push('npm install && npx cap sync ios');
+    }
+  }
 }
 
 // --- Sonuç -----------------------------------------------------------------
