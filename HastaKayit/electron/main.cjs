@@ -145,7 +145,11 @@ function createWindow() {
     y: s.y,
     minWidth: 380,
     minHeight: 560,
-    title: 'Hasta Kayıt',
+    // Başlıkta SÜRÜM var. Sebebi somut: "yeni sürümü kurdum ama simgeler
+    // gelmedi" sanılan birkaç tur, aslında ESKİ uygulamanın çalıştırılmasıydı
+    // ve bunu anlamanın kolay bir yolu yoktu. Artık pencerenin başlığına
+    // bakmak yetiyor.
+    title: `Hasta Kayıt ${app.getVersion()}`,
     backgroundColor: nativeTheme.shouldUseDarkColors ? '#1c1c1e' : '#fafafa',
     // macOS: başlık çubuğunu gizleyip trafik ışıklarını uygulamanın kendi mavi
     // üst çubuğunun üzerine bindiriyoruz — pencere böylece yerli bir Mac

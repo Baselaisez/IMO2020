@@ -19,6 +19,8 @@ body { font-family: system-ui, sans-serif; background: var(--bg); color: #222; f
    bir metin düğümü de olabilir (iki ayrı yerde üretiliyor). `:only-child`
    sayesinde tek kural ikisini de doğru boşluklar ve yalnızca-simge düğmelerde
    boşluk bırakmaz. */
+/* Üst çubuktaki sürüm etiketi — hangi yapının çalıştığı bir bakışta görünsün. */
+.ver { font-weight: 400; font-size: 12px; opacity: .65; margin-left: 6px; }
 .ic { flex: none; vertical-align: -0.22em; margin-right: 6px; }
 /* Yalnızca-simge düğmelerde sağ boşluk istemiyoruz. DİKKAT: `.ic:only-child`
    BURADA ÇALIŞMAZ — CSS'te `:only-child` yalnızca ELEMENT kardeşlere bakar,

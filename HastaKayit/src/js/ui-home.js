@@ -375,6 +375,13 @@ function injectHomeControls() {
     </div>
   `);
 
+  // ÜST ÇUBUKTA SÜRÜM. Sebebi somut: "yeni sürümü kurdum ama değişmemiş"
+  // diye geçen birkaç tur, aslında hep ESKİ uygulamanın çalıştırılmasıydı ve
+  // hangi sürümün açık olduğunu görmenin kolay bir yolu yoktu. Artık üst
+  // çubuğa bakmak yetiyor — telefonda da, Mac'te de.
+  const homeTitle = document.querySelector('#screen-home .appbar > span');
+  if (homeTitle) homeTitle.innerHTML = `Hasta Kayıtları <span class="ver">${__APP_VERSION__}</span>`;
+
   // "Seç" button: wrap the existing ⚙️ button so the appbar keeps its
   // original 2-slot (title | controls) space-between layout.
   const settingsBtn = document.getElementById('btn-settings');
