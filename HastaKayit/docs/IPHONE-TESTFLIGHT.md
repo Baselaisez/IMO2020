@@ -19,8 +19,26 @@ cd "$(find ~ -maxdepth 6 -type d -name HastaKayit -not -path '*/node_modules/*' 
 ```
 
 Çıktıda klasörün tam yolu ve `origin https://github.com/Baselaisez/IMO2020`
-satırı görünmeli. Hiçbir şey yazmazsa klasör bu Mac'te yok demektir — o zaman
-baştan klonlamak gerekir.
+satırı görünmeli.
+
+**`fatal: not a git repository` yazıyorsa** klasör GitHub'dan **ZIP olarak
+indirilmiş** demektir (adı `IMO2020-claude-...` gibi görünür). ZIP kopyasında
+`git pull` ÇALIŞMAZ — içinde sürüm geçmişi yoktur. Bir kez düzgün kopya alın;
+sonrasında her güncelleme tek komut olur:
+
+```bash
+cd ~/Desktop
+git clone -b claude/iphone-mac-app-versions-9sq20o https://github.com/Baselaisez/IMO2020.git HastaKayitApp
+cd ~/Desktop/HastaKayitApp/HastaKayit
+```
+
+Depo ~16 MB; birkaç saniye sürer. Herkese açık olduğu için şifre sorulmaz.
+Eski ZIP klasörünü, yenisi çalıştığını gördükten **sonra** çöpe atın (içinde
+hasta verisi yoktur; veriler `~/Library/Application Support/HastaKayit/`
+klasöründedir ve bu işlemlerden etkilenmez).
+
+Hiçbir şey yazmazsa klasör bu Mac'te hiç yok demektir — yukarıdaki `git clone`
+komutunu çalıştırın.
 
 **Bundan sonraki bütün komutlar bu klasörün içinde çalışır.** Terminal'i
 kapatırsanız bu adımı tekrarlayın.
