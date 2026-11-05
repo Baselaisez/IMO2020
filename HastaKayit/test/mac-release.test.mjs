@@ -70,3 +70,15 @@ test('derleme komutu tek mimari kullanıyor', async () => {
   assert.doesNotMatch(src, /'--arm64',\s*'--x64'/, 'iki mimari birden derlenmemeli');
   assert.match(src, /'electron-builder',\s*'--mac',\s*flag/);
 });
+
+// package.json'daki sabit mimari listesi, komut satırındaki --arm64 bayrağını
+// EZİYORDU: mac:release "Apple Silicon (M serisi)" yazıp yine iki mimariyi de
+// derliyor, süre iki katına çıkıyordu. Mimariyi artık yalnızca çağıran seçer.
+test('mac hedeflerinde sabit mimari listesi YOK', async () => {
+  const { readFileSync } = await import('node:fs');
+  const pkg = JSON.parse(readFileSync('package.json', 'utf8'));
+  for (const t of pkg.build.mac.target) {
+    assert.equal(typeof t, 'string',
+      `hedefe gömülü arch listesi --arm64 bayrağını ezer: ${JSON.stringify(t)}`);
+  }
+});
