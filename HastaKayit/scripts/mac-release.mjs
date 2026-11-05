@@ -38,6 +38,16 @@ export function pickDmg(files, arch) {
   return intel ?? arm ?? null;
 }
 
+/**
+ * electron-builder'a verilecek mimari bayrağı. Saf.
+ * Bilinmeyen bir mimaride Intel'e düşmek Rosetta altında da olsa ÇALIŞAN bir
+ * uygulama verir; arm64'e düşmek Intel Mac'te hiç çalışmayan bir uygulama
+ * verirdi — bu yüzden yedek değer x64.
+ */
+export function builderArchFlag(arch) {
+  return arch === 'arm64' ? '--arm64' : '--x64';
+}
+
 /** Kullanıcıya gösterilecek mimari adı. Saf. */
 export function archLabel(arch) {
   return arch === 'arm64' ? 'Apple Silicon (M serisi)' : 'Intel';
@@ -49,8 +59,13 @@ async function main() {
     process.exit(1);
   }
 
-  console.log('\nMac uygulaması paketleniyor — birkaç dakika sürebilir…\n');
-  const build = spawnSync('npx', ['electron-builder', '--mac', '--arm64', '--x64'], {
+  // YALNIZCA bu makinenin mimarisi derlenir. Eskiden arm64 ve x64 birlikte
+  // derleniyordu, ama aşağıdaki pickDmg zaten yalnızca host mimarisine uyan
+  // .dmg'yi seçiyor — diğeri hiç kullanılmadan üretiliyor, süreyi iki katına
+  // çıkarıyor ve yüzlerce MB disk yiyordu.
+  const flag = builderArchFlag(process.arch);
+  console.log(`\nMac uygulaması paketleniyor (${archLabel(process.arch)}) — birkaç dakika sürebilir…\n`);
+  const build = spawnSync('npx', ['electron-builder', '--mac', flag], {
     cwd: root, stdio: 'inherit',
   });
   if (build.status !== 0) {

@@ -44,3 +44,29 @@ test('mimari adı kullanıcının anlayacağı dilde', () => {
   assert.match(archLabel('arm64'), /Apple Silicon/);
   assert.match(archLabel('x64'), /Intel/);
 });
+
+// Yalnızca bu makinenin mimarisi derlenir: pickDmg zaten host mimarisine uyan
+// .dmg'yi seçiyordu, diğeri hiç kullanılmadan üretilip süreyi iki katına
+// çıkarıyordu.
+import { builderArchFlag } from '../scripts/mac-release.mjs';
+
+test('builderArchFlag: Apple Silicon → --arm64', () => {
+  assert.equal(builderArchFlag('arm64'), '--arm64');
+});
+
+test('builderArchFlag: Intel → --x64', () => {
+  assert.equal(builderArchFlag('x64'), '--x64');
+});
+
+test('builderArchFlag: bilinmeyen mimaride Intel’e düşer (Rosetta ile çalışır)', () => {
+  // arm64'e düşmek Intel Mac'te HİÇ çalışmayan bir uygulama verirdi.
+  assert.equal(builderArchFlag('ia32'), '--x64');
+  assert.equal(builderArchFlag(undefined), '--x64');
+});
+
+test('derleme komutu tek mimari kullanıyor', async () => {
+  const { readFileSync } = await import('node:fs');
+  const src = readFileSync('scripts/mac-release.mjs', 'utf8');
+  assert.doesNotMatch(src, /'--arm64',\s*'--x64'/, 'iki mimari birden derlenmemeli');
+  assert.match(src, /'electron-builder',\s*'--mac',\s*flag/);
+});
