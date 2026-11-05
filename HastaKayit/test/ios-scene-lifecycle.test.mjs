@@ -76,3 +76,35 @@ test('@UIApplicationMain değil @main', () => {
   assert.doesNotMatch(SWIFT.split('\n').filter(l => !l.trim().startsWith('//')).join('\n'),
     /@UIApplicationMain/);
 });
+
+// --- Ön denetim (npm run ios) bunu Xcode'dan ÖNCE yakalamalı --------------
+// Eksik sahne desteği derleme hatası vermez; uygulama telefonda açılışta çöker.
+// Testler yalnızca `npm test` çalıştırılınca koşar, ön denetim ise her
+// `npm run ios`'ta — kullanıcıyı koruyan asıl yer orası.
+import { sceneLifecycleIssues } from '../scripts/ios-preflight.mjs';
+
+const GOOD_PLIST = '<key>UIApplicationSceneManifest</key><key>UISceneDelegateClassName</key>';
+const GOOD_SWIFT = 'class SceneDelegate: UIResponder, UIWindowSceneDelegate {';
+
+test('ön denetim: her şey yerindeyse sorun yok', () => {
+  assert.deepEqual(sceneLifecycleIssues({ infoPlist: GOOD_PLIST, appDelegate: GOOD_SWIFT }), []);
+});
+
+test('ön denetim: manifest eksikse yakalar', () => {
+  const r = sceneLifecycleIssues({ infoPlist: '<key>CFBundleName</key>', appDelegate: GOOD_SWIFT });
+  assert.equal(r.length, 2);
+  assert.match(r[0], /açılışta çöker/);
+});
+
+test('ön denetim: SceneDelegate sınıfı yoksa yakalar', () => {
+  const r = sceneLifecycleIssues({ infoPlist: GOOD_PLIST, appDelegate: 'class AppDelegate {}' });
+  assert.equal(r.length, 1);
+  assert.match(r[0], /SceneDelegate/);
+});
+
+test('ön denetim: DEPODAKİ gerçek dosyalar geçiyor', () => {
+  assert.deepEqual(sceneLifecycleIssues({
+    infoPlist: readFileSync('ios/App/App/Info.plist', 'utf8'),
+    appDelegate: readFileSync('ios/App/App/AppDelegate.swift', 'utf8'),
+  }), []);
+});

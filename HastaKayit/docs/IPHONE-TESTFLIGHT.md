@@ -220,6 +220,53 @@ Kod güncellemesi için her seferinde ADIM 1'i tekrarlayın.
 
 ---
 
+## Sık karşılaşılan hatalar ve çözümleri
+
+### "Application failed to launch: UIScene life cycle is required"
+
+Uygulama telefona kuruluyor ama **açılır açılmaz çöküyor**. iOS 27 SDK ile
+derlenen uygulamalarda UIScene yaşam döngüsü zorunlu. Düzeltme 5.9.1'de hazır:
+
+```bash
+git pull
+```
+
+`npm run ios:check` çıktısında şunu görmelisiniz:
+`✅ UIScene yaşam döngüsü tamam (iOS 27 SDK şartı)`
+
+### iCloud ile ilgili imzalama hatası
+
+Signing & Capabilities'te iCloud bölümünde kırmızı yazı çıkarsa (kap
+oluşturulamadı, yetki verilemedi vb.), **önce uygulamayı kurun, iCloud'u sonra
+açın** — eşitleme olmadan da uygulama tam çalışır, veriler cihazda durur.
+
+1. Signing & Capabilities → **iCloud** bölümünün sağındaki **çöp kutusu**
+   simgesine basın (yetkiyi geçici kaldırır).
+2. **▶** ile kurun, çalıştığını görün.
+3. Geri almak için Terminal'de:
+   ```bash
+   git checkout -- ios/App/App/App.entitlements
+   ```
+   ve Xcode'da **+ Capability → iCloud → iCloud Documents** ile yeniden ekleyin.
+
+Hatanın metnini not edin; çoğu zaman Apple hesabında kap oluşturma izninin
+henüz işlenmemiş olmasından kaynaklanır ve bir süre sonra kendiliğinden geçer.
+
+### Telefon cihaz listesinde görünmüyor
+
+Kabloyu çıkarıp takın → telefonda **"Bu bilgisayara güvenilsin mi?"** → Güven.
+Sonra telefonda: Ayarlar → Gizlilik ve Güvenlik → **Geliştirici Modu** → Açık
+(telefon yeniden başlar).
+
+### "Untrusted Developer" / uygulama açılmıyor
+
+Telefonda: Ayarlar → Genel → **VPN ve Cihaz Yönetimi** → Apple Kimliğiniz →
+**Güven**.
+
+### Sarı ⚠️ uyarılar
+
+Normaldir, engellemez. Yalnızca **kırmızı** olanlar derlemeyi durdurur.
+
 ## Bir yerde takılırsanız
 
 Ekran görüntüsü alın ve hangi adımda olduğunuzu yazın. En çok ADIM 2 (imzalama)

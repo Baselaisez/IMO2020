@@ -116,6 +116,30 @@ export function icloudSeverity({ classList, entitlementsExists, pbxHasEntitlemen
   return 'block';
 }
 
+/**
+ * UIScene yaşam döngüsü eksiksiz mi? Saf — testi var.
+ *
+ * iOS 27 SDK ile derlenen uygulamalarda ZORUNLU. Eksikse uygulama telefonda
+ * açılır açılmaz çöker ("Application failed to launch: UIScene life cycle is
+ * required for apps built with this SDK") ve Xcode bunu derleme hatası olarak
+ * GÖSTERMEZ — bu yüzden burada denetleniyor.
+ *
+ * @returns {string[]} boşsa her şey yerinde
+ */
+export function sceneLifecycleIssues({ infoPlist, appDelegate }) {
+  const issues = [];
+  if (!/UIApplicationSceneManifest/.test(infoPlist)) {
+    issues.push('Info.plist içinde UIApplicationSceneManifest yok — uygulama telefonda açılışta çöker.');
+  }
+  if (!/UISceneDelegateClassName/.test(infoPlist)) {
+    issues.push('Info.plist sahne delegesini bildirmiyor (UISceneDelegateClassName).');
+  }
+  if (!/class\s+SceneDelegate\s*:\s*UIResponder\s*,\s*UIWindowSceneDelegate/.test(appDelegate)) {
+    issues.push('AppDelegate.swift içinde SceneDelegate sınıfı yok.');
+  }
+  return issues;
+}
+
 function run(cmd, args) {
   try { return { out: execFileSync(cmd, args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }) }; }
   catch (e) { return { err: e, out: `${e.stdout || ''}${e.stderr || ''}` }; }
@@ -214,6 +238,17 @@ else {
       blockers.push('npm install && npx cap sync ios');
     }
   }
+}
+
+// 9) UIScene yaşam döngüsü (iOS 27 SDK ile zorunlu)
+{
+  const read = (p) => { try { return readFileSync(path.join(root, p), 'utf8'); } catch { return ''; } };
+  const issues = sceneLifecycleIssues({
+    infoPlist: read('ios/App/App/Info.plist'),
+    appDelegate: read('ios/App/App/AppDelegate.swift'),
+  });
+  if (!issues.length) ok('UIScene yaşam döngüsü tamam (iOS 27 SDK şartı)');
+  else for (const i of issues) { bad(i); blockers.push('git pull   (düzeltme depoda hazır)'); }
 }
 
 // --- Sonuç -----------------------------------------------------------------
