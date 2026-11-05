@@ -21,6 +21,7 @@ import { changePinFlow } from './lock.js';
 import { getRecoveryStatus, setSecurityQuestions, setRecoveryCode } from './pin-recovery.js';
 import { setNotifSound } from './notify.js';
 import { openBatchImport } from './ui-batch.js';
+import { iconHtml } from './icons.js';
 
 function isNativeSafe() { try { return isNative() || isDesktop(); } catch { return false; } }
 
@@ -64,13 +65,13 @@ async function showDataLocation() {
       : '💾 Veri konumu bulunamadı.';
     if (btn) {
       btn.classList.remove('hidden');
-      btn.textContent = platform() === 'macos' ? "📂 Finder'da Göster" : '📂 Klasörü Aç';
+      btn.innerHTML = iconHtml('folder', 18) + (platform() === 'macos' ? "<span>Finder'da Göster</span>" : '<span>Klasörü Aç</span>');
     }
   } else if (platform() === 'ios') {
-    el.textContent = '💾 Yedekler: Dosyalar uygulaması → iPhone\'umda → Hasta Kayıt → HastaKayit/daily (günlük) ve HastaKayit/snapshots (anlık görüntü). Buradan Dosyalar üzerinden kopyalayabilir veya paylaşabilirsiniz.';
+    el.textContent = 'Yedekler: Dosyalar uygulaması → iPhone\'umda → Hasta Kayıt → HastaKayit/daily (günlük) ve HastaKayit/snapshots (anlık görüntü). Buradan Dosyalar üzerinden kopyalayabilir veya paylaşabilirsiniz.';
     btn?.classList.add('hidden');
   } else if (platform() === 'android') {
-    el.textContent = '💾 Yedekler: Belgeler/HastaKayit/daily (günlük) ve Belgeler/HastaKayit/snapshots (anlık görüntü).';
+    el.textContent = 'Yedekler: Belgeler/HastaKayit/daily (günlük) ve Belgeler/HastaKayit/snapshots (anlık görüntü).';
     btn?.classList.add('hidden');
   } else {
     el.textContent = `${platformLabel()} önizlemesinde veriler kalıcı DEĞİLDİR — yalnızca deneme amaçlıdır.`;

@@ -17,6 +17,7 @@ import {
   summarizeBatch, initialChecks, countChecked, pickChecked,
   allChecked, setAllChecks, detailLine,
 } from './batch-review.js';
+import { iconHtml } from './icons.js';
 
 // Read every File to bytes up front. A file whose bytes cannot be read must not
 // kill the batch: we hand parseFormFiles a `bytes` GETTER that re-throws the
@@ -76,10 +77,10 @@ export async function openBatchImport(files) {
 
 function badgeHtml(e) {
   if (!e.ok) {
-    return `<span class="chip" style="background:#fdecea;color:var(--red)">❌ ${esc(e.error || 'Okunamadı')}</span>`;
+    return `<span class="chip" style="background:#fdecea;color:var(--red)">${iconHtml('x', 14)}${esc(e.error || 'Okunamadı')}</span>`;
   }
   if (e.duplicate) {
-    return '<span class="chip" style="background:#fff4e5;color:var(--orange)">⚠️ Kopya</span>';
+    return `<span class="chip" style="background:#fff4e5;color:var(--orange)">${iconHtml('warn', 14)}Kopya</span>`;
   }
   return '';
 }

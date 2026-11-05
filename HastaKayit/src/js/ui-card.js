@@ -9,6 +9,7 @@ import { fileToResizedDataUrl, fileToDataUrl, validateReceiptFile } from './ui-p
 import { shareFile } from './files.js';
 import { attachVoice } from './ui-voice.js';
 import { afterSaveDestination } from './after-save.js';
+import { iconHtml } from './icons.js';
 
 // Best-effort device-calendar sync. Never throws — a calendar failure must
 // never block a DB write or the UI refresh that follows it.
@@ -59,7 +60,7 @@ async function renderCard() {
   const months = safeMonths(p);
   const body = document.getElementById('card-body');
   body.innerHTML = `
-    ${p.status === 'blocked' ? '<div class="warn-band">⛔ ASLA BAKILMAYACAK</div>' : ''}
+    ${p.status === 'blocked' ? `<div class="warn-band">${iconHtml('ban', 16)}ASLA BAKILMAYACAK</div>` : ''}
     <div class="card-hdr">
       ${p.photo ? `<img class="card-photo" src="${esc(p.photo)}" alt="Fotoğraf" style="width:72px;height:72px;border-radius:12px;object-fit:cover;float:right;margin:0 0 8px 12px;border:1px solid var(--line)">` : ''}
       <div style="display:flex;justify-content:space-between">
@@ -74,25 +75,25 @@ async function renderCard() {
         ${p.mother_name ? `<span class="chip">Anne: ${esc(p.mother_name)}</span>` : ''}
         ${months !== null ? `<span class="chip">${p.end_date ? `Bitiş: ${esc(fmtDate(p.end_date))} (${months} ay)` : months + '. ay'}</span>` : ''}
         ${p.next_appt ? `<span class="chip">Sonraki: ${esc(fmtDateTime(p.next_appt))}</span>` : ''}
-        ${p.phone ? `<a class="chip" href="tel:${esc(p.phone)}">📞 ${esc(p.phone)}</a>` : ''}
-        ${p.residence ? `<span class="chip">📍 ${esc(p.residence)}</span>` : ''}
+        ${p.phone ? `<a class="chip" href="tel:${esc(p.phone)}">${iconHtml('phone', 14)}${esc(p.phone)}</a>` : ''}
+        ${p.residence ? `<span class="chip">${iconHtml('pin', 14)}${esc(p.residence)}</span>` : ''}
         ${ageFrom(p.birth_date, todayIso()) != null ? `<span class="chip">${ageFrom(p.birth_date, todayIso())} yaşında</span>` : ''}
       </div>
     </div>
     <div class="actions">
       <button id="btn-pay" class="primary">+ Ödeme</button>
-      <button id="btn-appt">📅 Randevu</button>
-      ${p.status === 'active' ? '<button id="btn-done">✅ Tamamla</button>' : ''}
-      ${p.status !== 'blocked' ? '<button id="btn-block">⛔ Bakılmayacak</button>' : '<button id="btn-unblock">↩︎ Aktif yap</button>'}
-      <button id="btn-del">🗑️</button>
+      <button id="btn-appt"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3.5" y="5.5" width="17" height="15" rx="2"/><path d="M3.5 10h17"/><path d="M8 3.5v4M16 3.5v4"/></svg>Randevu</button>
+      ${p.status === 'active' ? '<button id="btn-done"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Tamamla</button>' : ''}
+      ${p.status !== 'blocked' ? '<button id="btn-block"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8.5"/><path d="M6 18L18 6"/></svg>Bakılmayacak</button>' : '<button id="btn-unblock"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 7L4.5 11.5 9 16"/><path d="M4.5 11.5H14a5.5 5.5 0 010 11h-3"/></svg>Aktif yap</button>'}
+      <button id="btn-del"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4.5 6.5h15"/><path d="M9.5 6.5V4h5v2.5"/><path d="M6.5 6.5L7.5 21h9l1-14.5"/></svg></button>
     </div>
     <div class="sec-title">Ödeme Geçmişi</div>
     <div class="ledger">
       <div class="lrow total"><span>Toplam (${payments.length} ödeme)</span><span class="money">${fmtTL(total)}</span></div>
       ${payments.map(o => `
         <div class="lrow">
-          <span class="muted">${esc(fmtDate(o.pay_date))} · ${esc(o.description || '')} <span class="pay-badge">${o.status === 'pending' ? '⏳' : '✓'}</span></span>
-          <span>${o.receipt ? `<button class="ghost pay-receipt" data-id="${o.id}" title="Dekont" aria-label="Dekontu görüntüle">🧾</button> ` : ''}<span class="money">${fmtTL(o.amount)}</span> <button class="ghost pay-edit" data-id="${o.id}">✏️</button></span>
+          <span class="muted">${esc(fmtDate(o.pay_date))} · ${esc(o.description || '')} <span class="pay-badge ${o.status === 'pending' ? 'pending' : 'paid'}">${o.status === 'pending' ? iconHtml('clock', 13) + 'Yapılacak' : iconHtml('check', 13) + 'Yapıldı'}</span></span>
+          <span>${o.receipt ? `<button class="ghost pay-receipt" data-id="${o.id}" title="Dekont" aria-label="Dekontu görüntüle"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/></svg></button> ` : ''}<span class="money">${fmtTL(o.amount)}</span> <button class="ghost pay-edit" data-id="${o.id}"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M14.5 5.5l4 4"/></svg></button></span>
         </div>`).join('')}
     </div>
     <div class="sec-title">Paket Teslimatları</div>
@@ -100,8 +101,8 @@ async function renderCard() {
       <div class="lrow total"><span>Teslimatlar (${deliveries.length})</span><button id="btn-del-add" class="ghost">+ Teslimat</button></div>
       ${deliveries.map(d => `
         <div class="lrow">
-          <span class="muted">${d.method === 'kargo' ? '📦 Kargo' : '🤝 Elden'}${d.tracking_no ? ' · ' + esc(d.tracking_no) : ''}${d.planned_date ? ' · Planlanan: ' + esc(fmtDate(d.planned_date)) : ''}${Number(d.delivered) === 1 ? ' · ✓ ' + esc(fmtDate(d.delivered_date)) : ''}</span>
-          <button class="ghost del-edit" data-id="${d.id}">✏️</button>
+          <span class="muted">${d.method === 'kargo' ? iconHtml('box', 14) + 'Kargo' : iconHtml('hand', 14) + 'Elden'}${d.tracking_no ? ' · ' + esc(d.tracking_no) : ''}${d.planned_date ? ' · Planlanan: ' + esc(fmtDate(d.planned_date)) : ''}${Number(d.delivered) === 1 ? ' · ✓ ' + esc(fmtDate(d.delivered_date)) : ''}</span>
+          <button class="ghost del-edit" data-id="${d.id}"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M14.5 5.5l4 4"/></svg></button>
         </div>`).join('')}
     </div>
     ${p.notes ? `<div class="sec-title">Notlar</div><p style="padding:0 14px 14px;color:#666">${esc(p.notes)}</p>` : ''}
@@ -152,7 +153,7 @@ function receiptSheet(o) {
     <h4>Dekont${o.pay_date ? ' — ' + esc(fmtDate(o.pay_date)) : ''}</h4>
     <div class="form" style="padding:0">
       ${isPdf
-        ? '<p class="muted">📄 PDF dekont</p><button id="rc-open" type="button" class="primary">📄 Dekontu Aç</button>'
+        ? `<p class="muted">${iconHtml('file', 14)}PDF dekont</p><button id="rc-open" type="button" class="primary"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/><path d="M9 12h6M9 15.5h6M9 19h3.5"/></svg>Dekontu Aç</button>`
         : `<img src="${esc(r)}" alt="Dekont" style="width:100%;max-height:70vh;object-fit:contain;border-radius:10px;border:1px solid var(--line)">`}
       <button id="rc-close" type="button" class="ghost">Kapat</button>
     </div>
@@ -182,21 +183,21 @@ async function paymentSheet(p, existing) {
     <h4>${existing ? 'Ödemeyi Düzenle' : 'Ödeme Ekle'} — ${esc(p.name)}</h4>
     <div class="seg">
       <button type="button" id="ps-paid" class="${(existing && existing.status === 'pending') ? '' : 'on'}">✓ Yapıldı</button>
-      <button type="button" id="ps-pending" class="${(existing && existing.status === 'pending') ? 'on' : ''}">⏳ Yapılacak</button>
+      <button type="button" id="ps-pending" class="${(existing && existing.status === 'pending') ? 'on' : ''}"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5.3l3.3 2"/></svg>Yapılacak</button>
     </div>
     <div class="quick-row">${quick.map(a => `<button type="button" class="q-amt" data-a="${esc(String(a))}">${fmtTL(a)}</button>`).join('')}</div>
     <div class="form" style="padding:0">
       <label>Tutar (₺) *<input id="pay-amount" type="text" inputmode="decimal" value="${existing ? esc(String(existing.amount)) : ''}"></label>
       <label>Ödeme Tarihi *<input id="pay-date" type="date" value="${existing ? esc(existing.pay_date) : todayIso()}"></label>
-      <label><span class="lbl-row">Açıklama<button type="button" class="mic-btn ghost" data-voice-for="pay-desc" title="Sesli yaz (Win + H)" aria-label="Sesli yaz">🎤</button></span><input id="pay-desc" value="${existing ? esc(existing.description) : 'Seans'}"></label>
+      <label><span class="lbl-row">Açıklama<button type="button" class="mic-btn ghost" data-voice-for="pay-desc" title="Sesli yaz (Win + H)" aria-label="Sesli yaz"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11.5a6.5 6.5 0 0013 0"/><path d="M12 18v3"/></svg></button></span><input id="pay-desc" value="${existing ? esc(existing.description) : 'Seans'}"></label>
       <div class="dekont-row" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:4px 0">
         <input id="pay-receipt-input" type="file" accept="image/*,application/pdf" style="display:none">
-        <button id="btn-receipt-add" type="button">🧾 Dekont Ekle</button>
+        <button id="btn-receipt-add" type="button"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/></svg>Dekont Ekle</button>
         <span id="pay-receipt-preview" class="muted"></span>
         <button id="btn-receipt-remove" type="button" class="ghost" style="display:none">Kaldır</button>
       </div>
       <button id="pay-save" class="primary">Kaydet ✓</button>
-      ${existing ? '<button id="pay-del" type="button">🗑️ Ödemeyi Sil</button>' : ''}
+      ${existing ? '<button id="pay-del" type="button"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4.5 6.5h15"/><path d="M9.5 6.5V4h5v2.5"/><path d="M6.5 6.5L7.5 21h9l1-14.5"/></svg>Ödemeyi Sil</button>' : ''}
       <button id="pay-cancel" type="button" class="ghost">Vazgeç</button>
     </div>
   `);
@@ -218,14 +219,14 @@ async function paymentSheet(p, existing) {
     if (!prev) return;
     if (receipt) {
       prev.innerHTML = String(receipt).startsWith('data:application/pdf')
-        ? '📄 PDF eklendi'
+        ? iconHtml('file', 14) + 'PDF eklendi'
         : `<img src="${esc(receipt)}" alt="Dekont" style="width:44px;height:44px;object-fit:cover;border-radius:8px;border:1px solid var(--line);vertical-align:middle">`;
       rm.style.display = '';
-      add.textContent = '🧾 Dekontu Değiştir';
+      add.innerHTML = iconHtml('receipt', 18) + '<span>Dekontu Değiştir</span>';
     } else {
       prev.textContent = '';
       rm.style.display = 'none';
-      add.textContent = '🧾 Dekont Ekle';
+      add.innerHTML = iconHtml('receipt', 18) + '<span>Dekont Ekle</span>';
     }
   };
   renderReceipt();
@@ -312,8 +313,8 @@ async function deliverySheet(p, existing) {
   openSheet(`
     <h4>${existing ? 'Paket Teslimini Düzenle' : 'Paket Teslimi'} — ${esc(p.name)}</h4>
     <div class="seg">
-      <button type="button" id="m-elden" class="${e.method === 'elden' ? 'on' : ''}">🤝 Elden</button>
-      <button type="button" id="m-kargo" class="${e.method === 'kargo' ? 'on' : ''}">📦 Kargo</button>
+      <button type="button" id="m-elden" class="${e.method === 'elden' ? 'on' : ''}"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M8 11V5.5a1.6 1.6 0 013.2 0V11"/><path d="M11.2 10.5V4.6a1.6 1.6 0 013.2 0V11"/><path d="M14.4 11V6.8a1.6 1.6 0 013.2 0V14a6.5 6.5 0 01-6.5 6.5h-.6A6.5 6.5 0 014 14v-1.5a1.6 1.6 0 013.2 0V15"/></svg>Elden</button>
+      <button type="button" id="m-kargo" class="${e.method === 'kargo' ? 'on' : ''}"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3.5 7.5L12 3.5l8.5 4v9L12 20.5 3.5 16.5z"/><path d="M3.5 7.5L12 11.5l8.5-4"/><path d="M12 11.5v9"/></svg>Kargo</button>
     </div>
     <div class="form" style="padding:0">
       <label id="track-wrap" style="${e.method === 'kargo' ? '' : 'display:none'}">Kargo Takip No<input id="d-track" value="${esc(e.tracking_no || '')}"></label>
@@ -326,7 +327,7 @@ async function deliverySheet(p, existing) {
       <label><input id="d-done" type="checkbox" ${Number(e.delivered) === 1 ? 'checked' : ''}> Teslim edildi</label>
       <label id="ddate-wrap" style="${Number(e.delivered) === 1 ? '' : 'display:none'}">Teslim Tarihi<input id="d-ddate" type="date" value="${esc(e.delivered_date || todayIso())}"></label>
       <button id="d-save" class="primary">Kaydet ✓</button>
-      ${existing ? '<button id="d-del" type="button">🗑️ Teslimatı Sil</button>' : ''}
+      ${existing ? '<button id="d-del" type="button"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4.5 6.5h15"/><path d="M9.5 6.5V4h5v2.5"/><path d="M6.5 6.5L7.5 21h9l1-14.5"/></svg>Teslimatı Sil</button>' : ''}
       <button id="d-cancel" type="button" class="ghost">Vazgeç</button>
     </div>
   `);

@@ -6,6 +6,42 @@ body { font-family: system-ui, sans-serif; background: var(--bg); color: #222; f
 .appbar { position: sticky; top: 0; z-index: 5; background: var(--blue); color: #fff; padding: 14px 12px;
   padding-top: calc(14px + env(safe-area-inset-top)); font-weight: 600; display: flex; justify-content: space-between; align-items: center; }
 .iconbtn { background: none; border: 0; color: inherit; font-size: 18px; padding: 4px 8px; }
+
+/* --- Simgeler ------------------------------------------------------------
+   Arayüzdeki simgeler EMOJİ değil, gömülü SVG (bkz. src/js/icons.js). Emoji
+   bir yazı tipine bağlıdır; doktorun Mac'inde o yazı tipi çizilmeyince ⚙️ 🏠
+   ← ✅ ✏️ ⚡ ☑️ 🔍 ⛔ simgelerinin HEPSİ kayboldu ve düğmeler görünmez oldu.
+   SVG hiçbir yazı tipine bağlı değildir.
+   `currentColor` → simge, düğmenin rengini alır (üst çubukta beyaz, Kaydet'te
+   yeşil). Yalnızca-simge düğmelerde SVG ortalanır; etiketli düğmelerde yazıyla
+   aynı satırda, yazının önünde durur.                                       */
+/* Simge ile yazı arasındaki boşluk: yazı bir <span> İÇİNDE DE OLABİLİR, çıplak
+   bir metin düğümü de olabilir (iki ayrı yerde üretiliyor). `:only-child`
+   sayesinde tek kural ikisini de doğru boşluklar ve yalnızca-simge düğmelerde
+   boşluk bırakmaz. */
+.ic { flex: none; vertical-align: -0.22em; margin-right: 6px; }
+/* Yalnızca-simge düğmelerde sağ boşluk istemiyoruz. DİKKAT: `.ic:only-child`
+   BURADA ÇALIŞMAZ — CSS'te `:only-child` yalnızca ELEMENT kardeşlere bakar,
+   metin düğümlerini saymaz. "<svg/>Randevu" biçimindeki düğmelerde (yazı bir
+   <span> içinde değil, çıplak metin) svg yine "tek çocuk" sayılır ve boşluk
+   silinirdi; simge yazıya yapışıyordu. Bu yüzden istisnalar TEK TEK yazılı. */
+.iconbtn > .ic, .fab > .ic, .fab-mini > .ic, .ghost > .ic:only-child { margin-right: 0; }
+.iconbtn { display: inline-flex; align-items: center; justify-content: center; }
+.chip-filter:has(> .ic), .chip:has(> .ic) { display: inline-flex; align-items: center; }
+.chip-filter > .ic, .chip > .ic { margin-right: 4px; }
+.warn-band:has(> .ic) { display: flex; align-items: center; }
+
+/* Liste satırındaki durum rozeti. Eskiden ' ✅' / ' ⛔' emoji'siydi ve o
+   çizilmeyince "tamamlandı" ile "bakılmayacak" AYIRT EDİLEMİYORDU. Artık hem
+   simge hem yazı var: simge olmasa bile anlam kaybolmaz. */
+.row-badge { display: inline-flex; align-items: center; font-size: 11px; font-weight: 600;
+  border-radius: 999px; padding: 2px 8px; margin-left: 6px; vertical-align: 1px; }
+.row-badge > .ic { margin-right: 3px; }
+.row-badge.done { background: #e7f6ec; color: #15803d; }
+.row-badge.blocked { background: #fdecea; color: var(--red); }
+.pay-badge.pending { color: var(--orange); }
+.pay-badge.paid { color: #15803d; }
+.pay-badge > .ic { margin-right: 2px; }
 /* Form/kart/ayarlar üst çubukları: solda ← ve 🏠 birlikte, ortada başlık, sağda
    (varsa) tek eylem düğmesi. Başlık flex:1 + text-align:center ile GERÇEKTEN
    ortalanır; sol ve sağ gruplara aynı min-width verildiği için 🏠 eklenmesi
@@ -18,7 +54,11 @@ body { font-family: system-ui, sans-serif; background: var(--bg); color: #222; f
 .banner { position: fixed; top: 0; left: 0; right: 0; z-index: 99; padding: 14px 12px; color: #fff; font-weight: 600; }
 .banner.error { background: var(--red); }
 .banner.ok { background: var(--green); }
-#search { width: calc(100% - 16px); margin: 8px; padding: 12px; border: 1px solid #ddd; border-radius: 10px; font-size: 16px; }
+/* Büyüteç artık placeholder'daki 🔍 emoji'si değil, arka plandaki SVG:
+   emoji çizilmediğinde kutu "Hasta ara…" yazısıyla kalakalıyordu. */
+#search { width: calc(100% - 16px); margin: 8px; padding: 12px 12px 12px 40px; border: 1px solid #ddd; border-radius: 10px; font-size: 16px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='1.8' stroke-linecap='round'%3E%3Ccircle cx='10.5' cy='10.5' r='6.5'/%3E%3Cpath d='M15.4 15.4L21 21'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: 12px 50%; }
 .today { background: #eaf1fb; margin: 0 8px 8px; border-radius: 10px; padding: 10px 12px; }
 .chips-row { display: flex; gap: 6px; margin: 0 8px 8px; }
 .chip-filter { border: 1px solid #cfd8e6; background: #fff; color: var(--blue); border-radius: 16px; padding: 6px 14px; }

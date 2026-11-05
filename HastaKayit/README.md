@@ -22,6 +22,7 @@ src/                 uygulama (tek kaynak — üç platform da bunu çalıştır
   js/sync-merge.js   cihazlar arası eşitleme — saf birleştirme (LWW)
   js/icloud.js       iPhone ↔ Mac ortak iCloud klasörü (5.9)
   js/after-save.js   kayıt bitince hangi ekran açılır (5.9)
+  js/icons.js        arayüz simgeleri — gömülü SVG, emoji DEĞİL (5.9.1)
 plugins/icloud/      yerli Capacitor eklentisi: iOS iCloud kabı (Swift)
 ios/                 Xcode projesi (iPhone + iPad)
 electron/            Mac uygulama kabuğu: pencere, menü, IPC, izinler
@@ -83,6 +84,12 @@ npm test
 
 Her iki platformda da Ayarlar ekranının altında gerçek konum yazar; Mac'te
 "📂 Finder'da Göster" düğmesi klasörü doğrudan açar.
+
+## Üst çubuktaki simgeler neden kayboldu
+
+Emoji bir yazı tipine bağlıdır; o yazı tipi çizmeyince ⚙️ 🏠 ✅ gibi bütün
+simgeler kayboldu ve düğmeler görünmez oldu. Hepsi gömülü SVG'ye taşındı:
+[docs/SIMGELER.md](docs/SIMGELER.md)
 
 ## "database is locked" hatası
 

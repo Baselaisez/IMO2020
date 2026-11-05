@@ -6,6 +6,7 @@ import { openForm } from './ui-form.js';
 import { openSettings } from './ui-settings.js';
 import { parsePatientText } from './paste-parse.js';
 import { openQuickAdd } from './ui-quickadd.js';
+import { iconHtml } from './icons.js';
 
 // ---------------------------------------------------------------------------
 // Paginated list state (F110-scale: list must never render all ~77k rows at
@@ -104,7 +105,13 @@ async function loadNextPage() {
 
 function appendRows(rows) {
   const el = document.getElementById('patient-list');
-  const badge = { done: ' ✅', blocked: ' ⛔' };
+  // Durum rozeti: eskiden ' ✅' / ' ⛔' emoji'siydi ve o Mac'te çizilmeyince
+  // tamamlanmış hasta ile bakılmayacak hasta AYIRT EDİLEMİYORDU. Artık hem
+  // simge hem yazı var — simge çizilmese bile yazı kalır.
+  const badge = {
+    done: ` <span class="row-badge done" title="Tamamlandı">${iconHtml('check', 14)}Tamamlandı</span>`,
+    blocked: ` <span class="row-badge blocked" title="Asla bakılmayacak">${iconHtml('ban', 14)}Bakılmayacak</span>`,
+  };
   for (const p of rows) {
     renderedRows.set(p.id, p);
     const div = document.createElement('div');
@@ -382,7 +389,7 @@ function injectHomeControls() {
   quickBtn.id = 'btn-quick-add';
   quickBtn.className = 'iconbtn';
   quickBtn.type = 'button';
-  quickBtn.textContent = '⚡';
+  quickBtn.innerHTML = iconHtml('bolt');
   quickBtn.title = 'Hızlı Ekle';
   quickBtn.setAttribute('aria-label', 'Hızlı Ekle');
   wrap.appendChild(quickBtn);
@@ -390,8 +397,9 @@ function injectHomeControls() {
   selectBtn.id = 'btn-select';
   selectBtn.className = 'iconbtn';
   selectBtn.type = 'button';
-  selectBtn.textContent = '☑️';
+  selectBtn.innerHTML = iconHtml('select');
   selectBtn.title = 'Seç';
+  selectBtn.setAttribute('aria-label', 'Seç');
   wrap.appendChild(selectBtn);
   wrap.appendChild(settingsBtn);
 
