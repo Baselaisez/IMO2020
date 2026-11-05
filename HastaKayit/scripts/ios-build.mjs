@@ -19,9 +19,12 @@
 import { spawn } from 'node:child_process';
 import { writeFile } from 'node:fs/promises';
 import path from 'node:path';
-import { pathToFileURL } from 'node:url';
+import { pathToFileURL, fileURLToPath } from 'node:url';
 
-const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
+// fileURLToPath ŞART: `new URL(import.meta.url).pathname` yolu YÜZDE KODLU
+// bırakır. Klasör adında boşluk varsa ("... 9sq20o 2/") yol içinde %20 kalır,
+// hiçbir dosya bulunamaz ve betik "node_modules eksik" gibi YANLIŞ teşhis koyar.
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
 /**
  * xcodebuild çıktısından benzersiz hataları çıkarır, en çok tekrarlayan önce. Saf.

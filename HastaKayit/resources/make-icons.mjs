@@ -12,6 +12,7 @@
 import sharp from 'sharp';
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const BLUE_DARK = '#24528f';
 const BLUE = '#2b5ea7';
@@ -85,7 +86,10 @@ function icns(entries) {
   return Buffer.concat([header, body]);
 }
 
-const here = path.dirname(new URL(import.meta.url).pathname);
+// fileURLToPath ŞART: `new URL(import.meta.url).pathname` yolu YÜZDE KODLU
+// bırakır. Klasör adında boşluk varsa ("... 9sq20o 2/") yol içinde %20 kalır,
+// hiçbir dosya bulunamaz ve betik "node_modules eksik" gibi YANLIŞ teşhis koyar.
+const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.join(here, '..');
 
 await mkdir(path.join(root, 'resources'), { recursive: true });

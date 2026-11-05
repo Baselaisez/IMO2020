@@ -14,9 +14,12 @@ import { execFileSync, spawnSync } from 'node:child_process';
 import { readdir, readFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
-import { pathToFileURL } from 'node:url';
+import { pathToFileURL, fileURLToPath } from 'node:url';
 
-const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
+// fileURLToPath ŞART: `new URL(import.meta.url).pathname` yolu YÜZDE KODLU
+// bırakır. Klasör adında boşluk varsa ("... 9sq20o 2/") yol içinde %20 kalır,
+// hiçbir dosya bulunamaz ve betik "node_modules eksik" gibi YANLIŞ teşhis koyar.
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const DIST = path.join(root, 'dist-mac');
 
 /**
