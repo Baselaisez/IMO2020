@@ -137,9 +137,15 @@ async function tryBiometric() {
     const { BiometricAuth } = await import('@aparajita/capacitor-biometric-auth');
     await BiometricAuth.authenticate({
       reason: 'Hasta kayıtlarına erişim',
-      cancelTitle: 'PIN kullan',
-      // iOS: LAContext'in düğme yazıları. Verilmezse İngilizce "Cancel"/"Enter
-      // Password" görünür — arayüzün geri kalanı Türkçeyken tutarsız olurdu.
+      // iOS: LAContext'in İKİ AYRI düğmesi. Verilmezse İngilizce
+      // "Cancel"/"Enter Password" görünür — arayüzün geri kalanı Türkçeyken
+      // tutarsız olurdu.
+      //
+      // İKİSİ FARKLI OLMAK ZORUNDA: ilk sürümde ikisine de "PIN kullan"
+      // yazmıştım ve Touch ID başarısız olunca pencerede YAN YANA İKİ TANE
+      // "PIN kullan" düğmesi çıkıyordu — hangisinin ne yaptığı anlaşılmıyordu.
+      // (Tetikledikleri sonuç aynı: ikisi de uygulamanın PIN ekranına düşürür.)
+      cancelTitle: 'Vazgeç',
       iosFallbackTitle: 'PIN kullan',
       allowDeviceCredential: false,
     });

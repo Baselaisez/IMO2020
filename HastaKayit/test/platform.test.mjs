@@ -134,3 +134,16 @@ test('biometryLabel: emoji YOK (simge SVG olarak geliyor)', () => {
     assert.doesNotMatch(biometryLabel(t), /[\u{1F000}-\u{1FAFF}\u{2300}-\u{27BF}]/u);
   }
 });
+
+// GERÇEK HATA: Touch ID başarısız olunca iOS penceresinde YAN YANA İKİ TANE
+// "PIN kullan" düğmesi çıkıyordu — iptal düğmesi ile yedek düğmesine aynı
+// yazıyı vermiştim. Hangisinin ne yaptığı anlaşılmıyordu.
+test('biyometri penceresindeki iki düğmenin yazısı FARKLI', async () => {
+  const { readFileSync } = await import('node:fs');
+  const src = readFileSync('src/js/lock.js', 'utf8');
+  const cancel = /cancelTitle:\s*'([^']+)'/.exec(src)?.[1];
+  const fallback = /iosFallbackTitle:\s*'([^']+)'/.exec(src)?.[1];
+  assert.ok(cancel, 'cancelTitle tanımlı olmalı (yoksa İngilizce "Cancel" çıkar)');
+  assert.ok(fallback, 'iosFallbackTitle tanımlı olmalı (yoksa İngilizce "Enter Password" çıkar)');
+  assert.notEqual(cancel, fallback, `iki düğme de "${cancel}" yazıyor — ayırt edilemez`);
+});
