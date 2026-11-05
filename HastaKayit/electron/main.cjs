@@ -373,7 +373,16 @@ ipcMain.handle('hk:file-delete', async (_e, kind, name) => {
 // Dışa aktarma: gerçek "Farklı Kaydet…" paneli. iPhone'daki paylaşım
 // sayfasının Mac'teki karşılığı budur.
 ipcMain.handle('hk:save-export', async (_e, name, base64) => {
-  const { canceled, filePath } = await dialog.showSaveDialog(liveWin() ?? undefined, {
+  // Pencereyi ÖNCE öne getir. macOS'ta bu panel pencereye bağlı bir "sheet"
+  // olarak açılır; pencere küçültülmüşse ya da başka bir masaüstündeyse panel
+  // GÖRÜNMEZ ve kullanıcı için uygulama donmuş gibi olur ("yedekleme
+  // çalışmıyor"). Öne getirince panel daima görünür.
+  const w = liveWin();
+  if (w) {
+    try { if (w.isMinimized()) w.restore(); w.show(); w.focus(); }
+    catch (e) { console.error('pencere öne getirilemedi', e); }
+  }
+  const { canceled, filePath } = await dialog.showSaveDialog(w ?? undefined, {
     title: 'Farklı Kaydet',
     defaultPath: path.join(app.getPath('downloads'), String(name)),
     buttonLabel: 'Kaydet',

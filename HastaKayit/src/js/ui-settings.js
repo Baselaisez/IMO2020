@@ -298,6 +298,9 @@ export function initSettings() {
 
   document.getElementById('btn-export-xlsx').addEventListener('click', async e => {
     const btn = e.currentTarget; btn.disabled = true;
+    // Büyük veride hazırlama birkaç saniye sürer ve ardından "Farklı Kaydet"
+    // paneli açılır. Arada hiçbir şey göstermemek "çalışmıyor" hissi veriyordu.
+    banner('Excel dosyası hazırlanıyor… birazdan kaydetme penceresi açılacak.', 'ok', 0);
     const r = await guarded(async () => {
       const d = await allData(state.exec);
       const wb = buildWorkbook(d.patients, d.payments, todayIso(), d.deliveries);
@@ -310,6 +313,9 @@ export function initSettings() {
 
   document.getElementById('btn-export-json').addEventListener('click', async e => {
     const btn = e.currentTarget; btn.disabled = true;
+    // Büyük veride hazırlama birkaç saniye sürer ve ardından "Farklı Kaydet"
+    // paneli açılır. Arada hiçbir şey göstermemek "çalışmıyor" hissi veriyordu.
+    banner('Yedek hazırlanıyor… birazdan kaydetme penceresi açılacak.', 'ok', 0);
     const r = await guarded(async () => {
       const d = await allData(state.exec);
       const b = makeBackup(d.patients, d.payments, new Date().toISOString(), d.deliveries, d.deletions);
