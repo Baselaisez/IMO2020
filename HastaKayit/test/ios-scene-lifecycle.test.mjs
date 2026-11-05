@@ -108,3 +108,47 @@ test('ön denetim: DEPODAKİ gerçek dosyalar geçiyor', () => {
     appDelegate: readFileSync('ios/App/App/AppDelegate.swift', 'utf8'),
   }), []);
 });
+
+// --- SİYAH EKRAN (ikinci arıza) -------------------------------------------
+// UIScene düzeltmesinden sonra çökme bitti ama telefonda SİYAH EKRAN geldi:
+// uygulama açılıyor, hiçbir şey çizilmiyor. Sebep, pencerenin kurulmasını
+// Info.plist'teki UISceneStoryboardFile'a bırakmaktı — pratikte kurmadı.
+// Siyah ekran "kök görünüm denetleyicisi yok" demektir.
+
+const SCENE = SWIFT.slice(SWIFT.indexOf('class SceneDelegate'));
+
+test('pencere AÇIKÇA kuruluyor (storyboard’a güvenmiyoruz)', () => {
+  assert.match(SCENE, /UIWindow\(windowScene:/,
+    'pencere elle kurulmalı — otomatik kuruluma güvenmek siyah ekran verdi');
+});
+
+test('kök denetleyici Main.storyboard’dan atanıyor', () => {
+  assert.match(SCENE, /UIStoryboard\(name:\s*"Main"/);
+  assert.match(SCENE, /instantiateInitialViewController\(\)/);
+  assert.match(SCENE, /rootViewController\s*=/);
+});
+
+test('pencere görünür yapılıyor', () => {
+  assert.match(SCENE, /makeKeyAndVisible\(\)/);
+});
+
+test('UIKit zaten kurduysa ÜZERİNE YAZILMIYOR (çift kurulum olmaz)', () => {
+  assert.match(SCENE, /if window == nil/);
+  assert.match(SCENE, /if window\?\.rootViewController == nil/);
+});
+
+test('arka plan siyah bırakılmıyor', () => {
+  assert.match(SCENE, /backgroundColor = \.white/);
+});
+
+test('storyboard açılamazsa SESSİZ siyah ekran yerine mesaj gösteriliyor', () => {
+  // Sessiz başarısızlık bu projede tekrar eden hata türü; en azından kendini
+  // söylemeli.
+  assert.match(SCENE, /failureViewController/);
+  assert.match(SCENE, /Arayüz yüklenemedi/);
+});
+
+test('konsola teşhis satırı yazılıyor', () => {
+  // Siyah ekran yine olursa Xcode konsolunda kök denetleyici görünsün.
+  assert.match(SCENE, /print\(/);
+});

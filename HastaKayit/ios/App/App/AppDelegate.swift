@@ -77,9 +77,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 /// kırılgandır. AppDelegate.swift zaten projede olduğu için sınıfı buraya
 /// koymak aynı sonucu risksiz veriyor.
 ///
-/// Pencereyi KURMUYORUZ: Info.plist'teki UISceneStoryboardFile sayesinde UIKit
-/// Main.storyboard'u (içinde CAPBridgeViewController var) kendisi yükler ve
-/// pencereyi buradaki `window` özelliğine yazar.
+/// PENCERE ELLE KURULUYOR (ikinci düzeltme)
+/// İlk sürümde pencereyi Info.plist'teki UISceneStoryboardFile'ın kurmasına
+/// güvenmiştik. Telefonda sonuç: çökme yok ama **SİYAH EKRAN** — uygulama
+/// açılıyor, hiçbir şey çizilmiyor. Siyah ekran "kök görünüm denetleyicisi
+/// yok" demektir. Artık pencereyi ve kök denetleyiciyi açıkça kuruyoruz;
+/// UIKit zaten kurmuşsa üzerine YAZMIYORUZ (iki kez kurulum olmaz).
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var window: UIWindow?
 
@@ -89,6 +92,21 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     // iletiyoruz — aksi hâlde sessizce çalışmazlardı.
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession,
                options connectionOptions: UIScene.ConnectionOptions) {
+        if let windowScene = scene as? UIWindowScene {
+            if window == nil { window = UIWindow(windowScene: windowScene) }
+            // Arka plan asla siyah kalmasın: yükleme anında bile açık renk.
+            window?.backgroundColor = .white
+            if window?.rootViewController == nil {
+                window?.rootViewController =
+                    UIStoryboard(name: "Main", bundle: nil).instantiateInitialViewController()
+                    ?? SceneDelegate.failureViewController(
+                        "Arayüz yüklenemedi: Main.storyboard açılamadı.")
+            }
+            window?.makeKeyAndVisible()
+            // Xcode konsolunda görünür — siyah ekran dönerse teşhis buradan.
+            print("⚡️ SceneDelegate: kök denetleyici = \(String(describing: window?.rootViewController))")
+        }
+
         if let url = connectionOptions.urlContexts.first?.url {
             _ = ApplicationDelegateProxy.shared.application(UIApplication.shared, open: url, options: [:])
         }
@@ -102,6 +120,31 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
         guard let url = URLContexts.first?.url else { return }
         _ = ApplicationDelegateProxy.shared.application(UIApplication.shared, open: url, options: [:])
+    }
+
+    /// Storyboard açılamazsa SİYAH EKRAN yerine OKUNABİLİR bir mesaj göster.
+    ///
+    /// Sessiz siyah ekran, teşhis edilmesi en zor hata türü: kullanıcı "açılmıyor"
+    /// der, ekranda tek bir ipucu yoktur. Bu uygulamada aynı sınıftan hatayı
+    /// birkaç kez yaşadık (görünmez düğmeler, sessizce atlanan betikler). Bir
+    /// tıbbi kayıt uygulamasında başarısızlık en azından KENDİNİ SÖYLEMELİ.
+    private static func failureViewController(_ message: String) -> UIViewController {
+        let vc = UIViewController()
+        vc.view.backgroundColor = .white
+        let label = UILabel()
+        label.text = "\(message)\n\nTerminal'de şunu çalıştırın:\nnpm run sync"
+        label.numberOfLines = 0
+        label.textAlignment = .center
+        label.textColor = .black
+        label.translatesAutoresizingMaskIntoConstraints = false
+        vc.view.addSubview(label)
+        NSLayoutConstraint.activate([
+            label.centerXAnchor.constraint(equalTo: vc.view.centerXAnchor),
+            label.centerYAnchor.constraint(equalTo: vc.view.centerYAnchor),
+            label.leadingAnchor.constraint(greaterThanOrEqualTo: vc.view.leadingAnchor, constant: 24),
+            label.trailingAnchor.constraint(lessThanOrEqualTo: vc.view.trailingAnchor, constant: -24)
+        ])
+        return vc
     }
 
     func scene(_ scene: UIScene, continue userActivity: NSUserActivity) {
