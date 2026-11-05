@@ -2,7 +2,7 @@ import { addPatient, updatePatient, getPatient, deletePatient, getMeta, findDupl
 import { afterSaveDestination } from './after-save.js';
 import { state, showScreen, guarded, banner, todayIso, esc, openSheet, closeSheet } from './ui.js';
 import { refreshHome } from './ui-home.js';
-import { openCard } from './ui-card.js';
+import { openCard, openCardThenPayment } from './ui-card.js';
 import { fileToResizedDataUrl } from './ui-photo.js';
 import { attachVoice } from './ui-voice.js';
 import { createAutosave, autosaveDelayMs } from './autosave.js';
@@ -333,16 +333,15 @@ export function initForm() {
       autoCreatedId = null; // artık doktorun bilerek kaydettiği bir kayıt
       setAutoStatus('');
       if (afterSaveDestination(formWasNew) === 'home') {
-        // Yeni hasta tamamlandı → sıradaki hastaya hazır ol (bkz. after-save.js).
-        // Kart AÇILMADIĞI için "son açılanlar" şeridini burada elle besliyoruz:
-        // normalde bunu openCard yapar. Böylece doktor ödemeyi eklemek
-        // istediğinde hastayı aramak zorunda kalmaz, ana sayfadaki şeritten
-        // TEK DOKUNUŞLA geri döner.
-        try { await noteRecentPatient(state.exec, state.currentId); }
-        catch (e) { console.error('son açılanlar', e); }
-        banner('Kaydedildi ✓ — ana sayfaya dönüldü', 'ok');
+        // YENİ HASTA AKIŞI: kaydet → ödeme ekranı → bitince ana sayfa.
+        // Muayenehanede hasta gelir, kaydı girilir, ödemesi alınır, sıradaki
+        // hastaya geçilir. Doktor ödeme eklemek için kartı yeniden bulup
+        // "+ Ödeme"ye basmak zorunda kalmasın diye panel kendiliğinden açılıyor.
+        // Panel kapanınca (kaydet ya da vazgeç) ana sayfaya dönülür —
+        // "son açılanlar" şeridini de openCard besliyor.
+        banner('Hasta kaydedildi ✓ — şimdi ödeme ekleyebilirsiniz', 'ok');
         await refreshHome();
-        showScreen('home');
+        await openCardThenPayment(state.currentId);
       } else {
         banner('Kaydedildi ✓', 'ok');
         await refreshHome();

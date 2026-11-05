@@ -49,6 +49,29 @@ export async function openCard(id) {
   showScreen('card');
 }
 
+/**
+ * Yeni hasta kaydedildikten SONRA çağrılır: hasta kartını açar ve hemen
+ * ödeme panelini gösterir.
+ *
+ * NEDEN: muayenehane akışı "hasta gelir → kaydı girilir → ödemesi alınır →
+ * sıradaki". Doktor ödeme eklemek için kartı bulup "+ Ödeme"ye basmak
+ * zorunda kalmasın diye panel kendiliğinden açılıyor. Panel kapanınca
+ * (kaydet ya da vazgeç) ana sayfaya dönülür.
+ *
+ * ASLA FIRLATMAZ: ödeme panelini açamamak, az önce BAŞARIYLA kaydedilmiş
+ * hastayı kaybetmek anlamına gelmemeli.
+ */
+export async function openCardThenPayment(id) {
+  try {
+    await openCard(id);
+    const { patient } = await getPatient(state.exec, id);
+    await paymentSheet(patient, null, { afterNewPatient: true });
+  } catch (e) {
+    console.error('openCardThenPayment', e);
+    banner(`Ödeme ekranı açılamadı — ${e.message || e}`, 'error', 0);
+  }
+}
+
 function safeMonths(p) {
   try { return durationMonths(p.start_date, p.end_date, todayIso()); }
   catch { return null; } // legacy bad dates: show nothing rather than crash the card
@@ -176,7 +199,16 @@ async function refreshAfterMutation() {
   await refreshHome();
 }
 
-async function paymentSheet(p, existing) {
+/**
+ * Ödeme paneli.
+ *
+ * `afterNewPatient`: bu panel YENİ HASTA kaydının hemen ardından açıldıysa
+ * true. Doktorun istediği akış şu: hasta kaydet → ödeme ekranı → bitince
+ * ANA SAYFA (sıradaki hasta). O akışta "Vazgeç" de ana sayfaya döner; hasta
+ * kartından elle açılan panelde ise kartta kalınır (orada çalışmaya devam
+ * ediliyordur).
+ */
+async function paymentSheet(p, existing, { afterNewPatient = false } = {}) {
   let quick;
   try { quick = JSON.parse((await getMeta(state.exec, 'quick_amounts')) || '[1500,2000]'); } catch { quick = [1500, 2000]; }
   openSheet(`
@@ -248,7 +280,11 @@ async function paymentSheet(p, existing) {
     }
   });
 
-  document.getElementById('pay-cancel').addEventListener('click', closeSheet);
+  document.getElementById('pay-cancel').addEventListener('click', async () => {
+    closeSheet();
+    // Yeni hasta akışında "Vazgeç" = "ödeme yok" demek; akış yine biter.
+    if (afterNewPatient) { await refreshHome(); showScreen('home'); }
+  });
   document.getElementById('pay-save').addEventListener('click', async e => {
     const btn = e.currentTarget; btn.disabled = true;
     // Turkish keyboards emit a comma decimal separator; parseAmountInput normalises

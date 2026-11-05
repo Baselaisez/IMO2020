@@ -67,3 +67,33 @@ test('kapalıyken son eşitleme zamanı yine gösterilir', () => {
   assert.match(t, /kapalı/);
   assert.match(t, /2026-11-04 10:00/);
 });
+
+// YENİ AKIŞ (doktorun isteği): hasta kaydet → ödeme ekranı → bitince ana sayfa.
+test('yeni hasta kaydedilince ödeme ekranı açılıyor', () => {
+  const src = readFileSync('src/js/ui-form.js', 'utf8');
+  assert.match(src, /openCardThenPayment\(state\.currentId\)/,
+    'yeni hastadan sonra ödeme paneli açılmalı');
+  // Düzenleme yolu bu akışa GİRMEMELİ.
+  const branch = src.slice(src.indexOf("afterSaveDestination(formWasNew)"));
+  const elseIdx = branch.indexOf('} else {');
+  assert.ok(branch.slice(0, elseIdx).includes('openCardThenPayment'),
+    'ödeme paneli yalnızca YENİ hasta dalında açılmalı');
+  assert.ok(!branch.slice(elseIdx).includes('openCardThenPayment'),
+    'düzenleme dalında ödeme paneli açılmamalı');
+});
+
+test('ödeme panelinde Vazgeç: yalnızca yeni hasta akışında ana sayfaya döner', () => {
+  const src = readFileSync('src/js/ui-card.js', 'utf8');
+  assert.match(src, /afterNewPatient = false/, 'bayrak varsayılan false olmalı');
+  assert.match(src, /if \(afterNewPatient\) \{[^}]*showScreen\('home'\)/s,
+    'Vazgeç yalnızca yeni hasta akışında ana sayfaya götürmeli');
+});
+
+test('openCardThenPayment hata yutmaz ama hastayı da kaybetmez', () => {
+  // Ödeme panelini açamamak, az önce BAŞARIYLA kaydedilmiş hastayı
+  // kaybetmek anlamına gelmemeli.
+  const src = readFileSync('src/js/ui-card.js', 'utf8');
+  const fn = src.slice(src.indexOf('export async function openCardThenPayment'));
+  assert.match(fn.slice(0, 600), /catch/, 'try/catch ile sarmalı');
+  assert.match(fn.slice(0, 600), /banner\(/, 'hata görünür olmalı');
+});

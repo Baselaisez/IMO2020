@@ -9,6 +9,13 @@
 //   YENİ bir kayıt tamamlandıysa ana sayfaya dön; MEVCUT bir kaydı
 //   düzenlediysen bulunduğun yerde kal.
 //
+// YENİ HASTADA ARADA BİR ADIM VAR (doktorun isteği): hasta kaydedilince
+// doğrudan ana sayfaya gidilmez, önce ÖDEME EKRANI açılır. Muayenehane akışı
+// "hasta gelir → kaydı girilir → ödemesi alınır → sıradaki". Ödeme kaydedilse
+// de vazgeçilse de akış ana sayfada biter. Yani varış noktası yine 'home';
+// değişen, oraya giderken ödeme panelinden geçilmesi
+// (bkz. ui-card.openCardThenPayment).
+//
 // İkinci yarısı neden böyle: doktor hasta kartından ✏️ ile bir alanı
 // düzelttiğinde ya da yanlış girilmiş bir ödemeyi düzelttiğinde ana sayfaya
 // fırlatılmak, "bitirdim" değil "kaybettim" hissi verir — baktığı kartı
