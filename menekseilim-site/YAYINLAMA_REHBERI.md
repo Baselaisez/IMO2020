@@ -43,7 +43,6 @@ isterseniz" kısmına bakın).
 | IBAN ve banka | Bağış sayfası | Derneğin IBAN numarası, banka ve şube adı |
 | Medrese adresleri | İletişim sayfası | Atalar, Cevizli, Kurfalı (ve açılınca Topselvi) medreselerinin açık adresi |
 | Sohbet ve zikir günleri | Anasayfa ve Hakkımızda | İsterseniz gün ve saatleri yazarız; şu an "bizi arayın" yazıyor |
-| Videolardaki talebeler | Anasayfa ve Hakkımızda | Videolarda talebelerin yüzü görünüyor; yayında kalacaksa veli izni (aşağıdaki yasal nota bakın) |
 
 Sitede kullanılan bilgiler ve kaynakları:
 
@@ -433,10 +432,10 @@ gelir. Teknik bir yakınınız varsa iyi bir seçenektir.
 
 * **KVKK:** `kvkk.html` sayfası genel bir aydınlatma metnidir; adres ve iletişim
   bilgilerini doldurun.
-* **Çocukların görüntüleri:** Talebe fotoğrafları siteden kaldırıldı. Ancak
-  tanıtım videosunda ve yıl sonu merasimi videolarında talebelerin yüzleri
-  görünüyor. Bunlar da KVKK kapsamında kişisel veridir. Videolar yayında
-  kalacaksa velilerin yazılı iznini alın; izin yoksa videoları kaldıralım.
+* **Çocukların görüntüleri:** Talebe fotoğrafları siteden ve GitHub geçmişinden
+  kaldırıldı. Tanıtım ve yıl sonu merasimi videoları dernek kararıyla sitede
+  kalıyor. Videolarda talebelerin yüzleri göründüğü için velilerin yazılı
+  izinlerini dernek dosyasında saklayın; bir veli isterse ilgili video kaldırılır.
 * **Bağış:** Dernekler, bağışları alındı belgesi (makbuz) karşılığında kabul
   eder. Kamuya açık yardım kampanyası (SMS, kumbara, geniş çaplı çağrı) 2860
   sayılı Yardım Toplama Kanunu kapsamında valilik izni gerektirebilir; web
