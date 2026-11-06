@@ -265,8 +265,23 @@ export function isSyncBusy() { return inFlight; }
 // damgalar eşitlendi ve karşı cihazın yazdığı kayıt "değişmedi" sanılıp
 // atlandı. Parmak izi veriyi anlatır, saati değil: aynı parmak izi zaten aynı
 // veri demektir, o yüzden atlamak güvenlidir.
-let lastFingerprint = null;
-let skippedRounds = 0;
+//
+// HEDEF BAŞINA AYRI: Mac artık İKİ hedefe birden eşitleniyor (iPhone için
+// iCloud, Samsung için Syncthing klasörü) ve "en son bu hedefe ne yazdım"
+// sorusunun cevabı hedefe göre değişir.
+//
+// Dürüst olmak gerekirse tek ortak hafıza da çoğu durumda doğru çalışırdı,
+// çünkü kısa yol parmak izinin yanında HEDEFİN BAŞLIĞINA da bakıyor: başka
+// bir klasörün başlığı tutmazsa tur zaten çalışır. Ayırmanın iki somut
+// kazancı var:
+//   - FULL_SYNC_EVERY güvenlik ağı her hedef için AYRI sayılır; ortak sayaçta
+//     iki hedef aynı 15'liği paylaşır ve bayat başlık düzeltmesi her hedefte
+//     yarı sıklıkta çalışırdı.
+//   - Atlama kararı, okunamayan/eksik bir başlığa bağlı kalmaz; her hedefin
+//     durumu kendi başına doğrudur.
+// Tıbbi kayıtta "çoğu durumda doğru" yeterli bir gerekçe değil.
+const lastFingerprint = new Map();   // hedef anahtarı -> parmak izi
+const skippedRounds = new Map();     // hedef anahtarı -> atlanan tur sayısı
 
 /**
  * Ne kadar atlarsak atlayalım, bu kadar turda bir TAM tur yapılır.
@@ -278,15 +293,21 @@ export const FULL_SYNC_EVERY = 15;
 
 /** Klasör/hesap değişince hafıza geçersizdir — yoksa yanlışlıkla atlanır. */
 export function resetSyncMemory() {
-  lastFingerprint = null;
-  skippedRounds = 0;
+  lastFingerprint.clear();
+  skippedRounds.clear();
 }
 
-export async function syncNow(x, { folder, nowMs = Date.now(), onProgress, force = false } = {}) {
+/** Hedefin hafıza anahtarı. Metin yol kendisi; test adaptörleri tek kova. */
+export function memoryKeyFor(folder) {
+  return typeof folder === 'string' && folder ? folder : 'adapter';
+}
+
+export async function syncNow(x, { folder, nowMs = Date.now(), onProgress, force = false, memoryKey } = {}) {
   const store = toStore(folder);
   if (!store) return { skipped: true, reason: 'disabled' };
   if (inFlight) return { skipped: true, reason: 'busy' };
   inFlight = true;
+  const key = memoryKey || memoryKeyFor(folder);
   const step = (s) => { try { onProgress?.(s); } catch { /* UI hatası eşitlemeyi düşürmesin */ } };
   try {
     // --- Ucuz tur: gerçekten bir şey değişti mi? --------------------------
@@ -294,18 +315,19 @@ export async function syncNow(x, { folder, nowMs = Date.now(), onProgress, force
     // yok. 100.722 kayıtta bu kontrol 19 ms; tam tur 5,5 sn + 40 MB yazma.
     // `force` (açılış, öne gelme, elle "Şimdi Eşitle", kayıt sonrası) bu yolu
     // atlar — kullanıcı bir şey beklediğinde kısa yol kullanılmaz.
-    if (!force && lastFingerprint != null && skippedRounds < FULL_SYNC_EVERY) {
+    const known = lastFingerprint.get(key) ?? null;
+    if (!force && known != null && (skippedRounds.get(key) || 0) < FULL_SYNC_EVERY) {
       step('check');
       const fp = await syncFingerprint(x);
       const head = await readRemoteHead(store);
       // Yerel değişmemiş VE uzaktaki dosya hâlâ bizim son yazdığımız durumu
       // anlatıyorsa yapacak iş yok. Başlık okunamazsa (null) tam tur yapılır.
-      if (fp === lastFingerprint && head && head.fingerprint === lastFingerprint) {
-        skippedRounds++;
+      if (fp === known && head && head.fingerprint === known) {
+        skippedRounds.set(key, (skippedRounds.get(key) || 0) + 1);
         return { skipped: true, reason: 'unchanged' };
       }
     }
-    skippedRounds = 0;
+    skippedRounds.set(key, 0);
 
     step('local');
     const local = await buildSyncState(x);
@@ -320,7 +342,7 @@ export async function syncNow(x, { folder, nowMs = Date.now(), onProgress, force
     // bir sonraki turda ikisi de "değişmedi" diyebilir.
     const fingerprint = await syncFingerprint(x);
     await writeRemoteState(store, merged, fingerprint);
-    lastFingerprint = fingerprint;
+    lastFingerprint.set(key, fingerprint);
     step('done');
     return { pulled: countOf(remote), pushed: countOf(merged), applied, at: new Date(nowMs).toISOString() };
   } catch (e) {
@@ -364,15 +386,49 @@ export function syncPlatform() {
  * VARSAYILAN OLARAK AÇIK olması buna bağlı (aşağıya bakın).
  */
 export function pickSyncTarget({ platform, folder, icloud, icloudPath }) {
+  const list = pickSyncTargets({ platform, folder, icloud, icloudPath });
+  return list[0] || { target: '', targetLabel: '', auto: false };
+}
+
+/**
+ * Bu turda yazılacak TÜM hedefler (saf — testi var).
+ *
+ * NEDEN BİRDEN FAZLA: Samsung ile Apple cihazları birbirine bağlamanın yolu
+ * Mac'i KÖPRÜ yapmaktan geçiyor.
+ *
+ *     iPhone ⇄ iCloud ⇄ [MAC] ⇄ Syncthing klasörü ⇄ Samsung
+ *
+ * Android'de masaüstündeki gibi "klasörü diske indirip eşitleyen" bir bulut
+ * istemcisi yok (Drive ve Dropbox'ın Android uygulamaları başka uygulamalara
+ * klasör düzeyinde yazma izni güvenilir biçimde vermez). Syncthing ise iki
+ * cihaz arasında doğrudan klasör eşitler — hesap da sunucu da gerekmez, veri
+ * muayenehaneden çıkmaz. Ama iPhone Syncthing'i kullanamaz, Samsung da
+ * iCloud'u. Ortak nokta Mac: ikisine de erişebilen tek cihaz o.
+ *
+ * DÜZELTİLEN TUZAK: eskiden Mac'te kullanıcının seçtiği klasör iCloud'u
+ * EZİYORDU. Yani doktor Syncthing klasörünü seçtiği anda iPhone eşitlemesi
+ * sessizce duracaktı — istediğimizin tam tersi. Artık ikisi de hedef.
+ * Tek hedef soran eski çağrılar (pickSyncTarget) aynı cevabı almaya devam
+ * ediyor: seçilen klasör hâlâ listenin başında.
+ *
+ * Birleştirme motorunda hiçbir değişiklik gerekmiyor: tur sırayla her hedefe
+ * karşı çalışır, her turda yerel durumla birleşir ve geri yazar. İki tur
+ * sonunda veri iki yöne de akmış olur.
+ */
+export function pickSyncTargets({ platform, folder, icloud, icloudPath }) {
   if (platform === 'mobile') {
-    if (icloud) return { target: ICLOUD_TARGET, targetLabel: ICLOUD_LABEL, auto: true };
-    return { target: ANDROID_SYNC_DIR, targetLabel: ANDROID_SYNC_LABEL, auto: false };
+    if (icloud) return [{ target: ICLOUD_TARGET, targetLabel: ICLOUD_LABEL, auto: true }];
+    return [{ target: ANDROID_SYNC_DIR, targetLabel: ANDROID_SYNC_LABEL, auto: false }];
   }
   if (platform === 'desktop') {
-    if (folder) return { target: folder, targetLabel: folder, auto: false };
-    if (icloud && icloudPath) return { target: icloudPath, targetLabel: ICLOUD_LABEL, auto: true };
+    const out = [];
+    if (folder) out.push({ target: folder, targetLabel: folder, auto: false });
+    if (icloud && icloudPath && icloudPath !== folder) {
+      out.push({ target: icloudPath, targetLabel: ICLOUD_LABEL, auto: true });
+    }
+    return out;
   }
-  return { target: '', targetLabel: '', auto: false };
+  return [];
 }
 
 export async function getSyncSettings(x) {
@@ -381,16 +437,20 @@ export async function getSyncSettings(x) {
   const folder = (await getMeta(x, META_FOLDER)) || '';
   const last = (await getMeta(x, META_LAST)) || '';
   const cloud = platform === 'web' ? { available: false } : await iCloudStatus();
-  const { target, targetLabel, auto } =
-    pickSyncTarget({ platform, folder, icloud: cloud.available, icloudPath: cloud.path });
+  const targets = pickSyncTargets({ platform, folder, icloud: cloud.available, icloudPath: cloud.path });
+  const { target, targetLabel, auto } = targets[0] || { target: '', targetLabel: '', auto: false };
+  // Birden fazla hedefte "kendiliğinden bulundu" sayılmak için BİRİNİN
+  // kendiliğinden bulunmuş olması yeter: doktor Syncthing klasörünü elle
+  // seçmiş olsa bile iCloud hedefi kendiliğinden eklenir ve eşitleme açık kalır.
+  const anyAuto = targets.some(t => t.auto);
   // VARSAYILAN AÇIK — ama yalnızca hedef kendiliğinden bulunduysa. Doktorun
   // "aynı iCloud hesabındaki iki cihaz birbirini görsün" isteği için hiçbir
   // ayar yapması gerekmemeli. Bilerek kapatmışsa ('off') ona dokunulmaz.
-  const enabled = raw == null ? auto : raw === 'on';
+  const enabled = raw == null ? anyAuto : raw === 'on';
   return {
-    platform, enabled, folder, last, target, targetLabel, auto,
+    platform, enabled, folder, last, target, targetLabel, auto, targets,
     icloud: !!cloud.available, icloudReason: cloud.reason || '',
-    active: enabled && !!target,
+    active: enabled && targets.length > 0,
   };
 }
 
@@ -400,17 +460,71 @@ export async function resolveSyncStore(x) {
   return toStore(s.target);
 }
 
+/** Bu turda yazılacak hedeflerin depoları (etiketleriyle birlikte). */
+export async function resolveSyncStores(x) {
+  const s = await getSyncSettings(x);
+  if (!s.active) return [];
+  return s.targets
+    .map(t => ({ ...t, store: toStore(t.target) }))
+    .filter(t => t.store);
+}
+
 // Tetikleyicilerin (açılış, zamanlayıcı, mutasyon) tek giriş noktası:
 // ayarlar kapalıysa sessizce çıkar, açıksa eşitler ve son eşitleme zamanını
 // meta'ya yazar.
 export async function syncIfConfigured(x, opts = {}) {
-  const store = await resolveSyncStore(x);
-  if (!store) return { skipped: true, reason: 'disabled' };
-  const r = await syncNow(x, { ...opts, folder: store });
-  if (!r.error && !r.skipped) {
-    try { await setMeta(x, META_LAST, r.at); } catch (e) { console.error('sync_last_at', e); }
+  const targets = await resolveSyncStores(x);
+  if (!targets.length) return { skipped: true, reason: 'disabled' };
+
+  // Hedefler SIRAYLA işlenir. Bir hedefin hatası (bulut istemcisi kapalı,
+  // klasör bağlı değil) diğerini DURDURMAZ: Syncthing kapalıyken iPhone
+  // eşitlemesinin de ölmesi kabul edilemez. Hatalar toplanıp birlikte dönülür.
+  const results = [];
+  for (const t of targets) {
+    const r = await syncNow(x, { ...opts, folder: t.target, memoryKey: memoryKeyFor(t.target) });
+    results.push({ ...r, targetLabel: t.targetLabel });
   }
-  return r;
+
+  const real = results.filter(r => !r.error && !r.skipped);
+  const errors = results.filter(r => r.error);
+  if (real.length) {
+    try { await setMeta(x, META_LAST, real[real.length - 1].at); } catch (e) { console.error('sync_last_at', e); }
+  }
+  return summarizeRounds(results, real, errors);
+}
+
+/**
+ * Birden çok hedefin sonucunu TEK bir sonuç nesnesine indirger (saf — testi var).
+ * Arayüz ve tetikleyiciler tek hedef varmış gibi çalışmaya devam eder.
+ *
+ * Kural: bir hedef bile iş yaptıysa tur "yapıldı" sayılır ve sayılar toplanır.
+ * Hiçbiri iş yapmadıysa ve hata varsa hata dönülür — hatayı yutmak, doktorun
+ * "eşitlendi" sanıp aslında eşitlenmemiş olması demek olurdu.
+ */
+export function summarizeRounds(results, real = null, errors = null) {
+  const done = real || results.filter(r => !r.error && !r.skipped);
+  const errs = errors || results.filter(r => r.error);
+  if (!done.length) {
+    if (errs.length) {
+      return { error: errs.map(e => (e.targetLabel ? `${e.targetLabel}: ${e.error}` : e.error)).join(' · ') };
+    }
+    return { skipped: true, reason: results[0]?.reason || 'unchanged' };
+  }
+  const sum = (k) => done.reduce((a, r) => a + (Number(r[k]) || 0), 0);
+  const applied = done.reduce((a, r) => {
+    for (const [k, v] of Object.entries(r.applied || {})) a[k] = (a[k] || 0) + (Number(v) || 0);
+    return a;
+  }, {});
+  const out = {
+    pulled: sum('pulled'), pushed: sum('pushed'), applied,
+    at: done[done.length - 1].at, targets: done.length,
+  };
+  // Bir hedef başarılı, biri hatalıysa BUNU SÖYLE. Sessizce başarı demek,
+  // Samsung'a hiç ulaşmamış bir kaydı ulaşmış göstermek olurdu.
+  if (errs.length) {
+    out.partialError = errs.map(e => (e.targetLabel ? `${e.targetLabel}: ${e.error}` : e.error)).join(' · ');
+  }
+  return out;
 }
 
 // --- Otomatik tetikleyiciler ----------------------------------------------

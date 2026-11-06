@@ -554,6 +554,12 @@ export function syncNoteText(s, androidLabel = ANDROID_SYNC_LABEL) {
  */
 export function syncStatusText(s, lastText) {
   if (s.active) {
+    // Mac artık İKİ hedefe birden yazabiliyor (iPhone için iCloud, Samsung
+    // için Syncthing klasörü). Doktor hangilerinin kullanıldığını GÖRMELİ:
+    // yalnızca birini yazsaydık, Samsung'a hiç ulaşmayan bir kaydı ulaşmış
+    // sanabilirdi.
+    const labels = (s.targets || []).map(t => t.targetLabel).filter(Boolean);
+    if (labels.length > 1) return `Son eşitleme: ${lastText} — ${labels.join(' + ')}`;
     return s.targetLabel
       ? `Son eşitleme: ${lastText} — ${s.targetLabel}`
       : `Son eşitleme: ${lastText}`;
@@ -579,7 +585,12 @@ async function runManualSync() {
     const r = await syncIfConfigured(state.exec, { force: true, onProgress: (p) => { if (st) st.textContent = `Eşitleniyor… (${p})`; } });
     if (r.error) banner(`EŞİTLEME BAŞARISIZ — ${r.error} (kayıtlarınıza dokunulmadı)`, 'error', 0);
     else if (r.skipped) banner(r.reason === 'busy' ? 'Eşitleme zaten sürüyor.' : 'Eşitleme kapalı.', 'ok');
-    else banner(`Eşitlendi (${r.applied.patientsUpserted} hasta, ${r.applied.paymentsUpserted} ödeme, ${r.applied.deliveriesUpserted} teslimat güncellendi)`, 'ok');
+    else if (r.partialError) {
+      // Hedeflerden biri başarılı, biri değil. Bunu "eşitlendi" diye geçmek,
+      // Samsung'a hiç ulaşmamış bir kaydı ulaşmış göstermek olurdu.
+      banner(`Kısmen eşitlendi — ${r.partialError}. Diğer hedefe yazıldı; `
+        + `bu hedef için kayıtlar HENÜZ GİTMEDİ.`, 'error', 0);
+    } else banner(`Eşitlendi (${r.applied.patientsUpserted} hasta, ${r.applied.paymentsUpserted} ödeme, ${r.applied.deliveriesUpserted} teslimat güncellendi)`, 'ok');
     if (!r.error && !r.skipped) await refreshHome();
   } finally {
     if (btn) btn.disabled = false;
