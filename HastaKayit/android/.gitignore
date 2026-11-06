@@ -53,9 +53,14 @@ captures/
 .idea/navEditor.xml
 
 # Keystore files
-# Uncomment the following lines if you do not want to check your keystore files in.
-#*.jks
-#*.keystore
+# İmza anahtarı ve parolası depoya girmez: keystore.properties parolayı düz
+# metin tutar ve depoya giren bir imza anahtarı, depoyu okuyabilen herkesin
+# bu uygulama adına sahte güncelleme imzalayabilmesi demektir.
+# Anahtarı bilinçli olarak eklemek isterseniz: git add -f ...
+# Ayrıntı ve gerekçe: docs/ANDROID-DERLEME.md
+*.jks
+*.keystore
+keystore.properties
 
 # External native build folder generated in Android Studio 2.2 and later
 .externalNativeBuild
