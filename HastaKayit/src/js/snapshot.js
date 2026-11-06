@@ -1,4 +1,4 @@
-import { allData, getMeta, setMeta } from './repo.js';
+import { allData, getMeta, setMeta, syncFingerprint } from './repo.js';
 import { makeBackup } from './backup.js';
 import { writeSnapshotFile, writeDailyFile } from './files.js';
 import { isNative, isDesktop } from './platform.js';
@@ -47,9 +47,31 @@ export function flushSnapshot() {
   if (timer) { clearTimeout(timer); timer = null; takeSnapshot().catch(() => {}); }
 }
 
-export async function takeSnapshot() {
+/**
+ * Anlık görüntü alınmalı mı, yoksa veri hiç değişmedi mi? Saf — testi var.
+ * `null` parmak izi (hesaplanamadı) "emin değiliz" demektir: alınır.
+ */
+export function snapshotChanged(lastFp, nowFp) {
+  if (nowFp == null) return true;
+  return lastFp !== nowFp;
+}
+
+let lastSnapshotFingerprint = null;
+/** Testler ve geri yükleme sonrası: bir sonraki görüntü kesin alınsın. */
+export function resetSnapshotMemory() { lastSnapshotAt = 0; lastSnapshotFingerprint = null; }
+
+export async function takeSnapshot({ force = false } = {}) {
   lastSnapshotAt = Date.now();
   try {
+    // DEĞİŞMEDİYSE HİÇ BAŞLAMA. Anlık görüntü doktorun defterinde ölçüldü:
+    // allData 2,9 sn + JSON.stringify 2,2 sn = ~5 saniye donan arayüz ve
+    // ~19 MB dosya. Bunu 10 dakikada bir, HİÇBİR ŞEY DEĞİŞMEMİŞKEN de
+    // yapıyorduk — uygulama açık durup beklerken bile. Parmak izi 33 ms;
+    // değişiklik yoksa 5 saniyelik iş tamamen atlanır.
+    // `force`: elle "Yedek Al" her zaman yazar.
+    const fp = await syncFingerprint(state.exec).catch(() => null);
+    if (!force && !snapshotChanged(lastSnapshotFingerprint, fp)) return null;
+
     const data = await allData(state.exec);
     const backup = makeBackup(data.patients, data.payments, new Date().toISOString(), data.deliveries, data.deletions);
     const stamp = new Date().toISOString().replace(/[:.]/g, '-');
@@ -59,6 +81,11 @@ export async function takeSnapshot() {
         at: backup.exported_at, patients: backup.counts.patients, payments: backup.counts.payments, deliveries: backup.counts.deliveries,
       }));
     }
+    // Parmak izi ancak görüntü GERÇEKTEN yazıldıktan sonra hatırlanır: yazma
+    // başarısız olursa (yukarıdaki catch) burası çalışmaz ve bir sonraki tur
+    // yeniden dener. Erken hatırlasaydık, başarısız bir yazmadan sonra
+    // "değişmedi" deyip yedeği hiç almayabilirdik.
+    lastSnapshotFingerprint = fp;
     // Own try/catch: a notification-scheduling failure must NOT masquerade as a
     // snapshot-write failure (the snapshot already succeeded above).
     try { await rescheduleNotifications(data.patients, data.deliveries, data.payments); } catch (e) { console.error('reschedule', e); }

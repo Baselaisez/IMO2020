@@ -16,7 +16,7 @@ import { openForm, setFormPhotoFromFile, setFormPhotoFromDataUrl } from './ui-fo
 import { initDragDrop, classifyFiles, attachDropZone, REMOTE_IMAGE_HELP } from './ui-dnd.js';
 import { generateBlankForm, parseForm } from './pdf-form.js';
 import { generateBlankDocx, parseDocx } from './docx-form.js';
-import { takeSnapshot } from './snapshot.js';
+import { takeSnapshot, resetSnapshotMemory } from './snapshot.js';
 import { changePinFlow } from './lock.js';
 import { getRecoveryStatus, setSecurityQuestions, setRecoveryCode } from './pin-recovery.js';
 import { setNotifSound } from './notify.js';
@@ -373,10 +373,17 @@ export function initSettings() {
     document.getElementById('restore-go').addEventListener('click', async ev => {
       const btn = ev.currentTarget; btn.disabled = true;
       const res = await guarded(async () => {
-        if (isNativeSafe()) await takeSnapshot(); // pre-restore safety snapshot (native only)
+        // force: geri yükleme ÖNCESİ emniyet kopyası her hâlükârda yazılmalı —
+        // "veri değişmedi" kısa yolu burada çalışmamalı, üzerine yazılacak
+        // hâlin kopyası bu.
+        if (isNativeSafe()) await takeSnapshot({ force: true });
         return restoreAll(state.exec, r.data);
       });
       if (!res.ok) { btn.disabled = false; return; }
+      // Geri yüklemeden sonra veritabanı baştan sona değişti: anlık görüntü
+      // hafızası sıfırlanmazsa bir sonraki tur "değişmedi" sanıp yeni hâlin
+      // yedeğini almayabilirdi.
+      resetSnapshotMemory();
       closeSheet();
       banner('Geri yükleme tamamlandı', 'ok');
       await refreshHome();

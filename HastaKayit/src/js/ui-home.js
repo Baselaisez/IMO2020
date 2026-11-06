@@ -392,6 +392,27 @@ function injectHomeControls() {
   // third FAB — the bottom-right corner already stacks two (+ and 📋) and a third
   // would reach halfway up the screen on a phone. Sits in the same wrap, so the
   // appbar keeps its 2-slot layout.
+  // ANA SAYFA düğmesi — doktorun ısrarla istediği 🏠, artık ana ekranda da var.
+  //
+  // Form/kart/ayarlar çubuklarındaki ev düğmesi "listeye dön" demekti; ana
+  // ekranda zaten listedesiniz, o yüzden orada hiç yoktu. Ama 100.784 kayıtlık
+  // bir listede ev düğmesinin asıl karşılığı "BAŞA DÖN"dür: arama kutusu dolu,
+  // süzgeç "Tamamlandı"da, liste beş bin satır aşağıda kalmışken tek tek geri
+  // almak gerekiyordu. Bu düğme hepsini bir dokunuşta sıfırlar.
+  //
+  // Sınıfı bilerek `btn-home` DEĞİL: o sınıfın genel (delege edilmiş)
+  // dinleyicisi refreshHome + showScreen('home') çalıştırır; burada ekran
+  // değiştirmiyoruz, görünümü sıfırlıyoruz. İki dinleyici birden çalışsaydı
+  // liste arka arkaya iki kez yüklenirdi.
+  const homeBtn = document.createElement('button');
+  homeBtn.id = 'btn-home-reset';
+  homeBtn.className = 'iconbtn';
+  homeBtn.type = 'button';
+  homeBtn.innerHTML = iconHtml('home');
+  homeBtn.title = 'Başa dön';
+  homeBtn.setAttribute('aria-label', 'Başa dön — aramayı ve süzgeci temizle');
+  wrap.appendChild(homeBtn);
+
   const quickBtn = document.createElement('button');
   quickBtn.id = 'btn-quick-add';
   quickBtn.className = 'iconbtn';
@@ -445,6 +466,18 @@ export function initHome() {
       resetAndLoadFirstPage();
     });
   }
+
+  document.getElementById('btn-home-reset').addEventListener('click', () => {
+    setSelectMode(false);                       // seçim kipindeysek çık
+    const box = document.getElementById('search');
+    box.value = '';
+    state.search = '';
+    document.querySelector('.chip-filter.active')?.classList.remove('active');
+    document.querySelector('.chip-filter[data-f="active"]')?.classList.add('active');
+    state.filter = 'active';
+    window.scrollTo(0, 0);
+    resetAndLoadFirstPage();
+  });
 
   document.getElementById('btn-new').addEventListener('click', () => openForm(null));
   document.getElementById('btn-settings').addEventListener('click', () => openSettings());

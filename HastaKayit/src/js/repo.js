@@ -850,15 +850,47 @@ export async function syncFingerprint(x) {
   const r = rows[0] || {};
   return [r.pc, r.pm, r.yc, r.ym, r.tc, r.tm, r.sc, r.sm].map(v => (v == null ? '' : v)).join('|');
 }
+/**
+ * Bir tablonun eşitlemeye GİREN sütunları: şemadaki her sütun, yerel olanlar
+ * hariç. Liste elle yazılmıyor, `PRAGMA table_info` ile şemadan okunuyor —
+ * yarın şemaya yeni bir sütun eklenirse eşitleme onu kendiliğinden taşır.
+ * Elle yazılmış bir liste, unutulduğu gün o sütunu SESSİZCE eşitlemeyi
+ * bırakırdı; tıbbi kayıtta kabul edilemez bir hata sınıfı.
+ */
+async function syncColumns(x, table, exclude) {
+  const info = await x.query(`PRAGMA table_info(${table})`);
+  return info.map(c => c.name).filter(n => !exclude.includes(n));
+}
+
+/**
+ * Eşitleme durumu — tüm kayıtlar, YEREL KİMLİKLER OLMADAN.
+ *
+ * `id` ve `patient_id` cihaza özeldir ve karşı tarafa yazılmaz; kayıt kimliği
+ * `uuid`, çocuk-ebeveyn bağı `patient_uuid`.
+ *
+ * NEDEN SQL'DE: eskiden `SELECT *` yapılıp JS'te üç kez kopyalanıyordu —
+ * bir kez patient_uuid eklemek için, bir kez de sync-file'daki stripLocalIds
+ * için. Doktorun 100.000 kayıtlık defterinde ölçülen maliyet 2,4 saniyeydi.
+ * Sütunları SQLite seçince ve uuid'yi SQLite eşleştirince JS'te tek bir kopya
+ * bile oluşmuyor.
+ *
+ * LEFT JOIN bilerek: sahibi silinmiş (öksüz) bir ödeme INNER JOIN ile sessizce
+ * DÜŞERDİ. Eski davranış onu patient_uuid'siz de olsa taşıyordu; eşitlemenin
+ * veri eksiltmesi yasak.
+ */
 export async function buildSyncState(x) {
-  const patients = await x.query('SELECT * FROM patients');
-  const payments = await x.query('SELECT * FROM payments');
-  const deliveries = await x.query('SELECT * FROM deliveries');
-  const uuidById = Object.fromEntries(patients.map(p => [p.id, p.uuid]));
+  const pCols = await syncColumns(x, 'patients', ['id']);
+  const oCols = await syncColumns(x, 'payments', ['id', 'patient_id']);
+  const dCols = await syncColumns(x, 'deliveries', ['id', 'patient_id']);
+  const join = (cols) => cols.map(c => `c.${c}`).join(', ');
   return {
-    patients,
-    payments: payments.map(o => ({ ...o, patient_uuid: uuidById[o.patient_id] })),
-    deliveries: deliveries.map(d => ({ ...d, patient_uuid: uuidById[d.patient_id] })),
+    patients: await x.query(`SELECT ${pCols.join(', ')} FROM patients`),
+    payments: await x.query(
+      `SELECT ${join(oCols)}, p.uuid AS patient_uuid
+         FROM payments c LEFT JOIN patients p ON p.id = c.patient_id`),
+    deliveries: await x.query(
+      `SELECT ${join(dCols)}, p.uuid AS patient_uuid
+         FROM deliveries c LEFT JOIN patients p ON p.id = c.patient_id`),
     deletions: await getDeletions(x),
   };
 }

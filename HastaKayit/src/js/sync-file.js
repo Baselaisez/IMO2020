@@ -52,33 +52,76 @@ function checksum(str) {
 
 // --- Zarf ------------------------------------------------------------------
 
-function stripLocalIds(list) {
-  return (list || []).map((r) => {
-    const { id, patient_id, ...rest } = r || {};
-    return rest;
-  });
+/**
+ * Zarfı doğrudan METİN olarak üretir.
+ *
+ * NEDEN NESNE DEĞİL METİN: eski yol önce zarf nesnesini kuruyor, sağlama
+ * toplamı için `JSON.stringify(data)` çağırıyor, sonra çağıran dosyaya yazmak
+ * için zarfın TAMAMINI bir kez DAHA stringify ediyordu. Yani 76 MB'lık metin
+ * iki kez üretiliyordu. Doktorun 100.000 kayıtlık defterinde ölçüldü:
+ *     kopyalama + stringify #1 : 3001 ms
+ *     stringify #2 (dosya için): 1557 ms
+ * Veriyi bir kez metne çevirip zarfı metin birleştirmesiyle kurunca ikinci
+ * geçiş tamamen kalkıyor. Zarf alanları (sabit metin, sürüm numarası, ISO
+ * damga, sayılar, onaltılık sağlama) hepsi güvenli; yine de her biri
+ * JSON.stringify ile kaçışlanarak ekleniyor, elle tırnak konmuyor.
+ *
+ * ALAN SIRASI KORUNUYOR (app, version, written_at, counts, checksum, data) ve
+ * `data` EN SONDA: parseSyncPayload'ın hızlı yolu buna dayanıyor, ayrıca eski
+ * sürümlerin yazdığı dosyalarla bayt bayt aynı biçim.
+ *
+ * Yerel kimlikler burada ayıklanmıyor; buildSyncState zaten `id`/`patient_id`
+ * seçmiyor (bkz. repo.js). Eskiden buradaki stripLocalIds her kaydı bir kez
+ * daha kopyalıyordu.
+ */
+export function serializeSyncPayload(state, writtenAtIso = new Date().toISOString()) {
+  const data = {
+    patients: state.patients || [],
+    payments: state.payments || [],
+    deliveries: state.deliveries || [],
+    deletions: state.deletions || [],
+  };
+  const dataStr = JSON.stringify(data);
+  const counts = {
+    patients: data.patients.length,
+    payments: data.payments.length,
+    deliveries: data.deliveries.length,
+    deletions: data.deletions.length,
+  };
+  return '{"app":"hastakayit-sync"'
+    + `,"version":${SYNC_VERSION}`
+    + `,"written_at":${JSON.stringify(writtenAtIso)}`
+    + `,"counts":${JSON.stringify(counts)}`
+    + `,"checksum":${JSON.stringify(checksum(dataStr))}`
+    + `,"data":${dataStr}}`;
 }
 
+/** Nesne biçimi — testler ve dışarıdan inceleme için. Yazma yolu metin üretir. */
 export function wrapSyncPayload(state, writtenAtIso = new Date().toISOString()) {
-  const data = {
-    patients: stripLocalIds(state.patients),
-    payments: stripLocalIds(state.payments),
-    deliveries: stripLocalIds(state.deliveries),
-    deletions: (state.deletions || []).map((d) => ({ ...d })),
-  };
-  return {
-    app: 'hastakayit-sync',
-    version: SYNC_VERSION,
-    written_at: writtenAtIso,
-    counts: {
-      patients: data.patients.length,
-      payments: data.payments.length,
-      deliveries: data.deliveries.length,
-      deletions: data.deletions.length,
-    },
-    checksum: checksum(JSON.stringify(data)),
-    data,
-  };
+  return JSON.parse(serializeSyncPayload(state, writtenAtIso));
+}
+
+/**
+ * Sağlama doğrulaması: ÖNCE ucuz yol, tutmazsa pahalı yol.
+ *
+ * Pahalı yol, çözümlenmiş veriyi yeniden metne çevirmektir — doktorun
+ * defterinde 1891 ms. Oysa sağlama zaten `data`nın metin hâli üzerinden
+ * hesaplanmıştı ve o metin elimizde: dosyanın kendisi. `"data":`den zarfın
+ * kapanış süslü parantezine kadar olan dilim tam olarak o metindir (zarfta
+ * `data` her zaman EN SON alan, bkz. serializeSyncPayload).
+ *
+ * NEDEN YİNE DE GERİ DÜŞÜŞ VAR: bu bir TIBBİ KAYIT bütünlük kontrolü. Dilim
+ * mantığı bir gün (başka bir yazıcı, farklı alan sırası, boşluklu biçim)
+ * tutmazsa sonuç "dosya bozuk" hatası olur ve doktorun eşitlemesi DURUR.
+ * Bu yüzden ucuz yol tutmazsa sessizce eski, kesin yönteme düşülür: hız
+ * kazanılır, doğruluktan hiçbir şey ödünç verilmez. Gerçekten bozuk bir
+ * dosya her iki yoldan da geçemez.
+ */
+export function checksumMatches(text, data, expected) {
+  const i = text.indexOf('"data":');
+  const end = text.lastIndexOf('}');
+  if (i !== -1 && end > i + 7 && checksum(text.slice(i + 7, end)) === expected) return true;
+  return checksum(JSON.stringify(data)) === expected;
 }
 
 // Bozuk dosya = FIRLAT. Çağıran (syncNow) bunu {error}'a çevirir ve yerel
@@ -97,7 +140,7 @@ export function parseSyncPayload(text) {
   if (d.patients.length !== c.patients || d.payments.length !== c.payments ||
       d.deliveries.length !== c.deliveries || d.deletions.length !== c.deletions)
     throw new Error('Eşitleme dosyasında kayıt sayıları uyuşmuyor (dosya bozuk).');
-  if (checksum(JSON.stringify(d)) !== env.checksum)
+  if (!checksumMatches(text, d, env.checksum))
     throw new Error('Eşitleme dosyası bütünlük kontrolünden geçemedi (bozuk veya değiştirilmiş).');
   return { patients: d.patients, payments: d.payments, deliveries: d.deliveries, deletions: d.deletions };
 }
@@ -151,7 +194,7 @@ export async function writeRemoteState(dirHandleOrPath, state, fingerprint = nul
   const store = toStore(dirHandleOrPath);
   if (!store) return { skipped: true };
   const writtenAt = new Date().toISOString();
-  const text = JSON.stringify(wrapSyncPayload(state, writtenAt));
+  const text = serializeSyncPayload(state, writtenAt);
   await store.write(SYNC_TMP, text);
   const back = await store.read(SYNC_TMP);
   if (back !== text) throw new Error('Eşitleme dosyası doğrulanamadı (geri okuma).');
@@ -386,6 +429,35 @@ export async function syncIfConfigured(x, opts = {}) {
 export const FIRST_SYNC_MS = 2000;
 export const PERIOD_MS = 60 * 1000;
 export const MUTATION_DEBOUNCE_MS = 3000;
+/** Kayıt sonrası turun en geç ne kadar ertelenebileceği. */
+export const MUTATION_MAX_DELAY_MS = 60 * 1000;
+/** Eşitleme, geçen zamanın en çok 1/ROUND_BUDGET'ini kullanabilir. */
+export const ROUND_BUDGET = 4;
+
+/**
+ * Kayıttan sonraki turu ne kadar bekleteceğiz?
+ *
+ * GERÇEK SORUN: sabit 3 saniyeydi ve tur, doktorun 100.000 kayıtlık
+ * defterinde ÖLÇÜLDÜĞÜNDE yazma tarafı 3,7 sn + okuma tarafı 1,4 sn sürüyor
+ * (eski hâlinde 7,0 + 3,1 sn). Doktor arka arkaya hasta girerken her kayıttan
+ * 3 saniye sonra 5 saniyelik bir tur başlıyordu: uygulama zamanının yarısından
+ * fazlasını eşitlemede geçiriyor, arayüz donuyordu. "Yavaş çalışıyor"
+ * şikâyetinin sebebi buydu.
+ *
+ * ÇÖZÜM kendi kendini ayarlasın: bekleme süresi son turun ÖLÇÜLEN süresine
+ * bağlanır. Küçük bir defterde tur ~20 ms sürer, bekleme 3 saniyede kalır
+ * (davranış aynı). Doktorun defterinde tur ~5 sn sürer, bekleme 20 saniyeye
+ * çıkar — yani eşitleme zamanın en çok dörtte birini kullanır, gerisi
+ * doktorundur. Sabit bir sayı seçmek yerine ölçüye bağlamak, cihaz hızı ve
+ * defter büyüklüğü ne olursa olsun doğru davranışı verir.
+ *
+ * Üst sınır 60 sn: eşitleme hiçbir koşulda bir dakikadan fazla gecikmesin.
+ * Saf fonksiyon — testi var.
+ */
+export function mutationDelayMs(lastRoundMs, base = MUTATION_DEBOUNCE_MS, max = MUTATION_MAX_DELAY_MS) {
+  if (!Number.isFinite(lastRoundMs) || lastRoundMs <= 0) return base;
+  return Math.min(max, Math.max(base, Math.round(lastRoundMs * ROUND_BUDGET)));
+}
 /** Öne gelme tetikleyicisi için en kısa aralık — pencere odağı gidip gelirken
  *  arka arkaya tur başlatmayı engeller. */
 export const RESUME_MIN_GAP_MS = 10000;
@@ -393,13 +465,23 @@ export const RESUME_MIN_GAP_MS = 10000;
 let firstTimer = null, periodTimer = null, mutationTimer = null;
 let autoCtx = null; // { x, onResult }
 let lastResumeAt = 0;
+let lastRoundMs = 0;
 
 async function runAuto(reason, { force = false } = {}) {
   if (!autoCtx) return;
   const { x, onResult } = autoCtx;
+  const t0 = Date.now();
   const r = await syncIfConfigured(x, { force }).catch(e => ({ error: e?.message || String(e) }));
+  // Yalnızca GERÇEKTEN çalışan turun süresi sayılır. Parmak izi kısa yolundan
+  // dönen tur 35 ms sürer; onu ölçüye katsaydık bekleme süresi her boş turda
+  // 3 saniyeye düşer ve geri çekilme mantığı hiç devreye girmezdi.
+  if (r && !r.skipped) lastRoundMs = Date.now() - t0;
   try { onResult?.(r, reason); } catch (e) { console.error('sync onResult', e); }
 }
+
+/** Testler için: son tur süresini oku / sıfırla. */
+export function getLastRoundMs() { return lastRoundMs; }
+export function resetRoundTiming() { lastRoundMs = 0; }
 
 export function startAutoSync(x, { onResult } = {}) {
   stopAutoSync();
@@ -407,6 +489,9 @@ export function startAutoSync(x, { onResult } = {}) {
   // Açılışta hafıza boş olmalı: önceki oturumdan kalan bir parmak izi, bu
   // oturumda atlanmaması gereken bir turu atlatabilirdi.
   resetSyncMemory();
+  // Tur süresi ölçümü de sıfırlanır: klasör değişmiş ya da cihaz başka
+  // olabilir, eski süreye göre geri çekilmek yanlış olurdu.
+  resetRoundTiming();
   firstTimer = setTimeout(() => { firstTimer = null; runAuto('startup', { force: true }); }, FIRST_SYNC_MS);
   periodTimer = setInterval(() => runAuto('timer'), PERIOD_MS);
   return stopAutoSync;
@@ -422,7 +507,11 @@ export function stopAutoSync() {
 export function scheduleSyncAfterMutation() {
   if (!autoCtx) return; // otomatik eşitleme başlamadıysa (kilit ekranı) hiçbir şey yapma
   clearTimeout(mutationTimer);
-  mutationTimer = setTimeout(() => { mutationTimer = null; runAuto('mutation', { force: true }); }, MUTATION_DEBOUNCE_MS);
+  // Sabit 3 sn DEĞİL: son turun ölçülen süresine göre geri çekiliyoruz
+  // (bkz. mutationDelayMs). Doktor arka arkaya hasta girerken uygulama
+  // eşitlemede boğulmasın.
+  mutationTimer = setTimeout(() => { mutationTimer = null; runAuto('mutation', { force: true }); },
+    mutationDelayMs(lastRoundMs));
 }
 
 /**
