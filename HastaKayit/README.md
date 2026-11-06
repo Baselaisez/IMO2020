@@ -118,5 +118,10 @@ iPhone'da girilen hasta Mac'te, Mac'te girilen hasta iPhone'da belirir. Klasör
 seçmek, hesap açmak gerekmez. 5.8'e kadar bu çalışmıyordu — sebebi ve
 düzeltmesi: [docs/ICLOUD-ESITLEME.md](docs/ICLOUD-ESITLEME.md)
 
-Android/Windows ya da Dropbox–OneDrive ile paylaşılan klasör yolu da duruyor:
+**Samsung (Android) ile Apple cihazlar** arasında eşitleme Mac üzerinden
+köprülenir — `iPhone ⇄ iCloud ⇄ Mac ⇄ Syncthing klasörü ⇄ Samsung`. Mac her
+turda iki hedefe birden yazar. Kurulum ve ilk kurulumdaki yedek-al/kaldır/kur
+adımları: [docs/SAMSUNG-ESITLEME.md](docs/SAMSUNG-ESITLEME.md)
+
+Windows ya da Dropbox–OneDrive ile paylaşılan klasör yolu da duruyor:
 [docs/ESITLEME.md](docs/ESITLEME.md)
