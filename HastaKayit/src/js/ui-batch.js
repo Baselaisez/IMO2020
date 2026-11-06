@@ -46,7 +46,7 @@ export async function openBatchImport(files) {
   if (!list.length) return;
 
   openSheet(`
-    <h4>📚 Toplu Form Aktarımı</h4>
+    <h4>Toplu Form Aktarımı</h4>
     <p class="muted">${list.length} dosya okunuyor…</p>
   `);
 
@@ -105,7 +105,7 @@ function renderReview(marked, sum) {
   let checks = initialChecks(marked);
 
   openSheet(`
-    <h4>📚 Toplu Form Aktarımı</h4>
+    <h4>Toplu Form Aktarımı</h4>
     <p class="muted">${sum.ok} form okundu · ${sum.dup} olası kopya · ${sum.err} okunamadı</p>
     <button id="bi-toggle-all" type="button" class="ghost" style="padding:6px 0">Tümünü Seç / Hiçbirini Seçme</button>
     <div id="bi-rows" style="max-height:46vh;overflow-y:auto;border:1px solid var(--line);border-radius:10px;background:#fff">

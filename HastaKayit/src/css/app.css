@@ -3,9 +3,31 @@
 body { font-family: system-ui, sans-serif; background: var(--bg); color: #222; font-size: 16px; }
 .hidden { display: none !important; }
 .screen { min-height: 100vh; padding-bottom: 80px; }
-.appbar { position: sticky; top: 0; z-index: 5; background: var(--blue); color: #fff; padding: 14px 12px;
-  padding-top: calc(14px + env(safe-area-inset-top)); font-weight: 600; display: flex; justify-content: space-between; align-items: center; }
-.iconbtn { background: none; border: 0; color: inherit; font-size: 18px; padding: 4px 8px; }
+/* Üst çubuk: dolgu 14px DEĞİL 6px. Düğmeler 44px'e çıktığı için çubuğun toplam
+   yüksekliği aynı kalıyor (6+44+6 = 14+28+14 = 56px) — görünüm değişmedi,
+   dokunma alanı 1,5 katına çıktı. */
+.appbar { position: sticky; top: 0; z-index: 5; background: var(--blue); color: #fff; padding: 6px 8px;
+  padding-top: calc(6px + env(safe-area-inset-top)); font-weight: 600; display: flex; justify-content: space-between; align-items: center; }
+
+/* --- DOKUNMA ALANI (44px) ------------------------------------------------
+   GERÇEK ŞİKÂYET: "simgelere basmak için birkaç kez tıklamak gerekiyor,
+   uygulama yavaş çalışıyor." Yavaşlık değildi — ISKALAMAYDI.
+   Eski ölçü: 20px simge + `padding: 4px 8px` = 36 × 28 piksel dokunma alanı.
+   Apple'ın İnsan Arayüzü Kılavuzu asgarî 44 × 44 pt ister; parmak ucunun
+   isabet alanı ~45px'tir. 28px yüksekliğinde bir hedefi parmakla vurmak kumar:
+   8px yukarı kayan dokunuş hiçbir şeye denk gelir, yan kayan dokunuş KOMŞU
+   düğmeye denk gelir (üst çubuktaki üç düğme arasında yalnızca 2px boşluk var).
+   Fareyle fark edilmiyordu çünkü fare piksel hassasiyetindedir — hata bu yüzden
+   Mac'te değil yalnızca telefonda görünüyordu.
+   Asgarî ölçü yazıyla gelen düğmelere de verildi: panellerdeki Kaydet/Vazgeç,
+   süzgeç çipleri, ödeme panelindeki Yapıldı/Yapılacak ve hızlı tutar düğmeleri. */
+.iconbtn { background: none; border: 0; color: inherit; font-size: 18px;
+  min-width: 44px; min-height: 44px; padding: 0 6px; }
+button.ghost { min-height: 44px; }
+.chip-filter, .seg button, .quick-row button, .actions button { min-height: 44px; }
+/* Mikrofon düğmesi istisna: etiket satırının İÇİNDE duruyor ve yalnızca
+   masaüstünde görünür (fare piksel hassasiyetinde) — 44px satırı şişirirdi. */
+.mic-btn { min-height: 0; }
 
 /* --- Simgeler ------------------------------------------------------------
    Arayüzdeki simgeler EMOJİ değil, gömülü SVG (bkz. src/js/icons.js). Emoji
@@ -21,7 +43,13 @@ body { font-family: system-ui, sans-serif; background: var(--bg); color: #222; f
    boşluk bırakmaz. */
 /* Üst çubuktaki sürüm etiketi — hangi yapının çalıştığı bir bakışta görünsün. */
 .ver { font-weight: 400; font-size: 12px; opacity: .65; margin-left: 6px; }
-.ic { flex: none; vertical-align: -0.22em; margin-right: 6px; }
+/* `pointer-events: none` ŞART, süs değil: dokunuş SVG'nin kendisine düşerse
+   WKWebView (iPhone) bazı durumlarda tıklamayı düğmeye hiç ulaştırmıyor —
+   kullanıcı tam simgenin üstüne basar, hiçbir şey olmaz; kenarına basınca
+   çalışır. Bu kural dokunuşu simgenin İÇİNDEN geçirip düğmeye verir, yani
+   düğmenin her noktası aynı davranır. Simgeler tamamen süs olduğu için
+   (yanlarında yazı ya da aria-label var) hiçbir şey kaybetmiyoruz. */
+.ic { flex: none; vertical-align: -0.22em; margin-right: 6px; pointer-events: none; }
 /* Yalnızca-simge düğmelerde sağ boşluk istemiyoruz. DİKKAT: `.ic:only-child`
    BURADA ÇALIŞMAZ — CSS'te `:only-child` yalnızca ELEMENT kardeşlere bakar,
    metin düğümlerini saymaz. "<svg/>Randevu" biçimindeki düğmelerde (yazı bir
@@ -62,7 +90,15 @@ body { font-family: system-ui, sans-serif; background: var(--bg); color: #222; f
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='1.8' stroke-linecap='round'%3E%3Ccircle cx='10.5' cy='10.5' r='6.5'/%3E%3Cpath d='M15.4 15.4L21 21'/%3E%3C/svg%3E");
   background-repeat: no-repeat; background-position: 12px 50%; }
 .today { background: #eaf1fb; margin: 0 8px 8px; border-radius: 10px; padding: 10px 12px; }
-.chips-row { display: flex; gap: 6px; margin: 0 8px 8px; }
+/* Dört süzgeç çipi (Aktif / Tamamlandı / Tümü / Asla Bakılmayacak) küçük bir
+   iPhone'un 375px'ine SIĞMIYOR: sonuncusu sağdan taşıp kısmen erişilemez
+   kalıyordu. Alt alta kaydırmak (flex-wrap) listeyi aşağı itiyor; çözüm yatay
+   kaydırma — telefonda alışılmış davranış, Mac'te zaten hepsi sığdığı için
+   görünmez. `flex: none` + `nowrap` olmadan çipler sıkışıp iki satıra bölünür. */
+.chips-row { display: flex; gap: 6px; margin: 0 8px 8px; overflow-x: auto;
+  -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+.chips-row::-webkit-scrollbar { display: none; }
+.chip-filter { flex: none; white-space: nowrap; }
 .chip-filter { border: 1px solid #cfd8e6; background: #fff; color: var(--blue); border-radius: 16px; padding: 6px 14px; }
 .chip-filter.active { background: var(--blue); color: #fff; }
 .plist { padding: 0 8px; }
@@ -86,7 +122,21 @@ button.ghost { background: none; border: 0; color: var(--blue); padding: 10px; }
 .lock-box { max-width: 300px; margin: 25vh auto 0; text-align: center; display: flex; flex-direction: column; gap: 12px; }
 .lock-box input { text-align: center; font-size: 24px; letter-spacing: 8px; padding: 10px; border: 1px solid #ccc; border-radius: 10px; }
 .overlay { position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 50; display: flex; align-items: flex-end; }
-.sheet { background: #fff; width: 100%; border-radius: 16px 16px 0 0; padding: 16px; padding-bottom: calc(16px + env(safe-area-inset-bottom)); }
+/* Alt panel KAYDIRILABİLİR olmak zorunda.
+   GERÇEK HATA: "ödemeler ekranı iyi çalışmıyor." Ödeme paneli uzundur —
+   başlık, Yapıldı/Yapılacak, iki hızlı tutar, Tutar, Tarih, Açıklama, Dekont
+   satırı, Kaydet, (düzenlemede) Ödemeyi Sil, Vazgeç. Toplamı küçük bir iPhone'da
+   ~560px. Klavye açılınca kullanılabilir yükseklik ~330px'e düşer. max-height
+   ve overflow olmadığı için panel ekranın ALTINA taşıyordu ve kaydırma da
+   olmadığı için Kaydet'e ULAŞILAMIYORDU — doktor tutarı yazıyor, kaydedemiyor.
+   96px payı üstte bırakıyoruz ki altındaki koyu kaplamadan panelin bittiği
+   görülsün (tam ekran olsa panel mi sayfa mı belli olmazdı).
+   `overscroll-behavior: contain` → panelin sonuna gelince arkadaki hasta
+   listesi kaymaya başlamaz. */
+.sheet { background: #fff; width: 100%; border-radius: 16px 16px 0 0; padding: 16px;
+  padding-bottom: calc(16px + env(safe-area-inset-bottom));
+  max-height: calc(100vh - 96px); overflow-y: auto; overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch; }
 .sheet h4 { margin-bottom: 10px; }
 .quick-row { display: flex; gap: 8px; margin-bottom: 10px; }
 .quick-row button { flex: 1; border: 1px solid #cfd8e6; background: #fff; color: var(--blue); border-radius: 10px; padding: 10px 0; font-weight: 600; }
@@ -105,7 +155,10 @@ table.monthly { width: 100%; border-collapse: collapse; background: #fff; }
 table.monthly td, table.monthly th { border: 1px solid var(--line); padding: 8px; font-size: 14px; text-align: left; }
 .warn-band { background: var(--red); color: #fff; font-weight: 700; text-align: center; padding: 10px; }
 .seg { display: flex; gap: 6px; margin-bottom: 8px; }
-.seg button { flex: 1; border: 1px solid #cfd8e6; background: #fff; color: var(--blue); border-radius: 8px; padding: 8px 0; }
+/* flex ortalama: "Yapıldı" düğmesindeki onay simgesi yazıyla aynı satırda ve
+   ortada dursun (komşusu "Yapılacak" ile hizalı görünsün). */
+.seg button { flex: 1; border: 1px solid #cfd8e6; background: #fff; color: var(--blue); border-radius: 8px; padding: 8px 0;
+  display: flex; align-items: center; justify-content: center; }
 .seg button.on { background: var(--blue); color: #fff; }
 .pending-line { color: var(--orange); font-weight: 600; margin-top: 4px; }
 /* Sürükle-bırak: pencere kaplaması + Ayarlar'daki görünür bırakma alanı.
@@ -154,6 +207,9 @@ input, textarea, select, .plist, #card-body, .ledger { -webkit-user-select: text
 html[data-platform="ios"] .screen { min-height: 100dvh; padding-bottom: calc(80px + env(safe-area-inset-bottom)); }
 html[data-platform="ios"] .fab { bottom: calc(24px + env(safe-area-inset-bottom)); right: calc(20px + env(safe-area-inset-right)); }
 html[data-platform="ios"] .banner { padding-top: calc(14px + env(safe-area-inset-top)); }
+/* 100vh iOS'ta yalan söyler (adres/araç çubuğu); panelin yüksekliği de gerçek
+   görünür alana (dvh) göre sınırlanmalı, yoksa Kaydet yine altta kalır. */
+html[data-platform="ios"] .sheet { max-height: calc(100dvh - 96px); }
 html[data-platform="ios"] .form,
 html[data-platform="ios"] .plist { padding-left: calc(8px + env(safe-area-inset-left)); padding-right: calc(8px + env(safe-area-inset-right)); }
 /* iOS'ta bir <input>'un yazı boyu 16px'in altına düşerse Safari odaklanınca

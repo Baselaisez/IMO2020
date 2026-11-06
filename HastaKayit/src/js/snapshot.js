@@ -130,7 +130,7 @@ export async function initSnapshots() {
       const n = async (t) => (await state.exec.query(`SELECT COUNT(*) c FROM ${t}`))[0].c;
       const d = { patients: { length: await n('patients') }, payments: { length: await n('payments') } };
       if (d.patients.length < last.patients || d.payments.length < last.payments) {
-        banner(`DİKKAT: Veritabanında son yedekten daha az kayıt var (beklenen ${last.patients} hasta / ${last.payments} ödeme). Ayarlar → Yedekten Geri Yükle ile kontrol edin. (Az önce kayıt sildiyseniz bu normal olabilir.)`, 'error', 0);
+        banner(`DİKKAT: Veritabanında son yedekten daha az kayıt var (beklenen ${last.patients} hasta / ${last.payments} ödeme). Ayarlar > Yedekten Geri Yükle ile kontrol edin. (Az önce kayıt sildiyseniz bu normal olabilir.)`, 'error', 0);
       }
     }
   } catch (e) {

@@ -1,4 +1,4 @@
-// after-save.js — "Kaydet ✓"ten sonra hangi ekran açılır?
+// after-save.js — "Kaydet"ten sonra hangi ekran açılır?
 //
 // İSTEK: "Yeni hastanın ve ödemenin kaydı bitince uygulama bizi hemen ana
 // sayfaya götürsün." Muayenehane akışı şöyle: hasta gelir → kaydı girilir →

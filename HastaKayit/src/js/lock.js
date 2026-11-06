@@ -270,7 +270,7 @@ async function firstRunSetPin() {
         btn.textContent = 'Aç';
         document.getElementById('lock-msg').textContent = 'PIN girin';
         document.getElementById('pin-input').value = '';
-        banner('PIN kaydedildi ✓', 'ok');
+        banner('PIN kaydedildi', 'ok');
         resolve();
       } catch (e) {
         banner(`PIN kaydedilemedi — ${e.message || e}`, 'error', 0);
@@ -304,7 +304,7 @@ export async function changePinFlow() {
       await setMeta(state.exec, 'pin_salt', newSalt);
       await setMeta(state.exec, 'pin_hash', await hashPin(newPin, newSalt));
       closeSheet();
-      banner('PIN değiştirildi ✓', 'ok');
+      banner('PIN değiştirildi', 'ok');
     } catch (e) {
       banner(`PIN doğrulama hatası — ${e.message || e}`, 'error', 0);
       btn.disabled = false;
@@ -452,7 +452,7 @@ function newPinAfterRecovery() {
       if (p1 !== p2) { banner('PIN’ler eşleşmiyor.', 'error', 2500); btn.disabled = false; return; }
       await resetPinAfterRecovery(state.exec, p1);
       closeSheet();
-      banner('PIN sıfırlandı ✓', 'ok');
+      banner('PIN sıfırlandı', 'ok');
       try { await unlock(); }
       catch (e) { banner(`Açılış hatası — ${e.message || e}`, 'error', 0); }
     } catch (e) {

@@ -10,7 +10,7 @@
 // ekrandan kaybolur, sadece dosya görünür.
 
 export const DND_OVERLAY_TEXT =
-  '📂 Dosyaları buraya bırakın (Form: PDF/Word · Veri: JSON/Excel · Fotoğraf: JPG/PNG)';
+  'Dosyaları buraya bırakın (Form: PDF/Word · Veri: JSON/Excel · Fotoğraf: JPG/PNG)';
 
 const IMAGE_EXT = /\.(jpe?g|png|webp)$/i;
 const DOC_EXT = /\.(pdf|docx|json|xlsx)$/i;

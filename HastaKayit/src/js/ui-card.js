@@ -124,7 +124,7 @@ async function renderCard() {
       <div class="lrow total"><span>Teslimatlar (${deliveries.length})</span><button id="btn-del-add" class="ghost">+ Teslimat</button></div>
       ${deliveries.map(d => `
         <div class="lrow">
-          <span class="muted">${d.method === 'kargo' ? iconHtml('box', 14) + 'Kargo' : iconHtml('hand', 14) + 'Elden'}${d.tracking_no ? ' · ' + esc(d.tracking_no) : ''}${d.planned_date ? ' · Planlanan: ' + esc(fmtDate(d.planned_date)) : ''}${Number(d.delivered) === 1 ? ' · ✓ ' + esc(fmtDate(d.delivered_date)) : ''}</span>
+          <span class="muted">${d.method === 'kargo' ? iconHtml('box', 14) + 'Kargo' : iconHtml('hand', 14) + 'Elden'}${d.tracking_no ? ' · ' + esc(d.tracking_no) : ''}${d.planned_date ? ' · Planlanan: ' + esc(fmtDate(d.planned_date)) : ''}${Number(d.delivered) === 1 ? ' · ' + esc(fmtDate(d.delivered_date)) : ''}</span>
           <button class="ghost del-edit" data-id="${d.id}"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M14.5 5.5l4 4"/></svg></button>
         </div>`).join('')}
     </div>
@@ -214,7 +214,7 @@ async function paymentSheet(p, existing, { afterNewPatient = false } = {}) {
   openSheet(`
     <h4>${existing ? 'Ödemeyi Düzenle' : 'Ödeme Ekle'} — ${esc(p.name)}</h4>
     <div class="seg">
-      <button type="button" id="ps-paid" class="${(existing && existing.status === 'pending') ? '' : 'on'}">✓ Yapıldı</button>
+      <button type="button" id="ps-paid" class="${(existing && existing.status === 'pending') ? '' : 'on'}">${iconHtml('check', 18)}Yapıldı</button>
       <button type="button" id="ps-pending" class="${(existing && existing.status === 'pending') ? 'on' : ''}"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5.3l3.3 2"/></svg>Yapılacak</button>
     </div>
     <div class="quick-row">${quick.map(a => `<button type="button" class="q-amt" data-a="${esc(String(a))}">${fmtTL(a)}</button>`).join('')}</div>
@@ -228,7 +228,7 @@ async function paymentSheet(p, existing, { afterNewPatient = false } = {}) {
         <span id="pay-receipt-preview" class="muted"></span>
         <button id="btn-receipt-remove" type="button" class="ghost" style="display:none">Kaldır</button>
       </div>
-      <button id="pay-save" class="primary">Kaydet ✓</button>
+      <button id="pay-save" class="primary">Kaydet</button>
       ${existing ? '<button id="pay-del" type="button"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4.5 6.5h15"/><path d="M9.5 6.5V4h5v2.5"/><path d="M6.5 6.5L7.5 21h9l1-14.5"/></svg>Ödemeyi Sil</button>' : ''}
       <button id="pay-cancel" type="button" class="ghost">Vazgeç</button>
     </div>
@@ -309,11 +309,11 @@ async function paymentSheet(p, existing, { afterNewPatient = false } = {}) {
     if (afterSaveDestination(!existing) === 'home') {
       // Ödeme de girildiyse hastanın işi bitti → ana sayfa (bkz. after-save.js).
       // Kart yeniden çizilmiyor: zaten terk ediliyor, 100k kayıtta gereksiz iş.
-      banner('Ödeme kaydedildi ✓ — ana sayfaya dönüldü', 'ok');
+      banner('Ödeme kaydedildi — ana sayfaya dönüldü', 'ok');
       await refreshHome();
       showScreen('home');
     } else {
-      banner('Kaydedildi ✓', 'ok');
+      banner('Kaydedildi', 'ok');
       await refreshAfterMutation();
     }
   });
@@ -362,7 +362,7 @@ async function deliverySheet(p, existing) {
       </select></label>
       <label><input id="d-done" type="checkbox" ${Number(e.delivered) === 1 ? 'checked' : ''}> Teslim edildi</label>
       <label id="ddate-wrap" style="${Number(e.delivered) === 1 ? '' : 'display:none'}">Teslim Tarihi<input id="d-ddate" type="date" value="${esc(e.delivered_date || todayIso())}"></label>
-      <button id="d-save" class="primary">Kaydet ✓</button>
+      <button id="d-save" class="primary">Kaydet</button>
       ${existing ? '<button id="d-del" type="button"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4.5 6.5h15"/><path d="M9.5 6.5V4h5v2.5"/><path d="M6.5 6.5L7.5 21h9l1-14.5"/></svg>Teslimatı Sil</button>' : ''}
       <button id="d-cancel" type="button" class="ghost">Vazgeç</button>
     </div>
@@ -385,7 +385,7 @@ async function deliverySheet(p, existing) {
       planned_time: document.getElementById('d-time').value || null, remind_min: Number(document.getElementById('d-remind').value) || 0 };
     const r = await guarded(() => existing ? updateDelivery(state.exec, existing.id, o) : addDelivery(state.exec, o));
     if (!r.ok) { btn.disabled = false; return; }
-    closeSheet(); banner('Kaydedildi ✓', 'ok'); await refreshAfterMutation();
+    closeSheet(); banner('Kaydedildi', 'ok'); await refreshAfterMutation();
     const g = await getPatient(state.exec, p.id);
     const fd = existing ? g.deliveries.find(x => x.id === existing.id) : g.deliveries.slice().sort((a, b) => b.id - a.id)[0];
     if (fd) syncCalendar('delivery', g.patient, fd);
@@ -414,7 +414,7 @@ async function apptSheet(p) {
         <option value="0">Saatinde</option><option value="15">15 dk önce</option><option value="30">30 dk önce</option>
         <option value="60">1 saat önce</option><option value="120">2 saat önce</option><option value="1440">1 gün önce</option>
       </select></label>
-      <button id="appt-save" class="primary">Kaydet ✓</button>
+      <button id="appt-save" class="primary">Kaydet</button>
       <button id="appt-cancel" type="button" class="ghost">Vazgeç</button>
     </div>
   `);
@@ -436,7 +436,7 @@ function confirmComplete(p) {
     <h4>Tedaviyi Tamamla — ${esc(p.name)}</h4>
     <div class="form" style="padding:0">
       <label>Bitiş Tarihi<input id="done-date" type="date" value="${todayIso()}"></label>
-      <button id="done-save" class="primary">Tamamla ✓</button>
+      <button id="done-save" class="primary">Tamamla</button>
       <button id="done-cancel" type="button" class="ghost">Vazgeç</button>
     </div>
   `);
@@ -445,7 +445,7 @@ function confirmComplete(p) {
     const btn = e.currentTarget; btn.disabled = true;
     const r = await guarded(() => completeTreatment(state.exec, p.id, document.getElementById('done-date').value));
     if (!r.ok) { btn.disabled = false; return; }
-    closeSheet(); banner('Tedavi tamamlandı ✓', 'ok'); await refreshAfterMutation();
+    closeSheet(); banner('Tedavi tamamlandı', 'ok'); await refreshAfterMutation();
     if (p.appt_cal_id) { try { await deleteEvent(p.appt_cal_id); } catch (e) { console.error('calendar', e); } }
   });
 }

@@ -82,7 +82,9 @@ test('autoBackupNote: Android metni iPhone/Mac’e sızmaz', () => {
 });
 
 test('notifHelpText: her platform kendi ayar yolunu gösterir', () => {
-  assert.match(notifHelpText('ios'), /Ayarlar → Bildirimler/);
+  // Menü yolu ASCII '>' ile yazılır, '→' ile DEĞİL: doktorun Mac'inde yazı tipi
+  // sembolleri çizmediği için ok işareti boş kutu olarak görünüyordu.
+  assert.match(notifHelpText('ios'), /Ayarlar > Bildirimler/);
   assert.match(notifHelpText('android'), /Telefon Ayarları/);
   assert.match(notifHelpText('macos'), /Sistem Ayarları/);
   assert.equal(notifHelpText('web'), '');

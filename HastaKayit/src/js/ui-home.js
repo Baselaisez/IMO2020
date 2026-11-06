@@ -348,7 +348,7 @@ function openPasteModal() {
     // sessiz bir başarısızlık yanlış tuşa basmaktan ayırt edilebilsin.
     if (state.screen === 'form') {
       const dolu = ['name', 'mother_name', 'residence', 'birth_date', 'phone', 'diagnosis'].filter(k => p[k]).length;
-      banner(dolu ? `${dolu} alan dolduruldu — kontrol edip kaydedin ✓`
+      banner(dolu ? `${dolu} alan dolduruldu — kontrol edip kaydedin`
                   : 'Alanlar okunamadı; metin Notlar’a aktarıldı.', 'ok', 4000);
     }
   });

@@ -208,7 +208,7 @@ function askDuplicate(dup, v) {
     const r = await guarded(() => updatePatient(state.exec, dup.id, v));
     if (!r.ok) return;
     closeSheet();
-    banner('Mevcut kayıt güncellendi ✓', 'ok');
+    banner('Mevcut kayıt güncellendi', 'ok');
     await refreshHome(); await openCard(dup.id);
   });
   document.getElementById('dup-new').addEventListener('click', async () => {
@@ -217,7 +217,7 @@ function askDuplicate(dup, v) {
     closeSheet();
     state.editing = true; state.currentId = r.value;
     autoCreatedId = null;
-    banner('Yeni kayıt oluşturuldu ✓', 'ok');
+    banner('Yeni kayıt oluşturuldu', 'ok');
     await refreshHome(); await openCard(r.value);
   });
 }
@@ -244,7 +244,7 @@ const autosave = createAutosave({
     if (created) autoCreatedId = id;
     document.getElementById('form-title').textContent = 'Hastayı Düzenle';
     const t = new Date().toTimeString().slice(0, 5);
-    setAutoStatus(`Otomatik kaydedildi ${esc(t)} ✓ ${autoCreatedId === id ? '<button type="button" id="autosave-undo" class="linkbtn">Geri Al</button>' : ''}`);
+    setAutoStatus(`Otomatik kaydedildi ${esc(t)} ${autoCreatedId === id ? '<button type="button" id="autosave-undo" class="linkbtn">Geri Al</button>' : ''}`);
     document.getElementById('autosave-undo')?.addEventListener('click', undoAutosave);
   },
   onError: (e) => setAutoStatus(`Otomatik kayıt yapılamadı — ${esc(e?.message || String(e))}`),
@@ -301,7 +301,7 @@ function applyParsedText(text) {
   if (notes && !String(notes.value || '').includes(text.trim())) {
     notes.value = notes.value ? `${notes.value}\n${text.trim()}` : text.trim();
   }
-  banner(filled.length ? `Yapıştırılan bilgiden ${filled.length} alan dolduruldu ✓ (dolu alanlara dokunulmadı)`
+  banner(filled.length ? `Yapıştırılan bilgiden ${filled.length} alan dolduruldu (dolu alanlara dokunulmadı)`
                        : 'Yapıştırılan metin Notlar\'a eklendi.', 'ok', 4000);
   autosave.bump();
 }
@@ -339,11 +339,11 @@ export function initForm() {
         // "+ Ödeme"ye basmak zorunda kalmasın diye panel kendiliğinden açılıyor.
         // Panel kapanınca (kaydet ya da vazgeç) ana sayfaya dönülür —
         // "son açılanlar" şeridini de openCard besliyor.
-        banner('Hasta kaydedildi ✓ — şimdi ödeme ekleyebilirsiniz', 'ok');
+        banner('Hasta kaydedildi — şimdi ödeme ekleyebilirsiniz', 'ok');
         await refreshHome();
         await openCardThenPayment(state.currentId);
       } else {
-        banner('Kaydedildi ✓', 'ok');
+        banner('Kaydedildi', 'ok');
         await refreshHome();
         await openCard(state.currentId);
       }
@@ -379,7 +379,7 @@ export function initForm() {
           if (!type) continue;
           const blob = await it.getType(type);
           const ok = await setFormPhotoFromFile(new File([blob], 'pano.jpg', { type }));
-          if (ok) { banner('Fotoğraf panodan eklendi ✓', 'ok'); autosave.bump(); }
+          if (ok) { banner('Fotoğraf panodan eklendi', 'ok'); autosave.bump(); }
           return;
         }
       }
@@ -389,7 +389,7 @@ export function initForm() {
       banner('Panoda fotoğraf ya da hasta bilgisi bulunamadı. WhatsApp\'ta fotoğrafa basılı tutup "Kopyala" deyin, sonra buraya dönüp tekrar deneyin.', 'error', 0);
     } catch (e) {
       // iOS izni reddedilirse ya da pano okunamazsa: yolu göster, suçlama.
-      banner(`Pano okunamadı — ${e?.message || e}. 📷 düğmesiyle Fotoğraflar'dan da seçebilirsiniz.`, 'error', 0);
+      banner(`Pano okunamadı — ${e?.message || e}. Fotoğraf düğmesiyle Fotoğraflar'dan da seçebilirsiniz.`, 'error', 0);
     }
   });
 
@@ -410,7 +410,7 @@ export function initForm() {
     const payload = extractDroppedImage(dt);
     if (payload.kind === 'file') {
       e.preventDefault();
-      if (await setFormPhotoFromFile(payload.file)) banner('Fotoğraf yapıştırıldı ✓', 'ok');
+      if (await setFormPhotoFromFile(payload.file)) banner('Fotoğraf yapıştırıldı', 'ok');
       autosave.bump();
       return;
     }
@@ -418,7 +418,7 @@ export function initForm() {
       e.preventDefault();
       formPhoto = payload.dataUrl;
       renderPhotoPreview();
-      banner('Fotoğraf yapıştırıldı ✓', 'ok');
+      banner('Fotoğraf yapıştırıldı', 'ok');
       autosave.bump();
       return;
     }

@@ -249,11 +249,11 @@ export function textToBase64(text) {
  * Dışa aktarma sonucunu kullanıcıya doğru anlatan mesaj. Saf.
  *
  * Mac'te artık gerçek bir "Farklı Kaydet…" paneli açılıyor ve kullanıcı bunu
- * İPTAL edebiliyor. Eski sabit "hazırlandı ✓" mesajı bu durumda yalan söylerdi;
+ * İPTAL edebiliyor. Eski sabit "hazırlandı" mesajı bu durumda yalan söylerdi;
  * dosya nereye yazıldıysa onu, yazılmadıysa iptal edildiğini söylüyoruz.
  */
 export function exportMessage(result, label) {
   if (result?.cancelled) return { text: 'Kaydetme iptal edildi.', kind: 'ok' };
-  if (result?.path) return { text: `${label} kaydedildi ✓ — ${result.path}`, kind: 'ok' };
-  return { text: `${label} hazırlandı ✓`, kind: 'ok' };
+  if (result?.path) return { text: `${label} kaydedildi — ${result.path}`, kind: 'ok' };
+  return { text: `${label} hazırlandı`, kind: 'ok' };
 }

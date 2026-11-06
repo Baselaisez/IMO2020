@@ -36,7 +36,7 @@ async function onSyncResult(r, reason) {
   const a = r?.applied;
   const changed = (a?.patientsUpserted || 0) + (a?.paymentsUpserted || 0) + (a?.deliveriesUpserted || 0) + (a?.deleted || 0);
   if (changed && state.screen === 'home') await refreshHome();
-  if (changed && reason !== 'mutation') banner('Diğer cihazdan kayıtlar alındı ✓', 'ok');
+  if (changed && reason !== 'mutation') banner('Diğer cihazdan kayıtlar alındı', 'ok');
 }
 
 async function main() {

@@ -6,7 +6,7 @@
 //   bu yüzden Android'de olduğu gibi iOS'ta da düğmeler gizlenir (attachVoice
 //   erken döner). Kullanıcı klavyedeki mikrofona basar.
 // • Mac: masaüstü klavyesinde böyle bir tuş yok; macOS diktesi bir kısayolla
-//   (varsayılan: Fn tuşuna iki kez basmak) ya da Düzen ▸ Dikteyi Başlat ile
+//   (varsayılan: Fn tuşuna iki kez basmak) ya da Düzen > Dikteyi Başlat ile
 //   açılır. Bu yüzden Mac'te düğme GÖSTERİLİR ve doğru kutuyu odaklayıp
 //   kısayolu hatırlatır — tıpkı Windows'taki Win + H akışı gibi.
 //   Uygulama HİÇBİR platformda kendisi ses kaydetmez.
@@ -51,7 +51,7 @@ export const VOICE_HINT_KEY = 'voice_hint';
 
 export const WIN_H_HINT = 'Sesli yazmak için imleç kutudayken klavyeden Win + H tuşlarına basın.';
 export const MAC_DICTATION_HINT = 'Sesli yazmak için imleç kutudayken Fn tuşuna iki kez basın '
-  + '(ya da menüden Düzen ▸ Dikteyi Başlat).';
+  + '(ya da menüden Düzen > Dikteyi Başlat).';
 
 // Bu uyarı bilerek kısa ve net: doktor hasta verisiyle ilgili bir kararı
 // bilmeden vermesin. Ayrıntısı docs/SESLI-YAZMA.md içinde.
@@ -72,8 +72,8 @@ export const MAC_PRIVACY_WARNING = 'DİKKAT: macOS diktesi bazı dil ve modeller
 /** Platforma göre ipucu + uyarı metni. Saf. */
 export function dictationCopy(p = platform()) {
   return p === 'macos'
-    ? { hint: MAC_DICTATION_HINT, warning: MAC_PRIVACY_WARNING, shortcut: 'Fn Fn', banner: '🎤 Fn tuşuna iki kez basıp konuşun — kimlik bilgisi dikte etmeyin.' }
-    : { hint: WIN_H_HINT, warning: PRIVACY_WARNING, shortcut: 'Win + H', banner: '🎤 Win + H ile konuşun — kimlik bilgisi dikte etmeyin.' };
+    ? { hint: MAC_DICTATION_HINT, warning: MAC_PRIVACY_WARNING, shortcut: 'Fn Fn', banner: 'Fn tuşuna iki kez basıp konuşun — kimlik bilgisi dikte etmeyin.' }
+    : { hint: WIN_H_HINT, warning: PRIVACY_WARNING, shortcut: 'Win + H', banner: 'Win + H ile konuşun — kimlik bilgisi dikte etmeyin.' };
 }
 
 export { isDesktop };
@@ -131,7 +131,7 @@ function hintSheet(onDone) {
   ov.style.zIndex = '60';
   ov.innerHTML = `
     <div class="sheet">
-      <h4>🎤 Sesli Yazma</h4>
+      <h4>Sesli Yazma</h4>
       <p class="muted" style="line-height:1.6">${copy.hint}
         Bu pencereyi kapatınca imleç doğru kutuya gelecek; <b>${copy.shortcut}</b> ile konuşmaya başlayın,
         bitirince aynı kısayolla kapatın. Noktalama için &quot;nokta&quot;,

@@ -32,7 +32,7 @@ function isNativeSafe() { try { return isNative() || isDesktop(); } catch { retu
  */
 export function autoBackupNote(p) {
   if (p === 'android') return ' Google Drive yedeği Android tarafından otomatik alınır.';
-  if (p === 'ios') return ' iPhone yedeklemesi açıksa (Ayarlar → Apple Kimliği → iCloud → iCloud Yedeklemesi) veriler cihaz yedeğine de dahil edilir.';
+  if (p === 'ios') return ' iPhone yedeklemesi açıksa (Ayarlar > Apple Kimliği > iCloud > iCloud Yedeklemesi) veriler cihaz yedeğine de dahil edilir.';
   return '';
 }
 
@@ -41,9 +41,9 @@ export function autoBackupNote(p) {
  * "Telefon Ayarları → Uygulamalar" yolu iPhone'da ve Mac'te yanlıştır. Saf.
  */
 export function notifHelpText(p) {
-  if (p === 'ios') return 'Bildirim sesi ve gösterim biçimi: Ayarlar → Bildirimler → Hasta Kayıt. Takvim hatırlatma sesi iPhone’un Takvim uygulamasından ayarlanır.';
-  if (p === 'android') return 'Özel bir zil sesi seçmek için: Telefon Ayarları → Uygulamalar → Hasta Kayıt → Bildirimler. Takvim hatırlatma sesi telefonun Takvim uygulamasından ayarlanır.';
-  if (p === 'macos') return 'Masaüstü sürümünde hatırlatmalar uygulama açıkken gösterilir; bildirim izni ve sesi macOS Sistem Ayarları → Bildirimler → Hasta Kayıt bölümünden yönetilir.';
+  if (p === 'ios') return 'Bildirim sesi ve gösterim biçimi: Ayarlar > Bildirimler > Hasta Kayıt. Takvim hatırlatma sesi iPhone’un Takvim uygulamasından ayarlanır.';
+  if (p === 'android') return 'Özel bir zil sesi seçmek için: Telefon Ayarları > Uygulamalar > Hasta Kayıt > Bildirimler. Takvim hatırlatma sesi telefonun Takvim uygulamasından ayarlanır.';
+  if (p === 'macos') return 'Masaüstü sürümünde hatırlatmalar uygulama açıkken gösterilir; bildirim izni ve sesi macOS Sistem Ayarları > Bildirimler > Hasta Kayıt bölümünden yönetilir.';
   if (p === 'windows' || p === 'linux') return 'Masaüstü sürümünde hatırlatmalar uygulama açıkken gösterilir.';
   return '';
 }
@@ -61,14 +61,14 @@ async function showDataLocation() {
   if (isDesktop()) {
     const dir = await desktop.dataDir().catch(() => null);
     el.textContent = dir
-      ? `💾 Veri konumu: ${dir} — yedekler: ${dir}/daily (günlük), ${dir}/backups (anlık görüntü)`
-      : '💾 Veri konumu bulunamadı.';
+      ? `Veri konumu: ${dir} — yedekler: ${dir}/daily (günlük), ${dir}/backups (anlık görüntü)`
+      : 'Veri konumu bulunamadı.';
     if (btn) {
       btn.classList.remove('hidden');
       btn.innerHTML = iconHtml('folder', 18) + (platform() === 'macos' ? "<span>Finder'da Göster</span>" : '<span>Klasörü Aç</span>');
     }
   } else if (platform() === 'ios') {
-    el.textContent = 'Yedekler: Dosyalar uygulaması → iPhone\'umda → Hasta Kayıt → HastaKayit/daily (günlük) ve HastaKayit/snapshots (anlık görüntü). Buradan Dosyalar üzerinden kopyalayabilir veya paylaşabilirsiniz.';
+    el.textContent = 'Yedekler: Dosyalar uygulaması > iPhone\'umda > Hasta Kayıt > HastaKayit/daily (günlük) ve HastaKayit/snapshots (anlık görüntü). Buradan Dosyalar üzerinden kopyalayabilir veya paylaşabilirsiniz.';
     btn?.classList.add('hidden');
   } else if (platform() === 'android') {
     el.textContent = 'Yedekler: Belgeler/HastaKayit/daily (günlük) ve Belgeler/HastaKayit/snapshots (anlık görüntü).';
@@ -96,7 +96,7 @@ export function htsReadNote(stats) {
   const used = [
     ['Ad', cols.isim], ['Anne', cols.anne], ['Tanı', cols.tani], ['Ücret', cols.ucret],
     ['Tarih', cols.tarih], ['Telefon', cols.telefon], ['İkamet', cols.ikamet], ['Yaş/Doğum', cols.dogum],
-  ].filter(([, v]) => v).map(([k, v]) => `${k} ← “${esc(String(v))}”`);
+  ].filter(([, v]) => v).map(([k, v]) => `${k}: “${esc(String(v))}”`);
   const lines = [`<b>${stats.totalRows}</b> satır okundu.`];
   if (stats.emptyRows) lines.push(`<b>${stats.emptyRows}</b> tamamen boş satır atlandı.`);
   if (stats.merged) lines.push(`<b>${stats.merged}</b> satır, aynı kişinin başka satırıyla birleştirildi (anne adı veya telefon eşleşmesi).`);
@@ -229,8 +229,8 @@ async function refreshRecoveryStatus() {
       el.textContent = 'Kurtarma yöntemi ayarlanmadı. PIN’i unutursanız kurtaramazsınız.';
     } else {
       const parts = [];
-      if (s.questions) parts.push('güvenlik soruları ✓');
-      if (s.code) parts.push('kurtarma kodu ✓');
+      if (s.questions) parts.push('güvenlik soruları');
+      if (s.code) parts.push('kurtarma kodu');
       el.textContent = `Kurtarma: ${parts.join(', ')}`;
     }
   } catch { el.textContent = ''; }
@@ -240,7 +240,7 @@ async function refreshRecoveryStatus() {
 // code. Answers/code are hashed by the repo functions — never stored in plaintext.
 export function recoverySetupFlow() {
   openSheet(`
-    <h4>🔐 Kurtarma Ayarları</h4>
+    <h4>Kurtarma Ayarları</h4>
     <p class="muted">PIN’inizi unutursanız bu yöntemlerle sıfırlayabilirsiniz.</p>
     <div class="form" style="padding:0">
       <h3 style="margin:4px 0">Güvenlik Soruları</h3>
@@ -271,7 +271,7 @@ export function recoverySetupFlow() {
     if (r.ok) {
       document.getElementById('rs-a1').value = '';
       document.getElementById('rs-a2').value = '';
-      banner('Güvenlik soruları kaydedildi ✓', 'ok');
+      banner('Güvenlik soruları kaydedildi', 'ok');
       await refreshRecoveryStatus();
     }
   });
@@ -378,7 +378,7 @@ export function initSettings() {
       });
       if (!res.ok) { btn.disabled = false; return; }
       closeSheet();
-      banner('Geri yükleme tamamlandı ✓', 'ok');
+      banner('Geri yükleme tamamlandı', 'ok');
       await refreshHome();
       await openSettings();
     });
@@ -408,12 +408,12 @@ export function initSettings() {
   document.getElementById('btn-clean-junk')?.addEventListener('click', async () => {
     const c = await guarded(() => countJunkPatients(state.exec));
     if (!c.ok) return;
-    if (!c.value) { banner('Temizlenecek çöp kayıt bulunamadı ✓', 'ok'); return; }
+    if (!c.value) { banner('Temizlenecek çöp kayıt bulunamadı', 'ok'); return; }
     openSheet(`
       <h4>Çöp Kayıtları Temizle</h4>
       <p class="muted"><b>${c.value}</b> kayıt silinecek. Bunların adında tek bir harf bile yok ve
       hiçbirinin ödemesi ya da teslimatı bulunmuyor. Ödemesi olan hiçbir kayda dokunulmaz.<br><br>
-      Bu işlem geri alınamaz. Önce <b>💾 Yedek Al</b> demeniz önerilir.</p>
+      Bu işlem geri alınamaz. Önce <b>Yedek Al</b> demeniz önerilir.</p>
       <div class="form" style="padding:0">
         <button id="junk-go" class="primary" style="background:var(--red)">Evet, Sil</button>
         <button id="junk-cancel" type="button" class="ghost">Vazgeç</button>
@@ -425,7 +425,7 @@ export function initSettings() {
       const r = await guarded(() => deleteJunkPatients(state.exec));
       if (!r.ok) { ev.currentTarget.disabled = false; return; }
       closeSheet();
-      banner(`${r.value} çöp kayıt silindi ✓`, 'ok', 4000);
+      banner(`${r.value} çöp kayıt silindi`, 'ok', 4000);
       await refreshHome();
       await openSettings();
     });
@@ -433,23 +433,23 @@ export function initSettings() {
 
   document.getElementById('autosave-delay')?.addEventListener('change', async e => {
     const r = await guarded(() => setMeta(state.exec, 'autosave_delay', e.target.value));
-    if (r.ok) banner(e.target.value === 'off' ? 'Otomatik kayıt kapatıldı ✓' : 'Otomatik kayıt ayarı kaydedildi ✓', 'ok');
+    if (r.ok) banner(e.target.value === 'off' ? 'Otomatik kayıt kapatıldı' : 'Otomatik kayıt ayarı kaydedildi', 'ok');
   });
 
   document.getElementById('bio-autoprompt')?.addEventListener('change', async e => {
     const v = e.target.value === 'off' ? 'off' : 'on';
     const r = await guarded(() => setMeta(state.exec, 'bio_autoprompt', v));
-    if (r.ok) banner(v === 'on' ? 'Açılışta biyometri sorulacak ✓' : 'Açılışta önce PIN ekranı gelecek ✓', 'ok');
+    if (r.ok) banner(v === 'on' ? 'Açılışta biyometri sorulacak' : 'Açılışta önce PIN ekranı gelecek', 'ok');
   });
 
   document.getElementById('lock-policy').addEventListener('change', async e => {
     const r = await guarded(() => setMeta(state.exec, 'lock_policy', e.target.value));
-    if (r.ok) banner('PIN ayarı kaydedildi ✓', 'ok');
+    if (r.ok) banner('PIN ayarı kaydedildi', 'ok');
   });
 
   document.getElementById('default-remind').addEventListener('change', async e => {
     const r = await guarded(() => setMeta(state.exec, 'default_remind_min', e.target.value));
-    if (r.ok) banner('Varsayılan hatırlatma kaydedildi ✓', 'ok');
+    if (r.ok) banner('Varsayılan hatırlatma kaydedildi', 'ok');
   });
 
   document.getElementById('notif-sound').addEventListener('change', async e => {
@@ -458,7 +458,7 @@ export function initSettings() {
     if (!r.ok) return;
     setNotifSound(v !== 'off');
     if (state.onMutate) state.onMutate(); // re-run reschedule so the channel change takes effect
-    banner('Bildirim ayarı kaydedildi ✓', 'ok');
+    banner('Bildirim ayarı kaydedildi', 'ok');
   });
 
   initSyncUi();
@@ -572,7 +572,7 @@ async function runManualSync() {
     const r = await syncIfConfigured(state.exec, { force: true, onProgress: (p) => { if (st) st.textContent = `Eşitleniyor… (${p})`; } });
     if (r.error) banner(`EŞİTLEME BAŞARISIZ — ${r.error} (kayıtlarınıza dokunulmadı)`, 'error', 0);
     else if (r.skipped) banner(r.reason === 'busy' ? 'Eşitleme zaten sürüyor.' : 'Eşitleme kapalı.', 'ok');
-    else banner(`Eşitlendi ✓ (${r.applied.patientsUpserted} hasta, ${r.applied.paymentsUpserted} ödeme, ${r.applied.deliveriesUpserted} teslimat güncellendi)`, 'ok');
+    else banner(`Eşitlendi (${r.applied.patientsUpserted} hasta, ${r.applied.paymentsUpserted} ödeme, ${r.applied.deliveriesUpserted} teslimat güncellendi)`, 'ok');
     if (!r.error && !r.skipped) await refreshHome();
   } finally {
     if (btn) btn.disabled = false;
@@ -589,7 +589,7 @@ function initSyncUi() {
     // Hedef/ayar değişti: "değişmedi" hafızası artık geçersiz, yoksa ilk tur
     // yanlışlıkla atlanabilir.
     resetSyncMemory();
-    if (r.ok) banner(v === 'on' ? 'Eşitleme açıldı ✓' : 'Eşitleme kapatıldı ✓', 'ok');
+    if (r.ok) banner(v === 'on' ? 'Eşitleme açıldı' : 'Eşitleme kapatıldı', 'ok');
     await refreshSyncUi();
   });
 
@@ -628,7 +628,7 @@ function initSyncUi() {
     if (!v.ok) { banner(`KLASÖR KAYDEDİLEMEDİ — ${v.error}`, 'error', 0); return; }
     const r = await guarded(() => setMeta(state.exec, 'sync_folder', v.path));
     resetSyncMemory(); // başka bir klasör = başka bir uzak durum
-    if (r.ok) banner('Eşitleme klasörü kaydedildi ✓', 'ok');
+    if (r.ok) banner('Eşitleme klasörü kaydedildi', 'ok');
     await refreshSyncUi();
   });
 
@@ -702,7 +702,7 @@ export async function handleImportFile(file) {
       const r = parseGeneralWorkbook(buf, todayIso());
       if (!r.ok) { banner(`İÇE AKTARMA REDDEDİLDİ — ${r.error}`, 'error', 0); return; }
       payload = r.data;
-      const mapLines = Object.entries(r.mapping).map(([f, h]) => `${FIELD_TR[f] || f} ← "${esc(h)}"`).join(', ');
+      const mapLines = Object.entries(r.mapping).map(([f, h]) => `${FIELD_TR[f] || f}: "${esc(h)}"`).join(', ');
       mappingInfo = `<p class="muted">Algılanan: ${mapLines}.${r.unmatched.length ? ` Eşleşmeyen sütunlar: ${esc(r.unmatched.join(', '))}.` : ''}</p>`;
     }
   } else {
@@ -728,7 +728,7 @@ export async function handleImportFile(file) {
     const res = await guarded(() => mergeImport(state.exec, payload));
     if (!res.ok) { btn.disabled = false; return; }
     closeSheet();
-    banner(`${res.value.added} yeni hasta eklendi, ${res.value.skipped} atlandı ✓`, 'ok', 4000);
+    banner(`${res.value.added} yeni hasta eklendi, ${res.value.skipped} atlandı`, 'ok', 4000);
     await refreshHome(); await openSettings();
   });
 }
@@ -769,7 +769,7 @@ function initDropHandling() {
       // Patient form open + an image dropped → that is the patient's photo.
       if (images.length && state.screen === 'form') {
         const ok = await setFormPhotoFromFile(images[0]); // shows its own error banner
-        if (ok) banner(images.length > 1 ? 'İlk fotoğraf eklendi ✓' : 'Fotoğraf eklendi ✓', 'ok');
+        if (ok) banner(images.length > 1 ? 'İlk fotoğraf eklendi' : 'Fotoğraf eklendi', 'ok');
         return;
       }
       if (docs.length) { await handleImportFiles(docs); return; }
@@ -783,7 +783,7 @@ function initDropHandling() {
       if (state.screen !== 'form') { banner('Fotoğrafı eklemek için önce bir hasta formunu açın.', 'error', 0); return; }
       if (payload.kind === 'dataurl') {
         const ok = await setFormPhotoFromDataUrl(payload.dataUrl);
-        if (ok) banner('Fotoğraf eklendi ✓', 'ok');
+        if (ok) banner('Fotoğraf eklendi', 'ok');
         return;
       }
       if (payload.kind === 'remote') banner(REMOTE_IMAGE_HELP, 'error', 0);
@@ -797,18 +797,18 @@ function initDropHandling() {
 function showSyncHelp(platform) {
   const desktop = platform === 'desktop';
   openSheet(`
-    <h4>🔄 Eşitleme Nasıl Kullanılır?</h4>
+    <h4>Eşitleme Nasıl Kullanılır?</h4>
     <p class="muted">Aynı hasta kayıtlarını hem bilgisayarda hem telefonda görmek için,
     iki cihazın da <b>aynı bulut klasörünü</b> kullanması yeterlidir. Hesap açmanıza gerek yok —
     OneDrive, Google Drive veya Dropbox'ın bilgisayarınızdaki klasörünü kullanır.</p>
 
     <div class="sec-title">1) Bir bulut klasörü seçin</div>
-    <p class="muted">Örn. Mac'te <code>iCloud Drive → HastaKayit</code>, Windows'ta <code>OneDrive\HastaKayit</code> klasörünü oluşturun.
+    <p class="muted">Örn. Mac'te <code>iCloud Drive > HastaKayit</code>, Windows'ta <code>OneDrive\HastaKayit</code> klasörünü oluşturun.
     Bu klasör iki cihazda da <b>otomatik eşitlenen</b> bir klasör olmalı.</p>
 
     <div class="sec-title">2) Bilgisayarda</div>
-    <p class="muted">Ayarlar → Eşitleme'yi <b>Açık</b> yapın → <b>📁 Klasör Seç</b> ile o klasörü seçin →
-    <b>💾 Klasörü Kaydet</b>. Sonra <b>🔄 Şimdi Eşitle</b>.</p>
+    <p class="muted">Ayarlar > Eşitleme'yi <b>Açık</b> yapın, <b>Klasör Seç</b> ile o klasörü seçin, sonra
+    <b>Klasörü Kaydet</b>. Ardından <b>Şimdi Eşitle</b>.</p>
 
     <div class="sec-title">3) Telefonda</div>
     <p class="muted">${desktop
@@ -824,7 +824,7 @@ function showSyncHelp(platform) {
 
     <div class="sec-title">Ne zaman eşitler?</div>
     <p class="muted">Uygulamayı açıp kilidi açtıktan kısa süre sonra, açıkken her birkaç dakikada bir,
-    ve bir kayıt ekleyip değiştirdiğinizde. <b>🔄 Şimdi Eşitle</b> ile istediğiniz an elle de yapabilirsiniz.</p>
+    ve bir kayıt ekleyip değiştirdiğinizde. <b>Şimdi Eşitle</b> ile istediğiniz an elle de yapabilirsiniz.</p>
 
     <p class="muted"><b>Not:</b> Eşitleme yedek yerine geçmez. Günlük otomatik yedekleriniz ayrıca alınmaya devam eder.</p>
     <div class="form" style="padding:0"><button id="sync-help-close" class="primary">Anladım</button></div>

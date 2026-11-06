@@ -20,7 +20,7 @@ export function openQuickAdd() {
   let ackKey = '';               // name the doctor already confirmed past the dup warning
 
   openSheet(`
-    <h4>⚡ Hızlı Ekle</h4>
+    <h4>Hızlı Ekle</h4>
     <p class="muted" id="qa-count">Bu oturumda eklenen: 0</p>
     <p class="muted" id="qa-note"></p>
     <div class="form" style="padding:0">
@@ -131,7 +131,7 @@ export function openQuickAdd() {
 
     if (closeAfter) {
       closeSheet();
-      banner(`${added} hasta eklendi ✓`, 'ok');
+      banner(`${added} hasta eklendi`, 'ok');
       await refreshHome();
       return;
     }
@@ -140,7 +140,7 @@ export function openQuickAdd() {
     amountEl.value = '';
     phoneEl.value = '';
     countEl.textContent = `Bu oturumda eklenen: ${added}`;
-    banner('Kaydedildi ✓', 'ok');
+    banner('Kaydedildi', 'ok');
     nameEl.focus();
     // NOTE: the home list is deliberately NOT refreshed between rapid saves
     // (refreshHome re-reads and re-renders the whole list) — it is refreshed once

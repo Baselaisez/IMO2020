@@ -34,7 +34,7 @@ import { desktop } from './desktop.js';
  */
 export const ICLOUD_TARGET = 'icloud:';
 
-export const ICLOUD_LABEL = 'iCloud Drive → Hasta Kayıt';
+export const ICLOUD_LABEL = 'iCloud Drive > Hasta Kayıt';
 
 const ICloudSync = registerPlugin('ICloudSync');
 
