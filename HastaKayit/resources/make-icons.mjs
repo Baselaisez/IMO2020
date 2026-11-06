@@ -11,6 +11,7 @@
 // Çalıştırma:  node resources/make-icons.mjs
 import sharp from 'sharp';
 import { mkdir, writeFile } from 'node:fs/promises';
+import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -125,5 +126,45 @@ await writeFile(path.join(root, 'resources/icon.icns'), icns([
   ['ic13', await png(macSvg, 256)],
   ['ic14', await png(macSvg, 512)],
 ]));
+
+// --- Android (Samsung) ----------------------------------------------------
+// Capacitor hazır projeye KENDİ genel simgesini koyuyor; uygulamanın kendi
+// simgesi olmazsa telefonun menüsünde Capacitor logosu görünür.
+//
+// Üç dosya gerekiyor:
+//   ic_launcher          — eski (uyarlanabilir simge öncesi) Android
+//   ic_launcher_round    — yuvarlak simge kullanan başlatıcılar
+//   ic_launcher_foreground — uyarlanabilir simgenin ÖN katmanı (Android 8+)
+//
+// Ön katmanın kendi kuralı var: tuvalin dış %33'ü başlatıcı tarafından
+// kırpılabilir (telefon simgeyi daire, yuvarlak kare, damla gibi farklı
+// biçimlere sokar). Bu yüzden çizim ortadaki güvenli alana küçültülüp
+// saydam bir tuvale yerleştiriliyor; aksi hâlde Samsung'un One UI'ında
+// simgenin kenarları kesilirdi. Arka plan katmanı zaten düz renk
+// (ic_launcher_background.xml), onu da markanın mavisine çekiyoruz.
+const ANDROID_RES = path.join(root, 'android/app/src/main/res');
+const DENSITIES = { mdpi: 48, hdpi: 72, xhdpi: 96, xxhdpi: 144, xxxhdpi: 192 };
+if (existsSync(ANDROID_RES)) {
+  const androidSvg = artwork({ bleed: true });
+  for (const [density, size] of Object.entries(DENSITIES)) {
+    const dir = path.join(ANDROID_RES, `mipmap-${density}`);
+    await mkdir(dir, { recursive: true });
+    const square = await sharp(Buffer.from(androidSvg)).resize(size, size).png().toBuffer();
+    await writeFile(path.join(dir, 'ic_launcher.png'), square);
+    await writeFile(path.join(dir, 'ic_launcher_round.png'), square);
+    // Ön katman: çizim tuvalin ortasındaki %66'lık güvenli alana sığdırılır.
+    const inner = Math.round(size * 0.66);
+    await writeFile(path.join(dir, 'ic_launcher_foreground.png'),
+      await sharp({ create: { width: size, height: size, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } } })
+        .composite([{
+          input: await sharp(Buffer.from(artwork({ bleed: false }))).resize(inner, inner).png().toBuffer(),
+          top: Math.round((size - inner) / 2), left: Math.round((size - inner) / 2),
+        }])
+        .png().toBuffer());
+  }
+  await writeFile(path.join(ANDROID_RES, 'values/ic_launcher_background.xml'),
+    `<?xml version="1.0" encoding="UTF-8"?>\n<resources>\n    <color name="ic_launcher_background">${BLUE_DARK}</color>\n</resources>\n`);
+  console.log('Android simgeleri üretildi: 5 yoğunluk x 3 dosya + arka plan rengi');
+}
 
 console.log('Simgeler üretildi: ios AppIcon + Splash, resources/icon.png, resources/icon.icns');

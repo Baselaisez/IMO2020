@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Hasta Kayıt</string>
+    <string name="title_activity_main">Hasta Kayıt</string>
+    <string name="package_name">com.hastakayit.app</string>
+    <string name="custom_url_scheme">com.hastakayit.app</string>
+</resources>

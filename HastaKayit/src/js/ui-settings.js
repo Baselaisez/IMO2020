@@ -540,11 +540,19 @@ export function syncNoteText(s, androidLabel = ANDROID_SYNC_LABEL) {
       + 'Klasör seçmenize gerek yok: kayıtlar iCloud Drive içindeki “Hasta Kayıt” klasöründe durur ve '
       + 'iki cihazda da birkaç saniye içinde görünür.';
   }
+  // iCloud yoksa bu cihaz ya bir Android telefon (Samsung) ya da iCloud Drive'ı
+  // kapalı bir iPhone'dur. İki durumda da yol aynı: eşitleme dosyası herkese
+  // açık Documents klasörüne yazılır ve oradan Mac'e Syncthing taşır.
   return `iCloud eşitlemesi kullanılamıyor — ${s.icloudReason || 'sebep bilinmiyor.'} `
-    + `Şimdilik eşitleme dosyası yalnızca bu cihazda, şuraya yazılıyor: ${androidLabel}. `
-    + 'DİKKAT: Google Drive ve OneDrive’ın Android uygulamaları telefondaki bir klasörü kendiliğinden eşitlemez — '
-    + 'bu klasörün bilgisayara ulaşması için klasör eşitleyen bir uygulama (Syncthing, FolderSync vb.) kurmanız ya da '
-    + 'yukarıdaki “Yedek Al (JSON)” / “İçe Aktar” adımlarını elle kullanmanız gerekir.';
+    + `Eşitleme dosyası şuraya yazılıyor: ${androidLabel}. `
+    + 'Bu klasörün Mac’e ulaşması için Syncthing gerekir: bu telefona ve Mac’e Syncthing kurup '
+    + 'bu klasörü eşleştirin; Mac tarafında Ayarlar > Eşitleme > Klasör Seç ile aynı klasörü seçin. '
+    + 'Mac hem iCloud’a hem bu klasöre yazdığı için iPhone ile bu telefon birbirini Mac üzerinden görür. '
+    + 'ÖNEMLİ: Android 11 ve sonrasında bu klasöre yazabilmek için uygulamaya bir kez '
+    + '“tüm dosyalara erişim” izni vermelisiniz — Ayarlar > Uygulamalar > Hasta Kayıt > İzinler > '
+    + 'Dosyalar ve medya > Tüm dosyaları yönetmeye izin ver. İzin verilmezse eşitleme yazma hatası verir '
+    + '(kayıtlarınıza bir şey olmaz). Dilerseniz Syncthing kurmadan “Yedek Al (JSON)” / “İçe Aktar” ile '
+    + 'elle de taşıyabilirsiniz.';
 }
 
 /**
