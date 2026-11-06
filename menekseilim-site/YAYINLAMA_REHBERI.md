@@ -88,6 +88,35 @@ değişikliklerin üzerine yazılır.
 
 ## A yolu – Hosting satın alıp dosyaları yüklemek (önerilen)
 
+### Otomatik yükleme (önerilen)
+
+Site, GitHub'daki her değişiklikten sonra sunucuya **kendiliğinden** yüklenir
+(`.github/workflows/menekseilim-yukle.yml`). Bunun için bir kez şu üç adımı
+yapın. Hepsi telefondan da yapılabilir. Şifrenizi e-postayla ya da sohbette
+kimseye göndermeyin; yalnızca GitHub'ın şifre kasasına girin.
+
+1. **Otomasyonları açın.** https://github.com/Baselaisez/IMO2020/actions
+   sayfasını açın. "Workflows aren't being run on this forked repository"
+   yazıyorsa yeşil **I understand my workflows, go ahead and enable them**
+   düğmesine basın.
+2. **FTP bilgilerini girin.** https://github.com/Baselaisez/IMO2020/settings/secrets/actions/new
+   sayfasında **Name** ve **Secret** kutularını doldurup **Add secret**
+   deyin. Bunu üç kez yapın:
+
+   | Name | Secret |
+   |---|---|
+   | `FTP_SUNUCU` | `srvc77.trwww.com` (Turhost e-postasında başka bir FTP sunucusu yazıyorsa onu) |
+   | `FTP_KULLANICI` | cPanel kullanıcı adınız |
+   | `FTP_SIFRE` | cPanel şifreniz |
+
+3. **Haber verin.** Bilgileri girdiğinizi yazmanız yeterli; ilk yüklemeyi
+   başlatıp sitenin açıldığını kontrol ederim. Sonrasında her değişiklik
+   kendiliğinden yüklenir.
+
+Yükleme `public_html` klasörüne yapılır ve oradaki başka dosyaları silmez.
+Bağlantı şifrelidir (FTPS). Yüklemelerin durumunu
+https://github.com/Baselaisez/IMO2020/actions sayfasından görebilirsiniz.
+
 ### A0. Turhost'a özel notlar (05.10.2026 itibarıyla durum)
 
 Satın alınan hizmetler (Turhost → Hizmet Yönetimi):
@@ -262,12 +291,8 @@ sunucuda düzenleyin.
 ## B yolu – GitHub Pages ile ücretsiz yayın (cPanel'siz, hosting'siz)
 
 GitHub Pages, statik siteleri ücretsiz ve süresiz barındırır; kendi alan
-adınızı bağlayabilir, SSL'i otomatik alır. İki şekilde kurabilirsiniz:
-
-* **B-1: Yeni, ayrı bir depo** (`menekseilim` adlı) → en temiz ve önerilen yol.
-* **B-2: Bu depo (IMO2020)** → dosyalar zaten burada; hazır bir otomasyon
-  (`.github/workflows/menekseilim-pages.yml`) `menekseilim-site/` klasörünü
-  yayınlar. Ders notlarıyla aynı depoda durması dışında bir sakıncası yok.
+adınızı bağlayabilir, SSL'i otomatik alır. Hosting satın aldığınız için bu yol
+artık yedek seçenektir; kurulum için ayrı bir depo açılır.
 
 ### B1. Dosyaları GitHub'a koyun
 
@@ -287,16 +312,6 @@ adınızı bağlayabilir, SSL'i otomatik alır. İki şekilde kurabilirsiniz:
      yüklemeniz zarar vermez, görmezden gelinir.
 4. **Settings → Pages → Source:** "Deploy from a branch", **Branch:** `main`,
    klasör `/ (root)` → Save.
-
-**B-2 (bu depo):**
-
-1. `claude/beautiful-goodall-4ej8xr` dalını `master` ile birleştirin
-   (Pull request → Merge).
-2. **Settings → Pages → Source:** "GitHub Actions" seçin.
-3. **Actions** sekmesi → soldan "Menekşe İlim sitesini yayınla" → **Run
-   workflow**. Bir dakika içinde site `baselaisez.github.io/IMO2020` adresinde
-   açılır. Bundan sonra `menekseilim-site/` içinde yapılan her değişiklik
-   `master`'a gidince otomatik yayınlanır.
 
 ### B2. Alan adını bağlayın
 

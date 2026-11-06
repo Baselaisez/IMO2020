@@ -1,0 +1,81 @@
+# menekseilim-site/ klasörünü Turhost hosting'e (cPanel) şifreli FTP (FTPS) ile yükler.
+#
+# Bir kez girilmesi gereken GitHub sırları
+# (Depo → Settings → Secrets and variables → Actions → New repository secret):
+#   FTP_SUNUCU     FTP sunucusu, örn. srvc77.trwww.com
+#   FTP_KULLANICI  cPanel kullanıcı adı
+#   FTP_SIFRE      cPanel şifresi
+#   FTP_KLASOR     (isteğe bağlı) hedef klasör; girilmezse public_html
+#
+# Sırlar girilmemişse yükleme hata vermeden atlanır.
+name: Siteyi sunucuya yükle
+
+on:
+  push:
+    branches: [master, claude/beautiful-goodall-4ej8xr]
+    paths:
+      - "menekseilim-site/**"
+      - ".github/workflows/menekseilim-yukle.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: menekseilim-yukle
+  cancel-in-progress: false
+
+jobs:
+  yukle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      FTP_SUNUCU: ${{ secrets.FTP_SUNUCU }}
+      FTP_KULLANICI: ${{ secrets.FTP_KULLANICI }}
+      LFTP_PASSWORD: ${{ secrets.FTP_SIFRE }}
+      FTP_KLASOR: ${{ secrets.FTP_KLASOR }}
+    steps:
+      - name: FTP bilgileri girilmiş mi?
+        id: kontrol
+        run: |
+          if [ -z "$FTP_SUNUCU" ] || [ -z "$FTP_KULLANICI" ] || [ -z "$LFTP_PASSWORD" ]; then
+            echo "::warning::FTP bilgileri henüz GitHub'a girilmemiş, yükleme atlandı. YAYINLAMA_REHBERI.md içindeki 'Otomatik yükleme' bölümüne bakın."
+            echo "hazir=hayir" >> "$GITHUB_OUTPUT"
+          else
+            echo "hazir=evet" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Depoyu al
+        if: steps.kontrol.outputs.hazir == 'evet'
+        uses: actions/checkout@v4
+
+      - name: lftp kur
+        if: steps.kontrol.outputs.hazir == 'evet'
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq lftp
+
+      - name: Siteyi yükle
+        if: steps.kontrol.outputs.hazir == 'evet'
+        run: |
+          HEDEF="${FTP_KLASOR:-public_html}"
+          echo "Hedef: $FTP_SUNUCU / $HEDEF"
+          # Şifre komut satırına yazılmaz; lftp onu LFTP_PASSWORD değişkeninden okur.
+          lftp <<EOF
+          set ftp:ssl-force true
+          set ftp:ssl-protect-data true
+          set ssl:verify-certificate true
+          set net:max-retries 3
+          set net:timeout 30
+          open --env-password -u "$FTP_KULLANICI" "$FTP_SUNUCU"
+          mirror --reverse --verbose --parallel=4 --exclude-glob README.md --exclude-glob YAYINLAMA_REHBERI.md --exclude-glob CNAME menekseilim-site "$HEDEF"
+          bye
+          EOF
+
+      - name: Site açılıyor mu?
+        if: steps.kontrol.outputs.hazir == 'evet'
+        run: |
+          sleep 5
+          if curl -fsSL --max-time 30 http://menekseilim.com.tr/ | grep -q "Menekşe Medreseleri"; then
+            echo "Site yayında: http://menekseilim.com.tr/"
+          else
+            echo "::warning::Dosyalar yüklendi ama anasayfa henüz yeni siteyi göstermiyor. Birkaç dakika sonra tekrar bakın."
+          fi
