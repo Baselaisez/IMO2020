@@ -28,9 +28,15 @@ INSTAGRAM = "https://www.instagram.com/menekseilim/"
 IBAN = "TR00 0000 0000 0000 0000 0000 00"   # gerçek IBAN ile değiştirin
 BANKA = "[Banka adı ve şube]"               # gerçek banka bilgisiyle değiştirin
 
-DERSLER = [
-    "Kur'an-ı Kerim", "Tecvid", "Talim", "Makam",
-    "İlmihal (dinî bilgiler)", "Peygamberler Tarihi", "İbadet", "Adab",
+DERSLER = [  # (ders, herkesin anlayacağı kısa açıklama)
+    ("Kur'an-ı Kerim", "Yüzünden okuma ve hafızlık"),
+    ("Tecvid", "Kur'an'ı kurallarına uygun okuma"),
+    ("Talim", "Hocayla birlikte okuyuş çalışması"),
+    ("Makam", "Kur'an'ı güzel sesle okuma"),
+    ("İlmihal", "Temel dinî bilgiler"),
+    ("Peygamberler Tarihi", "Peygamberlerimizin hayatı"),
+    ("İbadet", "Abdest, namaz ve ibadetlerin uygulaması"),
+    ("Adab", "Güzel ahlak ve görgü"),
 ]
 MEDRESELER = [  # (ad, yakında mı)
     ("Atalar Medresesi", False),
@@ -98,7 +104,7 @@ MENU = [
 ]
 
 
-def bas(baslik, aciklama, sayfa, kok=""):
+def bas(baslik, aciklama, sayfa, kok="", ek_head=""):
     return f"""<!DOCTYPE html>
 <html lang="tr">
 <head>
@@ -119,7 +125,7 @@ def bas(baslik, aciklama, sayfa, kok=""):
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,500;0,600;1,500&amp;family=Source+Sans+3:wght@400;600;700&amp;display=swap">
 <link rel="stylesheet" href="{kok}css/style.css">
-</head>
+{ek_head}</head>
 <body>
 <a class="atla" href="#icerik">İçeriğe geç</a>
 <header class="ana-baslik">
@@ -182,6 +188,7 @@ def son(kok=""):
     </div>
   </div>
 </footer>
+<a class="mobil-ara" href="tel:{TELEFON_LINK}">{IKON['tel']} Bizi arayın</a>
 <script src="{kok}js/main.js"></script>
 </body>
 </html>
@@ -198,8 +205,8 @@ def sayfa_basi(baslik, aciklama):
 """
 
 
-def sayfa(dosya, baslik, aciklama, govde):
-    yaz(dosya, bas(baslik, aciklama, dosya) + govde + son())
+def sayfa(dosya, baslik, aciklama, govde, ek_head=""):
+    yaz(dosya, bas(baslik, aciklama, dosya, ek_head=ek_head) + govde + son())
 
 
 def video(v, kapak, sinif="video"):
@@ -239,22 +246,63 @@ def medrese_kart(ad, yakinda):
 
 
 # ---------------------------------------------------------------- ANASAYFA
+import json
+
+SSS = [
+    ("Gündüzlü ve yatılı eğitim arasındaki fark nedir?",
+     "Gündüzlü talebelerimiz 09.00 – 20.00 arasında medresede olur, akşam evine döner. Yatılı talebelerimiz Pazar akşamı 21.00'de gelir, hafta boyunca medresede kalır ve Cumartesi sabahı 10.00'da ailesinin yanına döner."),
+    ("Hafta sonu ders var mı?",
+     "Hayır. Eğitim haftamız Cumartesi öğlen biter, hafta sonu ders yapmıyoruz."),
+    ("Hangi dersleri veriyorsunuz?",
+     "Kur'an-ı Kerim ve hafızlığın yanında tecvid, talim, makam, ilmihal, peygamberler tarihi, ibadet ve adab dersleri veriyoruz."),
+    ("Medreseleriniz nerede?",
+     "Atalar, Cevizli ve Kurfalı medreselerimizde hizmet veriyoruz. Topselvi Medresemiz çok yakında açılıyor. Adres ve yol tarifi için bizi arayabilirsiniz."),
+    ("Yetişkinler için bir programınız var mı?",
+     "Medreselerimizin dışında cemaatimizle sohbet ve zikir halkalarında buluşuyoruz. Gün ve saatleri öğrenmek için bizi arayabilirsiniz."),
+    ("Kayıt için ne yapmalıyım?",
+     f"{TELEFON} numaralı telefondan bizi aramanız yeterli. Sorularınızı cevaplayalım, sizi medresemizde ağırlayalım."),
+]
+
+KURUM = {
+    "@context": "https://schema.org",
+    "@type": ["NGO", "EducationalOrganization"],
+    "name": DERNEK,
+    "alternateName": MARKA,
+    "url": SITE + "/",
+    "logo": SITE + "/img/logo.svg",
+    "image": SITE + "/img/og-gorsel.png",
+    "telephone": "+90 " + TELEFON[1:],
+    "email": EPOSTA,
+    "address": {"@type": "PostalAddress", "addressLocality": "İstanbul", "addressCountry": "TR"},
+    "sameAs": [INSTAGRAM, FACEBOOK],
+}
+KURUM_HEAD = '<script type="application/ld+json">' + json.dumps(KURUM, ensure_ascii=False) + "</script>\n"
+
 ANASAYFA = f"""
 <section class="giris">
   <div class="kapsayici giris-ic">
     <div>
       <span class="ust-yazi">{MARKA}</span>
       <h1>Evlatlarımız Kur'an'la büyüsün</h1>
-      <p class="aciklama">Medreselerimizde her gün Kur'an-ı Kerim'in bereketiyle başlar; ilim, edep ve güzel ahlakla devam eder.</p>
+      <p class="aciklama">Medreselerimizde her gün Kur'an-ı Kerim'in bereketiyle başlar; ilim, edep ve güzel ahlakla devam eder. Kapımız, evladının Kur'an'la yetişmesini isteyen her aileye açık.</p>
       <div class="butonlar">
         <a class="btn btn-yesil" href="tel:{TELEFON_LINK}">{IKON['tel']} Bizi arayın</a>
-        <a class="btn btn-cizgi" href="#egitimlerimiz">Eğitimlerimiz</a>
+        <a class="btn btn-cizgi" href="#kayit">Kayıt nasıl yapılır?</a>
       </div>
       <p class="telefon-not">Bilgi ve kayıt: <strong>{TELEFON}</strong></p>
     </div>
     <div class="giris-video">
       {video("tanitim", "tanitim")}
     </div>
+  </div>
+</section>
+
+<section class="bakis" aria-label="Bir bakışta">
+  <div class="kapsayici bakis-ic">
+    <div><b>3 medrese</b><span>Atalar, Cevizli, Kurfalı · Topselvi yakında</span></div>
+    <div><b>8 ders</b><span>Kur'an-ı Kerim'den adaba</span></div>
+    <div><b>Gündüzlü ve yatılı</b><span>Ailenize uygun eğitim</span></div>
+    <div><b>Cemaate açık</b><span>Sohbet ve zikir halkaları</span></div>
   </div>
 </section>
 
@@ -272,15 +320,30 @@ ANASAYFA = f"""
   <div class="kapsayici">
     <div class="bolum-basi">
       <h2>Derslerimiz</h2>
+      <p>Talebelerimiz hafızlık yolunda ilerlerken bu dersleri de görür.</p>
     </div>
     <ul class="dersler">
-{chr(10).join(f'      <li>{d}</li>' for d in DERSLER)}
+{chr(10).join(f'      <li>{d}<span>{a}</span></li>' for d, a in DERSLER)}
     </ul>
     <p class="alinti">"Hafızlık sadece ezber değildir. Sabrı öğrenmek, disiplini kazanmak, kardeşliği yaşamak ve Allah'ın kelamıyla büyümektir."</p>
   </div>
 </section>
 
-<section class="bolum" id="medreselerimiz">
+<section class="bolum" id="kayit">
+  <div class="kapsayici">
+    <div class="bolum-basi">
+      <h2>Kayıt nasıl yapılır?</h2>
+      <p>Üç kolay adımda evladınız aramıza katılır.</p>
+    </div>
+    <ol class="adimlar">
+      <li><h3>Bizi arayın</h3><p>{TELEFON} numaralı telefondan bize ulaşın, sorularınızı cevaplayalım.</p></li>
+      <li><h3>Medresemizi görün</h3><p>Size en yakın medresemize gelin, hocalarımızla tanışın.</p></li>
+      <li><h3>Eğitime başlayalım</h3><p>Gündüzlü ya da yatılı eğitimden size uygun olanı birlikte belirleyelim.</p></li>
+    </ol>
+  </div>
+</section>
+
+<section class="bolum bolum-bej" id="medreselerimiz">
   <div class="kapsayici">
     <div class="bolum-basi">
       <h2>Medreselerimiz</h2>
@@ -288,6 +351,18 @@ ANASAYFA = f"""
     </div>
     <div class="izgara dort">
 {chr(10).join(medrese_kart(a, y) for a, y in MEDRESELER)}
+    </div>
+  </div>
+</section>
+
+<section class="bolum" id="merasim">
+  <div class="kapsayici">
+    <div class="bolum-basi">
+      <h2>Ailelerimizle birlikte</h2>
+      <p>Eğitim yılını talebelerimiz, aileleri ve hocalarımızla birlikte yıl sonu merasimiyle tamamlıyoruz.</p>
+    </div>
+    <div class="videolar uclu">
+{chr(10).join(f'      <figure>{video(v, k)}<figcaption>{a}</figcaption></figure>' for v, k, a in VIDEOLAR)}
     </div>
   </div>
 </section>
@@ -303,10 +378,22 @@ ANASAYFA = f"""
   </div>
 </section>
 
+<section class="bolum" id="sorular">
+  <div class="kapsayici">
+    <div class="bolum-basi">
+      <h2>Sık sorulanlar</h2>
+      <p>Ailelerimizin en çok sorduğu sorular. Aklınıza takılan başka bir şey olursa bizi arayın.</p>
+    </div>
+    <div class="sss">
+{chr(10).join(f'      <details><summary>{q}</summary><p>{c}</p></details>' for q, c in SSS)}
+    </div>
+  </div>
+</section>
+
 <section class="bolum cagri">
   <div class="kapsayici">
     <h2>Siz de evladınızın Kur'an'ın nuruyla yetişmesini istiyorsanız, sizi Menekşe Medreselerine bekliyoruz.</h2>
-    <p>Kayıt ve her türlü sorunuz için bizi arayabilirsiniz.</p>
+    <p>{DERNEK}, mahallelerimizin çocuklarına ve ailelerine hizmet etmek için çalışan, kâr amacı gütmeyen bir sivil toplum kuruluşudur. Hayırseverlerimizin desteğiyle büyüyoruz.</p>
     <div class="butonlar">
       <a class="btn btn-acik" href="tel:{TELEFON_LINK}">{IKON['tel']} {TELEFON}</a>
       <a class="btn btn-cizgi-acik" href="bagis.html">Bağışla destek olun</a>
@@ -316,8 +403,8 @@ ANASAYFA = f"""
 """
 
 sayfa("index.html", f"{MARKA} | {DERNEK}",
-      "Menekşe Medreseleri: gündüzlü ve yatılı hafızlık eğitimi, Kur'an-ı Kerim, tecvid, ilmihal ve daha fazlası. Atalar, Cevizli ve Kurfalı medreselerimiz.",
-      ANASAYFA)
+      "Menekşe Medreseleri: İstanbul'da gündüzlü ve yatılı hafızlık eğitimi. Kur'an-ı Kerim, tecvid, ilmihal ve daha fazlası. Atalar, Cevizli ve Kurfalı medreselerimiz. Bilgi ve kayıt: " + TELEFON,
+      ANASAYFA, ek_head=KURUM_HEAD)
 
 
 # ---------------------------------------------------------------- HAKKIMIZDA
@@ -353,21 +440,26 @@ HAKKIMIZDA = sayfa_basi("Hakkımızda", "Kimiz, ne yapıyoruz? Kısaca anlatalı
   </div>
 </section>
 
-<section class="bolum" id="merasim">
-  <div class="kapsayici">
+<section class="bolum" id="dernek-bilgileri">
+  <div class="kapsayici dar">
     <div class="bolum-basi">
-      <h2>Yıl sonu merasimimizden</h2>
-      <p>Eğitim yılını ailelerimizle ve hocalarımızla birlikte tamamladık.</p>
+      <h2>Dernek bilgileri</h2>
+      <p>Kim olduğumuzu açıkça bilmenizi isteriz.</p>
     </div>
-    <div class="videolar uclu">
-{chr(10).join(f'      <figure>{video(v, k)}<figcaption>{a}</figcaption></figure>' for v, k, a in VIDEOLAR)}
-    </div>
-    <p class="alt-not"><a class="btn btn-cizgi" href="hocalarimiz.html">Hocalarımızı tanıyın {IKON['ok']}</a></p>
+    <dl class="bilgi-kutusu">
+      <dt>Resmî adı</dt><dd>{DERNEK}</dd>
+      <dt>Hizmet adı</dt><dd>{MARKA}</dd>
+      <dt>Yapısı</dt><dd>5253 sayılı Dernekler Kanunu'na göre kurulmuş, kâr amacı gütmeyen sivil toplum kuruluşu</dd>
+      <dt>Merkez</dt><dd>İstanbul</dd>
+      <dt>Bağışlar</dt><dd>Her bağış için dernek makbuzu verilir</dd>
+      <dt>İletişim</dt><dd><a href="tel:{TELEFON_LINK}">{TELEFON}</a> · <a href="mailto:{EPOSTA}">{EPOSTA}</a></dd>
+    </dl>
+    <p class="alt-not">Yıl sonu merasimimizin videolarını <a href="index.html#merasim">anasayfada</a> izleyebilirsiniz.</p>
   </div>
 </section>
 """
 sayfa("hakkimizda.html", f"Hakkımızda | {MARKA}",
-      "Menekşe İlim Kültür Okuma Derneği ve Menekşe Medreseleri hakkında: eğitim anlayışımız, sohbet ve zikir halkalarımız, sosyal etkinliklerimiz ve yıl sonu merasimimiz.",
+      "Menekşe İlim Kültür Okuma Derneği ve Menekşe Medreseleri hakkında: eğitim anlayışımız, sohbet ve zikir halkalarımız, sosyal etkinliklerimiz ve dernek bilgilerimiz.",
       HAKKIMIZDA)
 
 

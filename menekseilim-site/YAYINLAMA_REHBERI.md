@@ -43,6 +43,8 @@ isterseniz" kısmına bakın).
 | IBAN ve banka | Bağış sayfası | Derneğin IBAN numarası, banka ve şube adı |
 | Medrese adresleri | İletişim sayfası | Atalar, Cevizli, Kurfalı (ve açılınca Topselvi) medreselerinin açık adresi |
 | Sohbet ve zikir günleri | Anasayfa ve Hakkımızda | İsterseniz gün ve saatleri yazarız; şu an "bizi arayın" yazıyor |
+| Yaş ve ücret bilgisi (isteğe bağlı) | Anasayfa → Sık sorulanlar | Kaç yaşında başlanabildiği ve eğitimin ücretli olup olmadığı; velilerin en çok sorduğu iki soru |
+| Dernek kütük numarası (isteğe bağlı) | Hakkımızda → Dernek bilgileri | Dernekler Bilgi Sistemi'ndeki kütük numarası; güven verir |
 
 Sitede kullanılan bilgiler ve kaynakları:
 
