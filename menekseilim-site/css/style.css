@@ -276,6 +276,14 @@ button, input, textarea, select { font: inherit; color: inherit; }
   .alt-cizgi { padding-bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px)); }
 }
 
+/* ---------- kamu yararı rozeti ---------- */
+.rozet { display: inline-flex; align-items: center; gap: .5rem; margin-top: 1rem; padding: .45rem .95rem; border-radius: 999px; background: #fff; border: 1px solid var(--cizgi); color: var(--yesil-koyu); font-weight: 600; font-size: .95rem; line-height: 1.3; }
+.rozet svg { width: 1.15rem; height: 1.15rem; fill: var(--yesil); flex: none; }
+.alt-statu { display: flex; align-items: flex-start; gap: .45rem; color: #EDF3F0; font-weight: 600; font-size: .95rem; margin-top: .75rem; }
+.alt-statu svg { width: 1.1rem; height: 1.1rem; fill: var(--bej); flex: none; margin-top: .15rem; }
+.kart ul { padding-left: 1.2rem; margin: 0 0 1em; display: grid; gap: .5rem; color: var(--metin); }
+.kart em { color: var(--metin-soluk); font-style: normal; font-size: .95rem; }
+
 /* 404 */
 .hata-sayfa { text-align: center; padding-block: 5rem; }
 .hata-sayfa img { width: 120px; margin: 0 auto 1.5rem; }

@@ -45,6 +45,7 @@ isterseniz" kısmına bakın).
 | Sohbet ve zikir günleri | Anasayfa ve Hakkımızda | İsterseniz gün ve saatleri yazarız; şu an "bizi arayın" yazıyor |
 | Yaş ve ücret bilgisi (isteğe bağlı) | Anasayfa → Sık sorulanlar | Kaç yaşında başlanabildiği ve eğitimin ücretli olup olmadığı; velilerin en çok sorduğu iki soru |
 | Dernek kütük numarası (isteğe bağlı) | Hakkımızda → Dernek bilgileri | Dernekler Bilgi Sistemi'ndeki kütük numarası; güven verir |
+| Kamu yararı kararının tarihi ve sayısı | Hakkımızda → Dernek bilgileri | Cumhurbaşkanı Kararı'nın tarihi ve sayısı (`olustur.py` → `KAMU_YARARI_KARAR`); statünün kendisi sitede yazıyor |
 
 Sitede kullanılan bilgiler ve kaynakları:
 

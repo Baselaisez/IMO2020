@@ -25,6 +25,8 @@ TELEFON_LINK = "+905511647464"
 EPOSTA = "menekseilim@gmail.com"
 FACEBOOK = "https://www.facebook.com/menekseilimkulturokumadernegi/"
 INSTAGRAM = "https://www.instagram.com/menekseilim/"
+KAMU_YARARI = "Cumhurbaşkanı Kararı ile kamu yararına çalışan dernek"
+KAMU_YARARI_KARAR = ""   # karar tarihi ve sayısı biliniyorsa, örn. "12.03.2024 tarihli ve 1234 sayılı Cumhurbaşkanı Kararı"
 IBAN = "TR00 0000 0000 0000 0000 0000 00"   # gerçek IBAN ile değiştirin
 BANKA = "[Banka adı ve şube]"               # gerçek banka bilgisiyle değiştirin
 
@@ -70,6 +72,7 @@ IKON = {
     "mail": '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1zm1 2.4V17h16V7.4l-8 5-8-5zM4.6 7l7.4 4.6L19.4 7H4.6z"/></svg>',
     "ig": '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 7.3a4.7 4.7 0 1 1 0 9.4 4.7 4.7 0 0 1 0-9.4zm0 1.8a2.9 2.9 0 1 0 0 5.8 2.9 2.9 0 0 0 0-5.8zm5-2.1a1.1 1.1 0 1 1 0 2.2 1.1 1.1 0 0 1 0-2.2zM12 3c2.5 0 2.8 0 3.8.05 2.6.12 4 1.5 4.15 4.15.05 1 .05 1.3.05 3.8s0 2.8-.05 3.8c-.12 2.65-1.5 4.03-4.15 4.15-1 .05-1.3.05-3.8.05s-2.8 0-3.8-.05c-2.65-.12-4.03-1.5-4.15-4.15C4 13.8 4 13.5 4 11s0-2.8.05-3.8C4.17 4.55 5.55 3.17 8.2 3.05 9.2 3 9.5 3 12 3z"/></svg>',
     "fb": '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13.5 22v-8h2.7l.4-3.2h-3.1V8.8c0-.9.3-1.6 1.6-1.6h1.7V4.4c-.3 0-1.3-.1-2.5-.1-2.5 0-4.1 1.5-4.1 4.2v2.3H7.4V14h2.8v8h3.3z"/></svg>',
+    "kalkan": '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 4 5v6c0 5 3.4 9.7 8 11 4.6-1.3 8-6 8-11V5l-8-3zm-1.2 14.2-3.5-3.5 1.4-1.4 2.1 2.1 4.9-4.9 1.4 1.4-6.3 6.3z"/></svg>',
     "ok": '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13.2 5.3 19.9 12l-6.7 6.7-1.4-1.4 4.3-4.3H4v-2h12.1l-4.3-4.3 1.4-1.4z"/></svg>',
     "menu": '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>',
     "kapat": '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6.4 5 12.6 12.6-1.4 1.4L5 6.4 6.4 5zm12.6 1.4L6.4 19 5 17.6 17.6 5 19 6.4z"/></svg>',
@@ -153,6 +156,7 @@ def son(kok=""):
     <div>
       <img class="alt-logo" src="{kok}img/logo-acik.svg" alt="{DERNEK}" width="243" height="52">
       <p>Evlatlarımızın Kur'an-ı Kerim'le, ilimle ve güzel ahlakla yetişmesi için çalışıyoruz.</p>
+      <p class="alt-statu">{IKON['kalkan']} {KAMU_YARARI}</p>
     </div>
     <div>
       <h2>Sayfalar</h2>
@@ -259,6 +263,8 @@ SSS = [
      "Atalar, Cevizli ve Kurfalı medreselerimizde hizmet veriyoruz. Topselvi Medresemiz çok yakında açılıyor. Adres ve yol tarifi için bizi arayabilirsiniz."),
     ("Yetişkinler için bir programınız var mı?",
      "Medreselerimizin dışında cemaatimizle sohbet ve zikir halkalarında buluşuyoruz. Gün ve saatleri öğrenmek için bizi arayabilirsiniz."),
+    ("Bağışım vergiden düşülür mü?",
+     "Evet. Derneğimiz Cumhurbaşkanı Kararı ile kamu yararına çalışan dernek statüsündedir. Makbuz karşılığı yaptığınız bağışlar, kanunda belirtilen sınırlar içinde vergi matrahınızdan indirilebilir. Ayrıntılar Bağış sayfamızda."),
     ("Kayıt için ne yapmalıyım?",
      f"{TELEFON} numaralı telefondan bizi aramanız yeterli. Sorularınızı cevaplayalım, sizi medresemizde ağırlayalım."),
 ]
@@ -268,6 +274,7 @@ KURUM = {
     "@type": ["NGO", "EducationalOrganization"],
     "name": DERNEK,
     "alternateName": MARKA,
+    "description": f"{KAMU_YARARI}. Gündüzlü ve yatılı hafızlık eğitimi, Kur'an-ı Kerim ve dinî bilgiler dersleri.",
     "url": SITE + "/",
     "logo": SITE + "/img/logo.svg",
     "image": SITE + "/img/og-gorsel.png",
@@ -290,6 +297,7 @@ ANASAYFA = f"""
         <a class="btn btn-cizgi" href="#kayit">Kayıt nasıl yapılır?</a>
       </div>
       <p class="telefon-not">Bilgi ve kayıt: <strong>{TELEFON}</strong></p>
+      <p class="rozet">{IKON['kalkan']} {KAMU_YARARI}</p>
     </div>
     <div class="giris-video">
       {video("tanitim", "tanitim")}
@@ -393,7 +401,7 @@ ANASAYFA = f"""
 <section class="bolum cagri">
   <div class="kapsayici">
     <h2>Siz de evladınızın Kur'an'ın nuruyla yetişmesini istiyorsanız, sizi Menekşe Medreselerine bekliyoruz.</h2>
-    <p>{DERNEK}, mahallelerimizin çocuklarına ve ailelerine hizmet etmek için çalışan, kâr amacı gütmeyen bir sivil toplum kuruluşudur. Hayırseverlerimizin desteğiyle büyüyoruz.</p>
+    <p>{DERNEK}, Cumhurbaşkanı Kararı ile kamu yararına çalışan bir dernektir. Mahallelerimizin çocuklarına ve ailelerine hizmet ediyor, hayırseverlerimizin desteğiyle büyüyoruz.</p>
     <div class="butonlar">
       <a class="btn btn-acik" href="tel:{TELEFON_LINK}">{IKON['tel']} {TELEFON}</a>
       <a class="btn btn-cizgi-acik" href="bagis.html">Bağışla destek olun</a>
@@ -403,7 +411,7 @@ ANASAYFA = f"""
 """
 
 sayfa("index.html", f"{MARKA} | {DERNEK}",
-      "Menekşe Medreseleri: İstanbul'da gündüzlü ve yatılı hafızlık eğitimi. Kur'an-ı Kerim, tecvid, ilmihal ve daha fazlası. Atalar, Cevizli ve Kurfalı medreselerimiz. Bilgi ve kayıt: " + TELEFON,
+      "Menekşe Medreseleri: İstanbul'da gündüzlü ve yatılı hafızlık eğitimi. Cumhurbaşkanı Kararı ile kamu yararına çalışan dernek. Kur'an-ı Kerim, tecvid, ilmihal ve daha fazlası. Atalar, Cevizli ve Kurfalı medreselerimiz. Bilgi ve kayıt: " + TELEFON,
       ANASAYFA, ek_head=KURUM_HEAD)
 
 
@@ -449,9 +457,10 @@ HAKKIMIZDA = sayfa_basi("Hakkımızda", "Kimiz, ne yapıyoruz? Kısaca anlatalı
     <dl class="bilgi-kutusu">
       <dt>Resmî adı</dt><dd>{DERNEK}</dd>
       <dt>Hizmet adı</dt><dd>{MARKA}</dd>
+      <dt>Statüsü</dt><dd>{KAMU_YARARI}{(" (" + KAMU_YARARI_KARAR + ")") if KAMU_YARARI_KARAR else ""}</dd>
       <dt>Yapısı</dt><dd>5253 sayılı Dernekler Kanunu'na göre kurulmuş, kâr amacı gütmeyen sivil toplum kuruluşu</dd>
       <dt>Merkez</dt><dd>İstanbul</dd>
-      <dt>Bağışlar</dt><dd>Her bağış için dernek makbuzu verilir</dd>
+      <dt>Bağışlar</dt><dd>Her bağış için dernek makbuzu verilir; bağışlar kanuni sınırlar içinde vergiden düşülebilir</dd>
       <dt>İletişim</dt><dd><a href="tel:{TELEFON_LINK}">{TELEFON}</a> · <a href="mailto:{EPOSTA}">{EPOSTA}</a></dd>
     </dl>
     <p class="alt-not">Yıl sonu merasimimizin videolarını <a href="index.html#merasim">anasayfada</a> izleyebilirsiniz.</p>
@@ -510,6 +519,20 @@ BAGIS = sayfa_basi("Bağış", "Bir talebemizin eğitimine siz de ortak olun.") 
       </dl>
       <button class="btn btn-yesil" type="button" data-kopyala="#iban">IBAN'ı kopyala</button>
     </div>
+  </div>
+</section>
+
+<section class="bolum bolum-bej" id="vergi">
+  <div class="kapsayici dar">
+    <article class="kart">
+      <h2 style="font-size:1.5rem">Bağışınız vergiden düşülebilir</h2>
+      <p>Derneğimiz {KAMU_YARARI.lower().replace("cumhurbaşkanı kararı", "Cumhurbaşkanı Kararı")} statüsündedir. Bu yüzden makbuz karşılığında yaptığınız bağışlar vergi matrahınızdan indirilebilir:</p>
+      <ul>
+        <li><strong>Gelir vergisi beyannamesi verenler:</strong> yıl içindeki bağışlarınızın, beyan ettiğiniz gelirin %5'ine kadar olan kısmı (kalkınmada öncelikli yörelerde %10'una kadar). <em>193 sayılı Gelir Vergisi Kanunu, madde 89/4</em></li>
+        <li><strong>Şirketler:</strong> bağışların, o yılın kurum kazancının %5'ine kadar olan kısmı. <em>5520 sayılı Kurumlar Vergisi Kanunu, madde 10/1-c</em></li>
+      </ul>
+      <p>Bunun için bağış makbuzunuzu saklayıp mali müşavirinize iletmeniz yeterli. Kendi durumunuz için mali müşavirinize danışmanızı öneririz.</p>
+    </article>
   </div>
 </section>
 """
