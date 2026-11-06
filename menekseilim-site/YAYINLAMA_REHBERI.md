@@ -38,11 +38,12 @@ isterseniz" kısmına bakın).
 
 | Eksik bilgi | Sitede nerede | Ne gerekiyor |
 |---|---|---|
-| Kadro fotoğrafları ve isimleri | Hakkımızda → Kadromuz | Başkan, başkan yardımcıları, finans müdürü, ilmî bölüm başkanı ve sınıf hocalarının fotoğrafı ve adı |
+| Hoca ve kadro fotoğrafları | Hocalarımız sayfası | Başkan, başkan yardımcıları, finans müdürü, ilmî bölüm başkanı ve sınıf hocalarının fotoğrafı ve adı |
+| Salih Gedik Hocamızın fotoğrafı | Anasayfa ve Hocalarımız | Tanıtım videosundan alınan karenin gerçekten Salih Gedik Hocamız olduğunun teyidi, varsa daha net bir fotoğraf |
 | IBAN ve banka | Bağış sayfası | Derneğin IBAN numarası, banka ve şube adı |
 | Medrese adresleri | İletişim sayfası | Atalar, Cevizli, Kurfalı (ve açılınca Topselvi) medreselerinin açık adresi |
 | Sohbet ve zikir günleri | Anasayfa ve Hakkımızda | İsterseniz gün ve saatleri yazarız; şu an "bizi arayın" yazıyor |
-| Veli izni | Talebelerimiz sayfası | 14 talebenin velisinden yazılı izin (aşağıdaki yasal nota bakın) |
+| Videolardaki talebeler | Anasayfa ve Hakkımızda | Videolarda talebelerin yüzü görünüyor; yayında kalacaksa veli izni (aşağıdaki yasal nota bakın) |
 
 Sitede kullanılan bilgiler ve kaynakları:
 
@@ -53,6 +54,9 @@ Sitede kullanılan bilgiler ve kaynakları:
 * **Saatler ve dersler** sizin mesajınızdan alındı: gündüzlü 09.00–20.00,
   yatılı Pazar 21.00 giriş, Cumartesi 10.00 çıkış, hafta sonu ders yok.
 * **Logo** gönderdiğiniz orijinal PDF'ten birebir alındı.
+* **Salih Gedik Hocamızın fotoğrafı**, tanıtım videosunda onun adının geçtiği
+  bölümdeki kareden kırpıldı.
+* **Talebe fotoğrafları** hukuki nedenlerle siteden kaldırıldı.
 
 ### Kendiniz düzenlemek isterseniz
 
@@ -64,18 +68,13 @@ kadro) değiştirip depo kökünden şunu çalıştırmaktır:
 python3 menekseilim-kaynak/olustur.py
 ```
 
-**Kadro fotoğrafı eklemek:** Fotoğrafları `menekseilim-site/img/kadro/`
+**Hoca ve kadro fotoğrafı eklemek:** Fotoğrafları `menekseilim-site/img/hocalar/`
 klasörüne koyun (dikey, yaklaşık 800×1000 piksel). Sonra `olustur.py` içindeki
 KADRO listesinde ilgili satıra isim ve dosya adını yazın, örneğin:
 
 ```python
 ("Dernek Başkanı", "Ahmet Yılmaz", "baskan.jpg"),
 ```
-
-**Talebe fotoğrafı eklemek:** `img/ogrenciler/` klasöründe her fotoğrafın iki
-boyutu var: `ogrenci-15.jpg` (büyük, 900 piksel) ve `ogrenci-15-k.jpg` (küçük,
-450 piksel). Yeni fotoğrafı bu adlarla ekleyip `olustur.py` içindeki
-`TALEBE_FOTO_SAYISI` değerini artırın.
 
 **Logo:** `menekseilim-kaynak/logo_uret.py` orijinal PDF'ten `img/logo.svg`,
 `img/logo-acik.svg` (koyu zemin için), `img/muhur.svg` ve `favicon.svg`
@@ -434,13 +433,10 @@ gelir. Teknik bir yakınınız varsa iyi bir seçenektir.
 
 * **KVKK:** `kvkk.html` sayfası genel bir aydınlatma metnidir; adres ve iletişim
   bilgilerini doldurun.
-* **Çocukların fotoğrafları:** Galeride yüzü açıkça görünen 14 öğrenci ve
-  videolarda çok sayıda çocuk var. Bunlar KVKK kapsamında kişisel veridir.
-  Yayına almadan önce her velinin yazılı (imzalı) iznini alın ve izinleri dernek
-  dosyasında saklayın. İzin vermeyen velinin çocuğunun fotoğrafını
-  `img/ogrenciler/` klasöründen silin ve bana haber verin. Talebelerimiz
-  sayfasındaki "velilerimizin izniyle yayınlanmaktadır" cümlesi ancak bu
-  izinler alındıysa doğrudur.
+* **Çocukların görüntüleri:** Talebe fotoğrafları siteden kaldırıldı. Ancak
+  tanıtım videosunda ve yıl sonu merasimi videolarında talebelerin yüzleri
+  görünüyor. Bunlar da KVKK kapsamında kişisel veridir. Videolar yayında
+  kalacaksa velilerin yazılı iznini alın; izin yoksa videoları kaldıralım.
 * **Bağış:** Dernekler, bağışları alındı belgesi (makbuz) karşılığında kabul
   eder. Kamuya açık yardım kampanyası (SMS, kumbara, geniş çaplı çağrı) 2860
   sayılı Yardım Toplama Kanunu kapsamında valilik izni gerektirebilir; web
@@ -455,9 +451,9 @@ gelir. Teknik bir yakınınız varsa iyi bir seçenektir.
 
 ```
 menekseilim-site/          ← sunucuya (public_html) yüklenen klasör
-├── index.html             Anasayfa: giriş videosu, eğitimlerimiz, dersler, medreseler, talebeler
-├── hakkimizda.html        Hakkımızda, sohbet/zikir, sosyal etkinlikler, kadromuz
-├── talebelerimiz.html     Videolar ve talebe fotoğrafları
+├── index.html             Anasayfa: giriş videosu, eğitimlerimiz, dersler, medreseler, hocalarımız
+├── hakkimizda.html        Hakkımızda, sohbet/zikir, sosyal etkinlikler, merasim videoları
+├── hocalarimiz.html       Salih Gedik Hocamız ve kadromuz
 ├── bagis.html             Bağış ve IBAN
 ├── iletisim.html          Telefon, e-posta, medreseler ve iletişim formu
 ├── kvkk.html              KVKK aydınlatma metni
@@ -466,10 +462,9 @@ menekseilim-site/          ← sunucuya (public_html) yüklenen klasör
 ├── .htaccess              Yönlendirmeler, önbellek, güvenlik ayarları
 ├── CNAME, robots.txt, sitemap.xml, favicon.svg
 ├── css/style.css          Tüm görünüm
-├── js/main.js             Menü, fotoğraf büyütme, form, IBAN kopyalama
+├── js/main.js             Menü, form, IBAN kopyalama
 ├── img/                   logo.svg, logo-acik.svg, muhur.svg, kisi.svg, medrese-ders.jpg, og-gorsel.png, desen.svg
-│   ├── ogrenciler/        Talebe fotoğrafları (büyük ve küçük boyut)
-│   └── kadro/             Kadro fotoğrafları (eklenecek)
+│   └── hocalar/           Hoca ve kadro fotoğrafları (salih-gedik.jpg; diğerleri eklenecek)
 └── video/                 Tanıtım ve yıl sonu merasimi videoları (.mp4) ve kapakları (.jpg)
 
 menekseilim-kaynak/        ← sunucuya YÜKLENMEZ; siteyi üreten dosyalar

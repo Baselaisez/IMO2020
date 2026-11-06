@@ -158,26 +158,14 @@ button, input, textarea, select { font: inherit; color: inherit; }
 .medrese.yakinda { border-style: dashed; background: var(--bej-acik); }
 .medrese.yakinda svg { fill: var(--kum); }
 
-/* talebe fotoğrafları */
-.galeri { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .9rem; }
-.galeri.yedili { grid-template-columns: repeat(7, minmax(0, 1fr)); gap: .75rem; }
-@media (max-width: 900px) { .galeri, .galeri.yedili { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-.galeri a { display: block; border-radius: var(--radius-kucuk); overflow: hidden; aspect-ratio: 3 / 4; background: var(--bej); }
-.galeri img { width: 100%; height: 100%; object-fit: cover; transition: transform .3s ease; }
-.galeri a:hover img { transform: scale(1.04); }
-.galeri figcaption { display: none; }
+/* videolar */
 .videolar { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1.25rem; }
 @media (max-width: 900px) { .videolar { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 480px) { .videolar { grid-template-columns: 1fr; } .videolar .video { max-width: 320px; margin-inline: auto; } }
 .videolar figure { margin: 0; display: flex; flex-direction: column; gap: .5rem; min-width: 0; }
 .videolar figcaption { color: var(--metin-soluk); font-size: 1rem; }
-
-.isik-kutusu { position: fixed; inset: 0; background: rgba(12, 30, 26, .92); display: grid; place-items: center; z-index: 1200; padding: 1.5rem; margin: 0; }
-.isik-kutusu[hidden] { display: none; }
-.isik-kutusu img { max-height: 85vh; width: auto; border-radius: var(--radius-kucuk); }
-.isik-kutusu figcaption { color: #fff; text-align: center; margin-top: .75rem; }
-.isik-kutusu button { position: absolute; top: calc(1rem + env(safe-area-inset-top, 0px)); right: 1rem; width: 44px; height: 44px; border-radius: 50%; border: 0; background: rgba(255,255,255,.15); color: #fff; cursor: pointer; display: grid; place-items: center; }
-.isik-kutusu button svg { width: 22px; height: 22px; fill: currentColor; }
+.videolar.uclu { grid-template-columns: repeat(3, minmax(0, 1fr)); max-width: 900px; }
+@media (max-width: 700px) { .videolar.uclu { grid-template-columns: 1fr; } .videolar.uclu .video { max-width: 320px; margin-inline: auto; } }
 
 /* yan yana metin + görsel */
 .yan-yana { display: grid; grid-template-columns: 1.2fr .8fr; gap: 3rem; align-items: center; }

@@ -21,7 +21,8 @@ ErrorDocument 404 /404.html
 
   # 4) Eski sayfa adresleri
   RewriteRule ^faaliyetler\.html$ /#egitimlerimiz [R=301,NE,L]
-  RewriteRule ^galeri\.html$ /talebelerimiz.html [R=301,L]
+  RewriteRule ^galeri\.html$ /hocalarimiz.html [R=301,L]
+  RewriteRule ^talebelerimiz\.html$ /hocalarimiz.html [R=301,L]
   RewriteRule ^duyurular\.html$ / [R=301,L]
 </IfModule>
 

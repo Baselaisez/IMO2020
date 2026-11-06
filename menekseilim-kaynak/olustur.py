@@ -38,7 +38,7 @@ MEDRESELER = [  # (ad, yakında mı)
     ("Kurfalı Medresesi", False),
     ("Topselvi Medresesi", True),
 ]
-KADRO = [  # (ünvan, isim, fotoğraf) – fotoğraf img/kadro/ altına konur
+KADRO = [  # (ünvan, isim, fotoğraf) – fotoğraf img/hocalar/ altına konur
     ("Dernek Başkanı", "", ""),
     ("Başkan Yardımcısı", "", ""),
     ("Başkan Yardımcısı", "", ""),
@@ -48,9 +48,11 @@ KADRO = [  # (ünvan, isim, fotoğraf) – fotoğraf img/kadro/ altına konur
     ("Sınıf Hocası", "", ""),
     ("Sınıf Hocası", "", ""),
 ]
-TALEBE_FOTO_SAYISI = 14
-VIDEOLAR = [  # (dosya, kapak, açıklama)
-    ("tanitim", "tanitim", "Menekşe Medreselerinden bir gün"),
+ONE_CIKAN_HOCA = {  # Hocalarımız sayfasında ve anasayfada öne çıkan hoca
+    "isim": "Salih Gedik Hocamız",
+    "foto": "img/hocalar/salih-gedik.jpg",   # tanıtım videosundan alınmış kare
+}
+VIDEOLAR = [  # (dosya, kapak, açıklama) – Hakkımızda sayfasındaki merasim videoları
     ("merasim-1", "merasim-1-kapak", "Yıl sonu merasimi: talebelerimizin girişi"),
     ("merasim-2", "merasim-2", "Hocalarımız talebelerimizi tebrik ediyor"),
     ("merasim-3", "merasim-3", "Merasimde ailelerimizle birlikte"),
@@ -91,7 +93,7 @@ MENU = [
     ("hakkimizda.html", "Hakkımızda"),
     ("index.html#egitimlerimiz", "Eğitimlerimiz"),
     ("index.html#medreselerimiz", "Medreselerimiz"),
-    ("talebelerimiz.html", "Talebelerimiz"),
+    ("hocalarimiz.html", "Hocalarımız"),
     ("iletisim.html", "İletişim"),
 ]
 
@@ -151,7 +153,7 @@ def son(kok=""):
       <ul>
         <li><a href="{kok}hakkimizda.html">Hakkımızda</a></li>
         <li><a href="{kok}index.html#egitimlerimiz">Eğitimlerimiz</a></li>
-        <li><a href="{kok}talebelerimiz.html">Talebelerimiz</a></li>
+        <li><a href="{kok}hocalarimiz.html">Hocalarımız</a></li>
         <li><a href="{kok}bagis.html">Bağış</a></li>
         <li><a href="{kok}iletisim.html">İletişim</a></li>
       </ul>
@@ -206,19 +208,8 @@ def video(v, kapak, sinif="video"):
             f'Tarayıcınız videoyu oynatamıyor. <a href="video/{v}.mp4">Videoyu indirin</a>.</video>')
 
 
-def talebe(i):
-    return (f'<a href="img/ogrenciler/ogrenci-{i:02d}.jpg"><img src="img/ogrenciler/ogrenci-{i:02d}-k.jpg" '
-            f'alt="Menekşe Medreseleri talebesi" width="450" height="600" loading="lazy">'
-            f'<figcaption>Talebemiz</figcaption></a>')
-
-
-ISIK_KUTUSU = f"""
-<figure class="isik-kutusu" hidden>
-  <button type="button" aria-label="Kapat">{IKON['kapat']}</button>
-  <img src="img/ogrenciler/ogrenci-01.jpg" alt="">
-  <figcaption></figcaption>
-</figure>
-"""
+HOCA_METNI = ("Medreselerimizdeki eğitim programı Salih Gedik Hocamızın riyasetinde yürütülüyor. "
+              "Evlatlarımız onun rehberliğinde hem hafızlık yolunda ilerliyor hem de millî ve manevî değerlerle yetişiyor.")
 
 EGITIM_KARTLARI = f"""
     <div class="izgara uc">
@@ -302,15 +293,13 @@ ANASAYFA = f"""
 </section>
 
 <section class="bolum bolum-bej">
-  <div class="kapsayici">
-    <div class="bolum-basi">
-      <h2>Talebelerimiz</h2>
-      <p>Derste de, merasimde de, birlikte geçen her günde.</p>
+  <div class="kapsayici yan-yana">
+    <div class="yazi">
+      <h2>Hocalarımız</h2>
+      <p>{HOCA_METNI}</p>
+      <p><a class="btn btn-cizgi" href="hocalarimiz.html">Hocalarımızı tanıyın {IKON['ok']}</a></p>
     </div>
-    <div class="galeri">
-{chr(10).join('      ' + talebe(i) for i in (1, 3, 9, 12))}
-    </div>
-    <p class="alt-not"><a class="btn btn-cizgi" href="talebelerimiz.html">Tüm fotoğraflar ve videolar {IKON['ok']}</a></p>
+    <img src="{ONE_CIKAN_HOCA['foto']}" alt="{ONE_CIKAN_HOCA['isim']}" width="400" height="500" loading="lazy">
   </div>
 </section>
 
@@ -324,7 +313,7 @@ ANASAYFA = f"""
     </div>
   </div>
 </section>
-{ISIK_KUTUSU}"""
+"""
 
 sayfa("index.html", f"{MARKA} | {DERNEK}",
       "Menekşe Medreseleri: gündüzlü ve yatılı hafızlık eğitimi, Kur'an-ı Kerim, tecvid, ilmihal ve daha fazlası. Atalar, Cevizli ve Kurfalı medreselerimiz.",
@@ -333,7 +322,7 @@ sayfa("index.html", f"{MARKA} | {DERNEK}",
 
 # ---------------------------------------------------------------- HAKKIMIZDA
 def kisi(unvan, isim, foto):
-    src = f"img/kadro/{foto}" if foto else "img/kisi.svg"
+    src = f"img/hocalar/{foto}" if foto else "img/kisi.svg"
     ad = isim or "İsim eklenecek"
     return (f'      <div class="kisi"><img src="{src}" alt="{isim + ", " if isim else ""}{unvan}" width="400" height="500" loading="lazy">'
             f'<h3>{ad}</h3><p>{unvan}</p></div>')
@@ -364,11 +353,42 @@ HAKKIMIZDA = sayfa_basi("Hakkımızda", "Kimiz, ne yapıyoruz? Kısaca anlatalı
   </div>
 </section>
 
-<section class="bolum" id="kadromuz">
+<section class="bolum" id="merasim">
+  <div class="kapsayici">
+    <div class="bolum-basi">
+      <h2>Yıl sonu merasimimizden</h2>
+      <p>Eğitim yılını ailelerimizle ve hocalarımızla birlikte tamamladık.</p>
+    </div>
+    <div class="videolar uclu">
+{chr(10).join(f'      <figure>{video(v, k)}<figcaption>{a}</figcaption></figure>' for v, k, a in VIDEOLAR)}
+    </div>
+    <p class="alt-not"><a class="btn btn-cizgi" href="hocalarimiz.html">Hocalarımızı tanıyın {IKON['ok']}</a></p>
+  </div>
+</section>
+"""
+sayfa("hakkimizda.html", f"Hakkımızda | {MARKA}",
+      "Menekşe İlim Kültür Okuma Derneği ve Menekşe Medreseleri hakkında: eğitim anlayışımız, sohbet ve zikir halkalarımız, sosyal etkinliklerimiz ve yıl sonu merasimimiz.",
+      HAKKIMIZDA)
+
+
+# ---------------------------------------------------------------- HOCALARIMIZ
+HOCALAR = sayfa_basi("Hocalarımız", "Evlatlarımızı yetiştiren hocalarımız ve derneğimizi yürüten kardeşlerimiz.") + f"""
+<section class="bolum">
+  <div class="kapsayici yan-yana">
+    <div class="yazi">
+      <h2>{ONE_CIKAN_HOCA['isim']}</h2>
+      <p>{HOCA_METNI}</p>
+      <p>Hafızlık bizim için sadece ezber değil; sabrı öğrenmek, disiplini kazanmak, kardeşliği yaşamak ve Allah'ın kelamıyla büyümek demek.</p>
+    </div>
+    <img src="{ONE_CIKAN_HOCA['foto']}" alt="{ONE_CIKAN_HOCA['isim']}" width="400" height="500">
+  </div>
+</section>
+
+<section class="bolum bolum-bej" id="kadromuz">
   <div class="kapsayici">
     <div class="bolum-basi">
       <h2>Kadromuz</h2>
-      <p>Derneğimizi ve medreselerimizi yürüten hocalarımız ve yöneticilerimiz.</p>
+      <p>Derneğimizi ve medreselerimizi birlikte yürütüyoruz.</p>
     </div>
     <div class="kadro">
 {chr(10).join(kisi(*k) for k in KADRO)}
@@ -376,37 +396,8 @@ HAKKIMIZDA = sayfa_basi("Hakkımızda", "Kimiz, ne yapıyoruz? Kısaca anlatalı
   </div>
 </section>
 """
-sayfa("hakkimizda.html", f"Hakkımızda | {MARKA}",
-      "Menekşe İlim Kültür Okuma Derneği ve Menekşe Medreseleri hakkında: eğitim anlayışımız, sohbet ve zikir halkalarımız, sosyal etkinliklerimiz ve kadromuz.",
-      HAKKIMIZDA)
-
-
-# ---------------------------------------------------------------- TALEBELERİMİZ
-TALEBELER = sayfa_basi("Talebelerimiz", "Evlatlarımızdan kareler: derslerimizden ve yıl sonu merasimimizden.") + f"""
-<section class="bolum">
-  <div class="kapsayici">
-    <div class="bolum-basi"><h2>Videolar</h2></div>
-    <div class="videolar">
-{chr(10).join(f'      <figure>{video(v, k)}<figcaption>{a}</figcaption></figure>' for v, k, a in VIDEOLAR)}
-    </div>
-  </div>
-</section>
-
-<section class="bolum bolum-bej">
-  <div class="kapsayici">
-    <div class="bolum-basi">
-      <h2>Fotoğraflar</h2>
-      <p>Büyütmek için fotoğrafa dokunun.</p>
-    </div>
-    <div class="galeri yedili">
-{chr(10).join('      ' + talebe(i) for i in range(1, TALEBE_FOTO_SAYISI + 1))}
-    </div>
-    <p class="alt-not">Fotoğraflar velilerimizin izniyle yayınlanmaktadır. Bir fotoğrafın kaldırılmasını isterseniz bize haber vermeniz yeterli. Daha fazlası için <a href="{INSTAGRAM}" target="_blank" rel="noopener">Instagram hesabımızı</a> takip edebilirsiniz.</p>
-  </div>
-</section>
-{ISIK_KUTUSU}"""
-sayfa("talebelerimiz.html", f"Talebelerimiz | {MARKA}",
-      "Menekşe Medreseleri talebelerinden fotoğraflar ve yıl sonu merasimi videoları.", TALEBELER)
+sayfa("hocalarimiz.html", f"Hocalarımız | {MARKA}",
+      "Menekşe Medreseleri hocaları ve dernek kadrosu: Salih Gedik Hocamız, dernek başkanımız, yöneticilerimiz ve sınıf hocalarımız.", HOCALAR)
 
 
 # ---------------------------------------------------------------- BAĞIŞ
@@ -481,7 +472,7 @@ KVKK = sayfa_basi("KVKK Aydınlatma Metni", "Kişisel verileriniz hakkında kıs
     <h2>Kimlerle paylaşıyoruz?</h2>
     <p>Bilgileriniz kanunun zorunlu kıldığı durumlar dışında kimseyle paylaşılmaz. Form mesajları yalnızca dernek yetkililerinin erişebildiği e-posta hesabımıza gelir.</p>
     <h2>Fotoğraf ve videolar</h2>
-    <p>Sitemizdeki talebe fotoğrafları ve videolar velilerimizin izniyle yayınlanır. Kaldırılmasını istediğiniz bir görsel için bize ulaşmanız yeterlidir.</p>
+    <p>Sitemizdeki fotoğraf ve videolar ilgili kişilerin ve velilerimizin izniyle yayınlanır. Kaldırılmasını istediğiniz bir görsel için bize ulaşmanız yeterlidir.</p>
     <h2>Haklarınız</h2>
     <p>6698 sayılı Kanun'un 11. maddesi gereği bilgilerinizin işlenip işlenmediğini öğrenebilir, düzeltilmesini ya da silinmesini isteyebilirsiniz. Bunun için {EPOSTA} adresine yazabilirsiniz.</p>
     <p>Sitemiz reklam veya takip çerezi kullanmaz.</p>
@@ -508,7 +499,7 @@ yaz("404.html", bas(f"Sayfa bulunamadı | {MARKA}", "Aradığınız sayfa buluna
 # ---------------------------------------------------------------- yardımcı dosyalar
 yaz("img/kisi.svg", KISI_SVG)
 
-SAYFALAR = ["index.html", "hakkimizda.html", "talebelerimiz.html", "bagis.html", "iletisim.html", "kvkk.html"]
+SAYFALAR = ["index.html", "hakkimizda.html", "hocalarimiz.html", "bagis.html", "iletisim.html", "kvkk.html"]
 yaz("sitemap.xml", '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
     + "".join(f"  <url><loc>{SITE}/{'' if s == 'index.html' else s}</loc></url>\n" for s in SAYFALAR)
     + "</urlset>\n")
@@ -536,7 +527,8 @@ ErrorDocument 404 /404.html
 
   # 4) Eski sayfa adresleri
   RewriteRule ^faaliyetler\.html$ /#egitimlerimiz [R=301,NE,L]
-  RewriteRule ^galeri\.html$ /talebelerimiz.html [R=301,L]
+  RewriteRule ^galeri\.html$ /hocalarimiz.html [R=301,L]
+  RewriteRule ^talebelerimiz\.html$ /hocalarimiz.html [R=301,L]
   RewriteRule ^duyurular\.html$ / [R=301,L]
 </IfModule>
 
@@ -559,9 +551,14 @@ ErrorDocument 404 /404.html
 
 # Artık kullanılmayan eski dosyalar
 for eski in ["duyurular.html", "faaliyetler.html", "galeri.html", "img/amblem.svg", "img/isaret.svg",
-             "img/yer-tutucu.svg", "img/hero.svg", "video/merasim-1.jpg"]:
+             "img/yer-tutucu.svg", "img/hero.svg", "video/merasim-1.jpg", "talebelerimiz.html"]:
     yol = os.path.join(OUT, eski)
     if os.path.exists(yol):
         os.remove(yol)
         print("silindi:", eski)
+import shutil
+_ogr = os.path.join(OUT, "img", "ogrenciler")
+if os.path.isdir(_ogr):
+    shutil.rmtree(_ogr)
+    print("silindi: img/ogrenciler/ (talebe fotoğrafları)")
 print("tamam")
