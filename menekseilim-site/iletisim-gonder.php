@@ -50,15 +50,22 @@ $konu    = $temiz('konu', 120);
 $mesaj   = isset($_POST['mesaj']) ? mb_substr(trim((string) $_POST['mesaj']), 0, 4000, 'UTF-8') : '';
 $kvkk    = !empty($_POST['kvkk']);
 
-if ($ad === '' || $mesaj === '' || !filter_var($eposta, FILTER_VALIDATE_EMAIL)) {
-    cevap(false, 'Lütfen ad, geçerli bir e-posta ve mesaj alanlarını doldurun.');
+$epostaGecerli = $eposta !== '' && filter_var($eposta, FILTER_VALIDATE_EMAIL);
+if ($ad === '' || $mesaj === '') {
+    cevap(false, 'Lütfen adınızı ve mesajınızı yazın.');
+}
+if ($telefon === '' && !$epostaGecerli) {
+    cevap(false, 'Size dönebilmemiz için bir telefon numarası ya da geçerli bir e-posta yazın.');
+}
+if ($eposta !== '' && !$epostaGecerli) {
+    cevap(false, 'E-posta adresi hatalı görünüyor, lütfen kontrol edin.');
 }
 if (!$kvkk) {
     cevap(false, 'Devam etmek için aydınlatma metnini onaylamanız gerekir.');
 }
 
 $govde  = "Ad Soyad : $ad\n";
-$govde .= "E-posta  : $eposta\n";
+$govde .= "E-posta  : " . ($eposta !== '' ? $eposta : '-') . "\n";
 $govde .= "Telefon  : " . ($telefon !== '' ? $telefon : '-') . "\n";
 $govde .= "Konu     : " . ($konu !== '' ? $konu : '-') . "\n";
 $govde .= "Tarih    : " . date('d.m.Y H:i') . "\n";
@@ -66,7 +73,9 @@ $govde .= "IP       : " . ($_SERVER['REMOTE_ADDR'] ?? '-') . "\n\n";
 $govde .= "Mesaj:\n$mesaj\n";
 
 $basliklar  = "From: " . mb_encode_mimeheader('Menekşe İlim Web Sitesi', 'UTF-8') . " <$GONDEREN>\r\n";
-$basliklar .= "Reply-To: " . mb_encode_mimeheader($ad, 'UTF-8') . " <$eposta>\r\n";
+if ($epostaGecerli) {
+    $basliklar .= "Reply-To: " . mb_encode_mimeheader($ad, 'UTF-8') . " <$eposta>\r\n";
+}
 $basliklar .= "MIME-Version: 1.0\r\n";
 $basliklar .= "Content-Type: text/plain; charset=UTF-8\r\n";
 $basliklar .= "Content-Transfer-Encoding: 8bit\r\n";

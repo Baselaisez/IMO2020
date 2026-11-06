@@ -39,8 +39,9 @@
   // Aktif menü bağlantısı
   var dosya = (location.pathname.split("/").pop() || "index.html").toLowerCase();
   document.querySelectorAll(".ana-menu a[href]").forEach(function (a) {
-    var hedef = a.getAttribute("href").split("#")[0].toLowerCase();
-    if (hedef === dosya) { a.classList.add("aktif"); a.setAttribute("aria-current", "page"); }
+    var href = a.getAttribute("href");
+    if (href.indexOf("#") !== -1) return; // bölüm bağlantıları (index.html#...) sayfa sayılmaz
+    if (href.toLowerCase() === dosya) { a.classList.add("aktif"); a.setAttribute("aria-current", "page"); }
   });
 
   // Galeri ışık kutusu

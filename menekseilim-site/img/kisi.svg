@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 500" role="img" aria-label="Fotoğraf eklenecek">
+  <rect width="400" height="500" fill="#EDE4CA"/>
+  <circle cx="200" cy="190" r="78" fill="#D8CBA6"/>
+  <path d="M60 500c8-96 66-158 140-158s132 62 140 158z" fill="#D8CBA6"/>
+  <text x="200" y="470" text-anchor="middle" font-family="Arial, sans-serif" font-size="22" fill="#7A6130">Fotoğraf eklenecek</text>
+</svg>

@@ -32,51 +32,59 @@ Ekran görüntünüzde iki alan adınız görünüyor:
 
 ## 0. Yayınlamadan önce mutlaka değiştirin
 
-Dosyalarda emin olamadığım bilgileri köşeli parantezle `[...]` işaretledim.
-Herhangi bir metin editörüyle (Windows'ta **Not Defteri**, daha rahatı
-ücretsiz **Visual Studio Code**) şu dosyaları açıp güncelleyin:
+Sitede bilmediğim birkaç bilgi kaldı. Bunları bana iletirseniz ben eklerim;
+isterseniz kendiniz de düzenleyebilirsiniz (aşağıda "Kendiniz düzenlemek
+isterseniz" kısmına bakın).
 
-| Ne | Nerede | Not |
+| Eksik bilgi | Sitede nerede | Ne gerekiyor |
 |---|---|---|
-| Telefon numarası | Tüm `.html` dosyaları: `+90 (5xx) xxx xx xx` ve `tel:+905000000000` | Düzenle → Tümünü Değiştir ile tek seferde yapabilirsiniz |
-| Adres | Tüm `.html` dosyaları: `[Mahalle] Mah. ...` | Alt bilgi, iletişim sayfası ve KVKK metninde geçer |
-| E-posta | `menekseilim@gmail.com` olarak yazıldı | Doğruysa bırakın; farklıysa tüm dosyalarda değiştirin |
-| IBAN ve banka | `index.html` ve `bagis.html` | `TR00 0000 ...` ve `[Banka Adı]` |
-| Dernek kütük numarası | Tüm sayfaların en altında `[000-000-000]` | Dernekler Bilgi Sistemi'ndeki numaranız |
-| Yönetim kurulu isimleri | `hakkimizda.html` | `[Ad Soyad]` ve baş harfler (`AS`) |
-| Sosyal medya | Facebook ve Instagram (`instagram.com/menekseilim`) bağlı | YouTube hesabı açarsanız bana iletin, simgesini geri ekleyelim |
-| Haftalık program | `index.html` → "Ders ve etkinlik takvimi" tablosu | Örnek saatler yazdım |
-| Duyurular | `index.html` ve `duyurular.html` | Örnek 4 duyuru var; birini kopyalayıp çoğaltın |
-| Faaliyet metinleri | `faaliyetler.html` | Yapmadığınız bir faaliyet varsa o bölümü silin |
-| Fotoğraflar | Öğrenci portreleri ve merasim videoları eklendi; `faaliyetler.html` sayfasında hâlâ `img/yer-tutucu.svg` var | Aşağıya bakın |
-| Veli izni | `galeri.html` altındaki "velilerinden yazılı izin alınmıştır" cümlesi | Yalnızca 14 öğrencinin hepsinin velisinden izin aldıysanız yayınlayın |
-| Google Haritası | `iletisim.html` içindeki `HARİTA:` açıklaması | Google Haritalar → Paylaş → Harita yerleştir → kodu yapıştır |
-| Tüzük PDF | `hakkimizda.html` → "buraya tıklayın (PDF)" | PDF'i `belgeler/tuzuk.pdf` gibi yükleyip bağlantıyı verin |
+| Kadro fotoğrafları ve isimleri | Hakkımızda → Kadromuz | Başkan, başkan yardımcıları, finans müdürü, ilmî bölüm başkanı ve sınıf hocalarının fotoğrafı ve adı |
+| IBAN ve banka | Bağış sayfası | Derneğin IBAN numarası, banka ve şube adı |
+| Medrese adresleri | İletişim sayfası | Atalar, Cevizli, Kurfalı (ve açılınca Topselvi) medreselerinin açık adresi |
+| Sohbet ve zikir günleri | Anasayfa ve Hakkımızda | İsterseniz gün ve saatleri yazarız; şu an "bizi arayın" yazıyor |
+| Veli izni | Talebelerimiz sayfası | 14 talebenin velisinden yazılı izin (aşağıdaki yasal nota bakın) |
 
-**Fotoğraf eklemek:** Fotoğrafları `img/` klasörüne kopyalayın (örn.
-`img/kurs-1.jpg`). Boyutları 1600 px genişliği geçmesin; telefon fotoğraflarını
-[squoosh.app](https://squoosh.app) ile küçültebilirsiniz. Sonra HTML'de
-`img/yer-tutucu.svg` yazan yeri `img/kurs-1.jpg` ile değiştirin. Galeri
-sayfasında her fotoğraf için bir satır var:
+Sitede kullanılan bilgiler ve kaynakları:
 
-```html
-<a href="img/kurs-1.jpg"><img src="img/kurs-1.jpg" alt="Kur'an dersi" loading="lazy"><figcaption>Kur'an-ı Kerim dersimizden</figcaption></a>
+* **Telefon 0551 164 74 64**, medrese adları (Atalar, Cevizli, Kurfalı,
+  Topselvi) ve Salih Gedik Hocamızın adı derneğin kendi tanıtım videosundan
+  alındı.
+* **E-posta** (menekseilim@gmail.com) derneğin Facebook sayfasından alındı.
+* **Saatler ve dersler** sizin mesajınızdan alındı: gündüzlü 09.00–20.00,
+  yatılı Pazar 21.00 giriş, Cumartesi 10.00 çıkış, hafta sonu ders yok.
+* **Logo** gönderdiğiniz orijinal PDF'ten birebir alındı.
+
+### Kendiniz düzenlemek isterseniz
+
+Sayfalar `menekseilim-kaynak/olustur.py` betiğiyle üretiliyor. En kolayı bu
+dosyanın başındaki **AYARLAR** bölümünü (telefon, IBAN, dersler, medreseler,
+kadro) değiştirip depo kökünden şunu çalıştırmaktır:
+
+```bash
+python3 menekseilim-kaynak/olustur.py
 ```
 
-**Öğrenci fotoğrafları ve videolar:** `img/ogrenciler/` klasöründe her
-fotoğrafın iki boyutu var: `ogrenci-01.jpg` (büyütülmüş görünüm, 900 px) ve
-`ogrenci-01-k.jpg` (küçük kare, 450 px). Yeni fotoğraf eklerken aynı adlandırmayı
-kullanın ve `galeri.html` içinde bir satırı kopyalayıp numarasını değiştirin.
-Merasim videoları `video/` klasöründe; her videonun bir `.mp4` dosyası ve bir
-`.jpg` kapak resmi var. Videolar web için sıkıştırıldı (toplam yaklaşık 12 MB).
+**Kadro fotoğrafı eklemek:** Fotoğrafları `menekseilim-site/img/kadro/`
+klasörüne koyun (dikey, yaklaşık 800×1000 piksel). Sonra `olustur.py` içindeki
+KADRO listesinde ilgili satıra isim ve dosya adını yazın, örneğin:
 
-**Amblem:** `img/logo.svg` (başlık ve alt bilgi), `img/amblem.svg` (anasayfa
-büyük görsel), `favicon.svg` (tarayıcı sekmesi) ve `img/og-gorsel.png`
-(WhatsApp/Facebook paylaşım görseli) derneğin bayrağındaki amblemden
-**fotoğraflara bakılarak yeniden çizildi**. Amblemin sağ alt kısmı tüm
-fotoğraflarda kadrajın dışında kaldığı için birebir aynı değildir. Matbaaya
-veya tasarımcıya ait orijinal dosya (SVG, PDF, AI ya da yüksek çözünürlüklü PNG)
-varsa aynı dosya adlarıyla değiştirin ya da bana gönderin, ben yerleştireyim.
+```python
+("Dernek Başkanı", "Ahmet Yılmaz", "baskan.jpg"),
+```
+
+**Talebe fotoğrafı eklemek:** `img/ogrenciler/` klasöründe her fotoğrafın iki
+boyutu var: `ogrenci-15.jpg` (büyük, 900 piksel) ve `ogrenci-15-k.jpg` (küçük,
+450 piksel). Yeni fotoğrafı bu adlarla ekleyip `olustur.py` içindeki
+`TALEBE_FOTO_SAYISI` değerini artırın.
+
+**Logo:** `menekseilim-kaynak/logo_uret.py` orijinal PDF'ten `img/logo.svg`,
+`img/logo-acik.svg` (koyu zemin için), `img/muhur.svg` ve `favicon.svg`
+dosyalarını üretir. Logo değişirse yeni PDF'i `logo-orijinal.pdf` adıyla
+koyup betiği çalıştırın.
+
+Python kullanmak istemezseniz HTML dosyalarını Not Defteri ile de
+düzenleyebilirsiniz; ama betiği sonra çalıştırırsanız elle yaptığınız
+değişikliklerin üzerine yazılır.
 
 ---
 
@@ -430,9 +438,9 @@ gelir. Teknik bir yakınınız varsa iyi bir seçenektir.
   videolarda çok sayıda çocuk var. Bunlar KVKK kapsamında kişisel veridir.
   Yayına almadan önce her velinin yazılı (imzalı) iznini alın ve izinleri dernek
   dosyasında saklayın. İzin vermeyen velinin çocuğunun fotoğrafını
-  `img/ogrenciler/` klasöründen ve `galeri.html` içinden silin. Galeri
-  sayfasındaki "velilerinden yazılı izin alınmıştır" cümlesi ancak bu izinler
-  alındıysa doğrudur.
+  `img/ogrenciler/` klasöründen silin ve bana haber verin. Talebelerimiz
+  sayfasındaki "velilerimizin izniyle yayınlanmaktadır" cümlesi ancak bu
+  izinler alındıysa doğrudur.
 * **Bağış:** Dernekler, bağışları alındı belgesi (makbuz) karşılığında kabul
   eder. Kamuya açık yardım kampanyası (SMS, kumbara, geniş çaplı çağrı) 2860
   sayılı Yardım Toplama Kanunu kapsamında valilik izni gerektirebilir; web
@@ -446,28 +454,31 @@ gelir. Teknik bir yakınınız varsa iyi bir seçenektir.
 ## Dosya yapısı
 
 ```
-menekseilim-site/
-├── index.html            Anasayfa
-├── hakkimizda.html       Hakkımızda, misyon-vizyon, yönetim kurulu
-├── faaliyetler.html      Faaliyet detayları
-├── duyurular.html        Duyurular
-├── galeri.html           Merasim videoları ve öğrenci fotoğrafları
-├── bagis.html            Bağış bilgileri ve SSS
-├── iletisim.html         İletişim bilgileri ve form
-├── kvkk.html             KVKK aydınlatma metni
-├── 404.html              Bulunamayan sayfa
-├── iletisim-gonder.php   Form gönderici (PHP)
-├── .htaccess             Yönlendirme, önbellek, güvenlik başlıkları (Apache)
-├── CNAME                 GitHub Pages için alan adı
-├── robots.txt, sitemap.xml
-├── favicon.svg
-├── css/style.css         Tüm stil
-├── js/main.js            Menü, galeri, form, IBAN kopyalama
-├── img/                  logo.svg, amblem.svg, isaret.svg, og-gorsel.png, desen.svg, yer-tutucu.svg
-│   └── ogrenciler/       Öğrenci portreleri (büyük ve küçük boyut)
-└── video/                Yıl sonu merasimi videoları (.mp4) ve kapak resimleri (.jpg)
+menekseilim-site/          ← sunucuya (public_html) yüklenen klasör
+├── index.html             Anasayfa: giriş videosu, eğitimlerimiz, dersler, medreseler, talebeler
+├── hakkimizda.html        Hakkımızda, sohbet/zikir, sosyal etkinlikler, kadromuz
+├── talebelerimiz.html     Videolar ve talebe fotoğrafları
+├── bagis.html             Bağış ve IBAN
+├── iletisim.html          Telefon, e-posta, medreseler ve iletişim formu
+├── kvkk.html              KVKK aydınlatma metni
+├── 404.html               Bulunamayan sayfa
+├── iletisim-gonder.php    Form gönderici (PHP)
+├── .htaccess              Yönlendirmeler, önbellek, güvenlik ayarları
+├── CNAME, robots.txt, sitemap.xml, favicon.svg
+├── css/style.css          Tüm görünüm
+├── js/main.js             Menü, fotoğraf büyütme, form, IBAN kopyalama
+├── img/                   logo.svg, logo-acik.svg, muhur.svg, kisi.svg, medrese-ders.jpg, og-gorsel.png, desen.svg
+│   ├── ogrenciler/        Talebe fotoğrafları (büyük ve küçük boyut)
+│   └── kadro/             Kadro fotoğrafları (eklenecek)
+└── video/                 Tanıtım ve yıl sonu merasimi videoları (.mp4) ve kapakları (.jpg)
+
+menekseilim-kaynak/        ← sunucuya YÜKLENMEZ; siteyi üreten dosyalar
+├── olustur.py             Sayfaları üretir (AYARLAR bölümü burada)
+├── logo_uret.py           Logo SVG dosyalarını PDF'ten üretir
+├── logo-orijinal.pdf      Derneğin orijinal logosu
+└── og-gorsel.html         Paylaşım görseli şablonu
 ```
 
-Renkler amblemden alınmıştır: koyu yeşil, bej ve beyaz. Değiştirmek isterseniz
-`css/style.css` dosyasının en üstündeki `:root { --yesil: ...; --bej: ...; --kum: ...; }`
-değerlerini düzenlemeniz yeterlidir; tüm site bu değişkenleri kullanır.
+Renkler logodan alındı: koyu yeşil, bej ve beyaz. Değiştirmek isterseniz
+`css/style.css` dosyasının en üstündeki `:root { --yesil: ...; --bej: ...; }`
+değerlerini düzenlemeniz yeterli.
