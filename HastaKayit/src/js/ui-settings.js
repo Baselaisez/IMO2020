@@ -7,7 +7,7 @@ import { isHtsWorkbook, parseHtsWorkbook } from './hts-excel.js';
 import { shareFile, textToBase64, bytesToBase64, exportMessage, validateSyncFolder, pickSyncFolder } from './files.js';
 import { isNative, isDesktop, platform, platformLabel } from './platform.js';
 import { desktop } from './desktop.js';
-import { getSyncSettings, syncIfConfigured, ANDROID_SYNC_LABEL, resetSyncMemory } from './sync-file.js';
+import { getSyncSettings, syncIfConfigured, ANDROID_SYNC_LABEL, resetSyncMemory, syncPlatform } from './sync-file.js';
 import { resetICloudStatus } from './icloud.js';
 import { state, showScreen, guarded, banner, openSheet, closeSheet, todayIso, esc } from './ui.js';
 import { monthlySummaryFrom, fmtTL } from './compute.js';
@@ -200,7 +200,9 @@ export async function openSettings() {
            ${rows.map(r => `<tr><td>${esc(r.month)}</td><td>${fmtTL(r.total)}</td><td>${r.count}</td><td>${r.activePatients}</td></tr>`).join('')}</table>`
         : '<p class="muted">Henüz ödeme kaydı yok.</p>';
     }
-    document.getElementById('lock-policy').value = (await getMeta(state.exec, 'lock_policy')) || '2';
+    const lockSel = document.getElementById('lock-policy');
+    lockSel.value = (await getMeta(state.exec, 'lock_policy')) || '2';
+    setLockHelp(lockSel.value);
     // Biyometri yalnızca telefonda var; Mac'te çalışmayacak bir seçenek gösterilmez.
     const bioRow = document.getElementById('bio-autoprompt-row');
     const bioHelp = document.getElementById('bio-autoprompt-help');
@@ -451,7 +453,7 @@ export function initSettings() {
 
   document.getElementById('lock-policy').addEventListener('change', async e => {
     const r = await guarded(() => setMeta(state.exec, 'lock_policy', e.target.value));
-    if (r.ok) banner('PIN ayarı kaydedildi', 'ok');
+    if (r.ok) { setLockHelp(e.target.value); banner('PIN ayarı kaydedildi', 'ok'); }
   });
 
   document.getElementById('default-remind').addEventListener('change', async e => {
@@ -531,6 +533,39 @@ export async function refreshSyncUi() {
  * iPhone'da iCloud açıkken doktorun hiçbir şey ayarlaması gerekmiyor; bunu
  * açıkça söylemek, "klasör seçmem mi lazım?" sorusunu baştan kesiyor.
  */
+/**
+ * PIN ayarının NE YAPACAĞINI düz Türkçe anlatır. Saf — testi var.
+ *
+ * NEDEN VAR: doktor ayarı 10 dakikaya aldı ve "çalışmıyor" dedi. Ayar doğru
+ * kaydediliyordu; iPhone uygulamayı arka planda bellek için sonlandırdığı için
+ * geri dönüş soğuk başlangıç oluyor ve süre hiç sorulmadan PIN isteniyordu
+ * (düzeltildi: compute.coldStartGrace). Ama sorunun yarısı GÖRÜNÜRLÜKTÜ:
+ * ekranda ayarın ne anlama geldiği yazmıyordu, dolayısıyla doktorun kendi
+ * başına "ayar mı bozuk, başka bir şey mi" diye ayırt etmesi imkânsızdı.
+ * Artık seçtiği şeyin karşılığı seçimin hemen altında yazıyor.
+ */
+export function lockPolicyHelp(policy, platform) {
+  const telefon = platform === 'mobile';
+  if (policy === 'switch') {
+    return 'Uygulamadan her çıkışta PIN sorulur — bir saniyeliğine başka bir uygulamaya baksanız bile.';
+  }
+  if (policy === 'close') {
+    return telefon
+      ? 'Uygulama açık kaldığı sürece PIN sorulmaz. Uygulamayı kapatırsanız — ya da telefon onu bellek için kapatırsa — yeniden sorulur.'
+      : 'Uygulama açık kaldığı sürece PIN sorulmaz. Yalnızca uygulamayı kapatıp açtığınızda sorulur.';
+  }
+  const dk = Number(policy) || 2;
+  const ortak = `Uygulamadan ayrıldıktan sonra ${dk} dakika içinde geri dönerseniz PIN sorulmaz; ${dk} dakikayı geçerse sorulur.`;
+  return telefon
+    ? `${ortak} Telefon uygulamayı bu sırada bellek için kapatsa bile bu süreye uyulur.`
+    : ortak;
+}
+
+function setLockHelp(policy) {
+  const el = document.getElementById('lock-policy-help');
+  if (el) el.textContent = lockPolicyHelp(policy, syncPlatform());
+}
+
 export function syncNoteText(s, androidLabel = ANDROID_SYNC_LABEL) {
   if (s.platform !== 'mobile') {
     return 'Eşitleme yalnızca masaüstü uygulamasında (Mac/Windows) ve telefonda çalışır (tarayıcı önizlemesinde kapalıdır).';

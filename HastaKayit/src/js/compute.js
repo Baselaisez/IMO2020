@@ -102,6 +102,40 @@ export function humanizeLead(min) {
   return `${n} dakika sonra`;
 }
 
+/**
+ * SOĞUK BAŞLANGIÇTA PIN atlanmalı mı? Saf — testi var.
+ *
+ * GERÇEK ŞİKÂYET: "PIN'i 10 dakikaya aldım ama 2-3 dakikada yine soruyor."
+ * Ayar doğru kaydediliyordu; sorun başka yerdeydi. iPhone, arka plandaki
+ * uygulamaları bellek için SONLANDIRIR ve bu uygulama 100.000 kayıtla epey
+ * bellek tutuyor — birkaç dakika içinde öldürülmesi olağan. Öldürülünce geri
+ * dönüş artık "arka plandan geri gelme" değil, uygulamanın SIFIRDAN açılması
+ * olur: `lockedFrom`/`bgAt` gibi bellek içi değerler yok olur ve kilit ekranı
+ * ayardan bağımsız olarak PIN ister. Kullanıcının gördüğü şey "ayar
+ * çalışmıyor"dur; oysa ayar hiç sorulmamıştır.
+ *
+ * Çözüm: arka plana geçiş ANI diske yazılır ve açılışta okunur. Süre dolmadıysa
+ * PIN sorulmaz. Güvenlikten ödün verilmez, çünkü verilen karar kullanıcının
+ * zaten seçtiği karardır: "şu kadar dakika boyunca sorma".
+ *
+ * Yalnızca SÜRE temelli ayarlar için geçerli:
+ *   'switch' → her uygulama değişiminde sorulsun demek; soğuk başlangıç evveliyatla sorar.
+ *   'close'  → "sadece uygulama kapanınca" demek; süreç öldüyse uygulama GERÇEKTEN
+ *              kapanmıştır, dolayısıyla sorulmalı.
+ *
+ * Emniyetli taraf her durumda "PIN sor": damga yoksa, bozuksa ya da saat geri
+ * alınmışsa false döner.
+ */
+export function coldStartGrace(policy, bgAtMs, nowMs) {
+  const p = policy || '2';
+  if (p === 'switch' || p === 'close') return false;
+  const bg = Number(bgAtMs);
+  if (!Number.isFinite(bg) || bg <= 0) return false;
+  const elapsed = Number(nowMs) - bg;
+  if (!Number.isFinite(elapsed) || elapsed < 0) return false;
+  return elapsed < (Number(p) || 2) * 60000;
+}
+
 // PIN-lock policy: given the setting and how long the app was backgrounded (ms),
 // should we demand the PIN on resume? Default (null/unknown) = 2 minutes.
 export function shouldRequirePin(policy, elapsedMs) {

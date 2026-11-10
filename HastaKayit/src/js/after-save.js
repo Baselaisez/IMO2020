@@ -25,10 +25,21 @@
 // ile ui-card.js (ödeme) aynı kararı iki ayrı yerde farklı yorumlayamasın.
 
 /**
- * @param {boolean} isNew Kayıt YENİ mi oluşturuldu (true), yoksa mevcut bir
- *   kayıt mı güncellendi (false)?
+ * Sorulan soru ŞU: "bu kayıt, YENİ HASTA akışının son adımı mı?"
+ *
+ * "Bu yeni bir ödeme mi" DEĞİL. İkisi aynı sanıldığı için gerçek bir hata
+ * çıkmıştı: ödeme panelinde `!existing` ("yeni ödeme") sorulduğu için, doktor
+ * MEVCUT bir hastanın kartından ödeme eklediğinde de ana ekrana fırlatılıyor,
+ * karta devam edemiyordu. Aynı paneldeki "Vazgeç" düğmesi doğru bayrağa
+ * baktığı için iki düğme farklı davranıyordu.
+ *
+ * Her iki çağrı yeri de artık aynı kavramı geçiriyor:
+ *   ui-form.js  → formWasNew      (form YENİ hasta için mi açıldı)
+ *   ui-card.js  → afterNewPatient (panel yeni hasta kaydının hemen ardından mı açıldı)
+ *
+ * @param {boolean} endsNewPatientFlow Yeni hasta akışının son adımı mı?
  * @returns {'home'|'stay'} 'home' → ana listeye dön. 'stay' → hasta kartında kal.
  */
-export function afterSaveDestination(isNew) {
-  return isNew ? 'home' : 'stay';
+export function afterSaveDestination(endsNewPatientFlow) {
+  return endsNewPatientFlow ? 'home' : 'stay';
 }

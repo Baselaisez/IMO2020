@@ -306,7 +306,13 @@ async function paymentSheet(p, existing, { afterNewPatient = false } = {}) {
     });
     if (!r.ok) { btn.disabled = false; return; }
     closeSheet();
-    if (afterSaveDestination(!existing) === 'home') {
+    // `afterNewPatient` — `!existing` DEĞİL. Eskiden burada "bu YENİ bir ödeme mi"
+    // sorulurdu ve cevabı evet olduğu için, doktor MEVCUT bir hastanın kartından
+    // "+ Ödeme" ile ödeme eklediğinde de ana ekrana fırlatılıyordu: kartı
+    // incelemeye ya da ikinci bir ödeme girmeye devam edemiyordu. Doğru soru
+    // "bu panel yeni hasta akışının son adımı mı". Hemen yukarıdaki "Vazgeç"
+    // düğmesi zaten bu bayrağa bakıyordu; iki düğme farklı davranıyordu.
+    if (afterSaveDestination(afterNewPatient) === 'home') {
       // Ödeme de girildiyse hastanın işi bitti → ana sayfa (bkz. after-save.js).
       // Kart yeniden çizilmiyor: zaten terk ediliyor, 100k kayıtta gereksiz iş.
       banner('Ödeme kaydedildi — ana sayfaya dönüldü', 'ok');

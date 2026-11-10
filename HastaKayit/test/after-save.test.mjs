@@ -37,10 +37,20 @@ test('yönlendirme otomatik kaydın değiştirdiği state.editing’e DEĞİL, f
     'state.editing otomatik kayıtla değiştiği için güvenilmez');
 });
 
-test('ödeme: yeni ödeme için home, düzenleme için stay', () => {
+test('ödeme paneli: karar "yeni ödeme mi" DEĞİL, "yeni hasta akışı mı"', () => {
+  // DÜZELTİLEN HATA: burada `!existing` ("bu yeni bir ödeme mi") soruluyordu.
+  // Sonuç: doktor MEVCUT bir hastanın kartından "+ Ödeme" ile ödeme
+  // eklediğinde de ana ekrana fırlatılıyor, kartta kalamıyordu. Üstelik aynı
+  // paneldeki "Vazgeç" düğmesi doğru bayrağa (afterNewPatient) baktığı için
+  // iki düğme aynı panelde farklı davranıyordu.
   const src = readFileSync('src/js/ui-card.js', 'utf8');
-  assert.match(src, /afterSaveDestination\(!existing\)/,
-    '`existing` yoksa yeni ödemedir → ana sayfa');
+  assert.match(src, /afterSaveDestination\(afterNewPatient\)/,
+    'karar, panelin yeni hasta akışından açılıp açılmadığına bakmalı');
+  assert.doesNotMatch(src, /afterSaveDestination\(\s*!existing\s*\)/,
+    '"yeni ödeme mi" sorusu yanlış soru');
+  // Kaydet ile Vazgeç aynı bayrağa bakmalı — ikisi de akışı aynı yerde bitirir.
+  assert.match(src, /if \(afterNewPatient\) \{ await refreshHome\(\); showScreen\('home'\); \}/,
+    'Vazgeç de aynı bayrağa bakmalı');
 });
 
 // --- Ayarlar ekranındaki eşitleme metinleri (saf) -------------------------

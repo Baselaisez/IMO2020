@@ -8,7 +8,7 @@ import {
 import { state, banner, showScreen, openSheet, closeSheet, esc } from './ui.js';
 import { isNative, isDesktop } from './platform.js';
 import { flushSnapshot } from './snapshot.js';
-import { shouldRequirePin } from './compute.js';
+import { shouldRequirePin, coldStartGrace } from './compute.js';
 import { iconHtml } from './icons.js';
 
 let onUnlockCb = null;
@@ -48,6 +48,8 @@ async function bioAutoPrompt() {
 }
 let bgAt = 0;
 let lockedFrom = null;
+/** Arka plana geçiş anının diskteki anahtarı (soğuk başlangıç için). */
+export const LOCK_BG_AT = 'lock_bg_at';
 let bgTimer = null;
 
 function clearBgTimer() { clearTimeout(bgTimer); bgTimer = null; }
@@ -199,6 +201,10 @@ async function tryBiometric({ auto = false } = {}) {
 
 async function unlock() {
   bioDismissed = false;
+  // Damga tüketildi: bundan sonraki soğuk başlangıç, araya yeni bir arka plana
+  // geçiş girmedikçe PIN sormalı. Bırakılsaydı, ön planda çöken bir uygulama
+  // eski damgayla açılabilirdi.
+  setMeta(state.exec, LOCK_BG_AT, '').catch(() => {});
   await setFailState(0, 0).catch(() => {});
   document.getElementById('pin-input').value = '';
   if (onUnlockCb) await onUnlockCb();
@@ -482,6 +488,26 @@ export async function initLock(onUnlock) {
   // A PIN now exists (either pre-existing or just set): offer recovery on the lock screen.
   document.getElementById('btn-forgot-pin').classList.remove('hidden');
 
+  // SOĞUK BAŞLANGIÇ AFFI — doktorun "10 dakika yaptım ama 2-3 dakikada soruyor"
+  // şikâyetinin düzeltmesi. iPhone, arka plandaki uygulamayı bellek için
+  // sonlandırdığında geri dönüş bir yeniden açılıştır; bellekteki sayaç yok
+  // olduğu için ayar hiç sorulmadan PIN isteniyordu. Artık arka plana geçiş anı
+  // diske yazılıyor (bkz. LOCK_BG_AT) ve burada okunuyor.
+  //
+  // Biyometri penceresinden ÖNCE: süre dolmadıysa kullanıcıya ne PIN ne de
+  // Face ID gösterilmeli, doğrudan içeri girmeli.
+  try {
+    const policy = await readLockPolicy();
+    const bgAt = Number(await getMeta(state.exec, LOCK_BG_AT));
+    if (coldStartGrace(policy, bgAt, Date.now())) {
+      await unlock();
+      return;
+    }
+  } catch (e) {
+    // Okunamadıysa emniyetli taraf: kilit ekranı açık kalsın.
+    console.error('coldStartGrace', e);
+  }
+
   bioAvailable = await biometricAvailable();
   document.getElementById('btn-bio').classList.toggle('hidden', !bioAvailable);
   if (bioAvailable) {
@@ -527,6 +553,12 @@ export async function initLock(onUnlock) {
     if (state.screen === 'lock' || !setUp) { if (isNative()) lockNow(); return; }
     lockedFrom = state.screen;
     bgAt = Date.now();
+    // Damgayı DİSKE de yaz. Bellekteki bgAt, iPhone uygulamayı arka planda
+    // sonlandırırsa yok olur ve geri dönüş soğuk başlangıç olur; o zaman
+    // kullanıcının seçtiği süre hiç sorulmadan PIN istenirdi (bkz.
+    // compute.coldStartGrace). Beklemiyoruz: arka plana geçerken elimizde
+    // birkaç saniye var ve bu yazma küçük; hata olursa kilit yine sorar.
+    setMeta(state.exec, LOCK_BG_AT, String(bgAt)).catch(() => {});
     if (isNative()) { lockNow(); return; }
 
     const policy = await readLockPolicy();
