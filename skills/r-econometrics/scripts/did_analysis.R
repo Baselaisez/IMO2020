@@ -150,8 +150,7 @@ n_cl      <- length(unique(d$did_cl))
 n_cl_tr   <- length(unique(d$did_cl[d$did_g > 0]))
 
 if (!is_panel) add_note("(unit, time) is not unique: treating the data as micro / repeated cross-section. ",
-                        "Callaway-Sant'Anna and the Bacon decomposition are skipped; see references/did.md for did(panel = FALSE) ",
-                        "or collapse the data to unit-time means.")
+                        "Callaway-Sant'Anna uses panel = FALSE; the Bacon decomposition is skipped.")
 if (length(always)) add_note(length(always), " unit(s) are treated from the first observed period (no pre-period): ",
                              paste(head(always, 10), collapse = ", "), ". Consider dropping them.")
 if (length(late)) {
@@ -247,20 +246,24 @@ if (!is.null(m_sa)) {
 cs_dyn <- NULL
 if (!has("did")) {
   add_note("Package 'did' is not installed: Callaway-Sant'Anna skipped (install.packages('did')).")
-} else if (!is_panel) {
-  # skipped; note already added
 } else {
   cs <- tryCatch({
-    d$did_id <- as.integer(factor(d$did_unit))
-    cl_vars <- "did_id"
-    if (clus != opt$unit) { d$did_cl_id <- as.integer(factor(d$did_cl)); cl_vars <- c("did_id", "did_cl_id") }
+    d$did_cl_id <- as.integer(factor(d$did_cl))
+    if (is_panel) {
+      d$did_id <- as.integer(factor(d$did_unit))
+      id_var <- "did_id"
+      cl_vars <- if (clus != opt$unit) c("did_id", "did_cl_id") else "did_id"
+    } else {                                   # repeated cross-sections: no panel id, cluster directly
+      id_var <- NULL; cl_vars <- "did_cl_id"
+    }
     xf <- if (length(controls)) as.formula(paste("~", paste(bt(controls), collapse = " + "))) else NULL
     set.seed(1)
-    did::att_gt(yname = "did_y", tname = "did_time", idname = "did_id", gname = "did_g", data = d,
+    did::att_gt(yname = "did_y", tname = "did_time", idname = id_var, gname = "did_g", data = d,
+                panel = is_panel,
                 control_group = if (has_never) "nevertreated" else "notyettreated",
                 xformla = xf, clustervars = cl_vars,
                 weightsname = if (!is.null(opt$weights)) "did_w" else NULL,
-                allow_unbalanced_panel = !balanced, base_period = "universal", print_details = FALSE)
+                allow_unbalanced_panel = is_panel && !balanced, base_period = "universal", print_details = FALSE)
   }, error = function(e) { add_note("Callaway-Sant'Anna failed: ", conditionMessage(e)); NULL })
   if (!is.null(cs)) {
     cs_simple <- did::aggte(cs, type = "simple", na.rm = TRUE)
@@ -288,7 +291,7 @@ if (staggered && balanced && has("bacondecomp")) {
   }, error = function(e) { add_note("Bacon decomposition failed: ", conditionMessage(e)); NULL })
 } else if (staggered && !has("bacondecomp")) {
   add_note("Package 'bacondecomp' is not installed: Bacon decomposition skipped.")
-} else if (staggered && !balanced) {
+} else if (staggered && is_panel && !balanced) {
   add_note("Panel is unbalanced: Bacon decomposition skipped (it needs a balanced panel).")
 }
 
@@ -316,7 +319,8 @@ if (has("ggplot2")) {
     scale_x_continuous(breaks = seq(lo, hi)) +
     labs(x = paste0("Periods relative to treatment (TWFE endpoints binned at ", lo, " and ", hi, ")"),
          y = paste("Effect on", opt$y), colour = NULL,
-         title = "Event study", subtitle = "95% CIs; reference period = -1") +
+         title = "Event study",
+         subtitle = "95% CIs (Callaway-Sant'Anna: simultaneous bands); reference period = -1") +
     theme_minimal(base_size = 11) + theme(legend.position = "bottom")
   ggsave(png_path, p, width = 8, height = 5, dpi = 150)
 } else {

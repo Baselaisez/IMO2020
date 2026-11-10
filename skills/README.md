@@ -34,6 +34,8 @@ r-econometrics/
 You upload the skill once per account. It then works in all chats and in all Projects.
 Claude Code cloud sessions sync the skills enabled on your claude.ai account, so it should appear there too.
 
+**If you already have a plugin with a skill of the same name:** turn off the plugin's `r-econometrics` before uploading this one, so the two don't compete. The plugin version is a code template. This version also runs the analysis, handles staggered adoption, and keeps never-treated units in the event study.
+
 **Claude Code on your own computer (every project)**
 
 Personal skills live in `~/.claude/skills/`:

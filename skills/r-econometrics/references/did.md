@@ -105,7 +105,11 @@ Notes:
 
 - **Clustering at a coarser level** (for example, units are counties and treatment is by state): use `clustervars = c("id", "state_id")`. The second variable must be numeric and constant within unit.
 - **Unbalanced panels:** set `allow_unbalanced_panel = TRUE`.
-- **Repeated cross-sections or micro data:** set `panel = FALSE`. Alternatively, collapse to state-year cells, weighting by cell size, and run the panel version.
+- **Repeated cross-sections or micro data:** leave out `idname`, set `panel = FALSE`, and cluster on a numeric state id:
+  ```r
+  att_gt(yname = "y", tname = "year", gname = "first_treat", data = micro, panel = FALSE, clustervars = "state_id")
+  ```
+- **Wald pre-test:** `did` skips it when you cluster above the unit level. Judge pre-trends from the bootstrap bands of `aggte(type = "dynamic")` instead.
 - `did` drops units that are already treated in the first period. Report how many were dropped.
 
 ## 5. Diagnosing TWFE
