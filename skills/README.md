@@ -21,7 +21,7 @@ r-econometrics/
     └── python-fallback.md        # pyfixest equivalents
 ```
 
-`r-econometrics.zip` is the same folder packaged for upload.
+`r-econometrics.zip` and `r-econometrics.skill` are the same folder packaged for upload. Some Claude apps install a `.skill` file in one click.
 
 ### Install globally
 
