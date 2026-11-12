@@ -20,7 +20,7 @@
 // - `syncNow` depolamayı PARAMETRE olarak alır (yol veya {read,write} adaptörü),
 //   böylece dosya sistemi olmadan test edilebilir.
 
-import { buildSyncState, applyMergedState, getMeta, setMeta, syncFingerprint } from './repo.js';
+import { buildSyncState, applyMergedState, getMeta, setMeta, syncFingerprint, tick } from './repo.js';
 import { mergeStates } from './sync-merge.js';
 import { makeSyncStore, isNative } from './files.js';
 import { isDesktop } from './platform.js';
@@ -44,10 +44,14 @@ const EMPTY = { patients: [], payments: [], deliveries: [], deletions: [] };
 // hasta kayıt yedeği içindir ve referans bütünlüğü (payment.patient_id ->
 // patients.id) doğrular; eşitleme dosyasında tamsayı kimlik bulunmaz, bu yüzden
 // o doğrulayıcı burada kullanılamaz. Ortak olan tek şey bütünlük özetidir.
-function checksum(str) {
-  let h = 5381;
+const HASH_SEED = 5381;
+/** djb2'nin tek adımı — metin parçalar hâlinde geldiğinde de aynı sonucu verir. */
+function hashPush(h, str) {
   for (let i = 0; i < str.length; i++) h = ((h << 5) + h + str.charCodeAt(i)) >>> 0;
-  return h.toString(16);
+  return h;
+}
+function checksum(str) {
+  return hashPush(HASH_SEED, str).toString(16);
 }
 
 // --- Zarf ------------------------------------------------------------------
@@ -94,6 +98,77 @@ export function serializeSyncPayload(state, writtenAtIso = new Date().toISOStrin
     + `,"counts":${JSON.stringify(counts)}`
     + `,"checksum":${JSON.stringify(checksum(dataStr))}`
     + `,"data":${dataStr}}`;
+}
+
+/**
+ * Aynı metni PARÇA PARÇA üretir ve parçalar arasında arayüze sıra verir.
+ *
+ * NEDEN: tek bir JSON.stringify çağrısı 76 MB'lık metni üretirken ana iş
+ * parçacığını bırakmıyor — doktorun defterinde bu sunucuda 2,6 saniye, eski bir
+ * iPhone'da bunun birkaç katı. O süre boyunca dokunuşlar işlenmiyor; kullanıcı
+ * bunu "geç tepki" olarak görüyor. İş toplamda azalmıyor, ama her 500 kayıtta
+ * bir sıra verildiği için arayüz donmuyor.
+ *
+ * ÇIKTI BAYT BAYT AYNI: JSON.stringify(dizi) === "[" + elemanlar.join(",") + "]"
+ * olduğu için diziyi dilimleyip birleştirmek birebir aynı metni verir. Testi var.
+ */
+async function pushArray(out, rows, chunk, onYield, state) {
+  const list = rows || [];
+  const add = (s) => { out.push(s); state.h = hashPush(state.h, s); };
+  add('[');
+  for (let i = 0; i < list.length; i += chunk) {
+    // JSON.stringify(dilim) -> "[a,b,c]"; köşeli parantezleri atıp içini alıyoruz.
+    add((i ? ',' : '') + JSON.stringify(list.slice(i, i + chunk)).slice(1, -1));
+    if (onYield && i + chunk < list.length) await onYield();
+  }
+  add(']');
+}
+
+export const SERIALIZE_CHUNK = 2000;
+
+/**
+ * Zarfı PARÇA PARÇA üretir; parçalar arasında arayüze sıra verir.
+ *
+ * NEDEN: tek bir JSON.stringify çağrısı 75 MB'lık metni üretirken ana iş
+ * parçacığını hiç bırakmıyordu. Doktorun defterinde ölçüldü: tur boyunca
+ * 3582 ms kesintisiz donma — kalp atışı sayacı o süre içinde BİR KEZ bile
+ * çalışamadı. Dokunuşlar o sürede işlenmez; kullanıcının "geç tepki" dediği şey
+ * budur.
+ *
+ * Sağlama toplamı da yol boyunca hesaplanıyor. Eskiden 75 milyon karakter
+ * üzerinde AYRI bir geçiş yapılıyordu; o geçiş hem tek başına yarım saniyelik
+ * bir donmaydı hem de veriyi ikinci kez dolaşıyordu.
+ *
+ * ÇIKTI BAYT BAYT AYNI: JSON.stringify(dizi) === "[" + elemanlar.join(",") + "]"
+ * olduğundan diziyi dilimleyip birleştirmek birebir aynı metni verir; djb2 de
+ * soldan katlandığı için parça parça beslenince aynı sonucu üretir. Testi var.
+ */
+export async function serializeSyncPayloadAsync(state, writtenAtIso = new Date().toISOString(),
+                                                { chunk = SERIALIZE_CHUNK, onYield = tick } = {}) {
+  const out = [];
+  const h = { h: HASH_SEED };
+  out.push('{"patients":');  h.h = hashPush(h.h, '{"patients":');
+  await pushArray(out, state.patients, chunk, onYield, h);
+  out.push(',"payments":');  h.h = hashPush(h.h, ',"payments":');
+  await pushArray(out, state.payments, chunk, onYield, h);
+  out.push(',"deliveries":'); h.h = hashPush(h.h, ',"deliveries":');
+  await pushArray(out, state.deliveries, chunk, onYield, h);
+  out.push(',"deletions":'); h.h = hashPush(h.h, ',"deletions":');
+  await pushArray(out, state.deletions, chunk, onYield, h);
+  out.push('}'); h.h = hashPush(h.h, '}');
+
+  const counts = {
+    patients: (state.patients || []).length,
+    payments: (state.payments || []).length,
+    deliveries: (state.deliveries || []).length,
+    deletions: (state.deletions || []).length,
+  };
+  return '{"app":"hastakayit-sync"'
+    + `,"version":${SYNC_VERSION}`
+    + `,"written_at":${JSON.stringify(writtenAtIso)}`
+    + `,"counts":${JSON.stringify(counts)}`
+    + `,"checksum":${JSON.stringify(h.h.toString(16))}`
+    + `,"data":${out.join('')}}`;
 }
 
 /** Nesne biçimi — testler ve dışarıdan inceleme için. Yazma yolu metin üretir. */
@@ -194,7 +269,7 @@ export async function writeRemoteState(dirHandleOrPath, state, fingerprint = nul
   const store = toStore(dirHandleOrPath);
   if (!store) return { skipped: true };
   const writtenAt = new Date().toISOString();
-  const text = serializeSyncPayload(state, writtenAt);
+  const text = await serializeSyncPayloadAsync(state, writtenAt);
   await store.write(SYNC_TMP, text);
   const back = await store.read(SYNC_TMP);
   if (back !== text) throw new Error('Eşitleme dosyası doğrulanamadı (geri okuma).');
@@ -291,6 +366,71 @@ const skippedRounds = new Map();     // hedef anahtarı -> atlanan tur sayısı
  */
 export const FULL_SYNC_EVERY = 15;
 
+/** "Değişmedi" hafızasının diskteki yeri (açılışlar arasında yaşar). */
+export const META_SYNC_MEM = 'sync_memory';
+/**
+ * Diskten okunan hafıza bu yaştan eskiyse kullanılmaz.
+ *
+ * Güvenlik ağı: karşı cihaz asıl dosyayı yazıp başlık dosyasını yazamamışsa
+ * (disk dolu, bulut istemcisi yarıda kesilmiş) başlık bayat kalır ve biz
+ * sonsuza dek atlardık. Aynı oturum içinde bunu FULL_SYNC_EVERY çözüyor;
+ * oturumlar arasında bu yaş sınırı çözüyor.
+ */
+export const MEMORY_MAX_AGE_MS = 6 * 60 * 60 * 1000;
+
+/**
+ * Diskten okunan ham hafızayı kullanılabilir girdilere indirger. Saf — testi var.
+ *
+ * NEDEN VAR: açılışta hafıza boşaltılıyordu, bu yüzden uygulama her
+ * başladığında TAM tur çalışıyordu — doktorun 100.000 kayıtlık defterinde
+ * yazma tarafı tek başına 4,6 saniye, üstüne karşı tarafın 76 MB'lık dosyasını
+ * okuma. iPhone'da bu iş SQLite sonuçlarını Capacitor köprüsünden geçirmeyi de
+ * içerdiği için çok daha pahalı. Sonuç: uygulamayı her açtığında donan arayüz.
+ * Oysa hiçbir şey değişmemişse yapılacak iş de yok. Parmak izini diskte
+ * tutunca açılış turu 33 ms'lik bir kontrole iniyor.
+ *
+ * Atlamak GÜVENLİ, çünkü karar iki şarta birden bağlı: yerel parmak izi
+ * değişmemiş OLACAK ve uzak başlık hâlâ bizim en son yazdığımızı gösterecek.
+ * Karşı cihaz bir şey yazdıysa başlık değişir ve tur normal çalışır.
+ */
+export function usableMemory(raw, nowMs, maxAgeMs = MEMORY_MAX_AGE_MS) {
+  const out = new Map();
+  if (!raw || typeof raw !== 'object') return out;
+  for (const [key, v] of Object.entries(raw)) {
+    if (!v || typeof v.fp !== 'string' || !v.fp) continue;
+    const at = Number(v.at);
+    if (!Number.isFinite(at) || at <= 0) continue;
+    const age = Number(nowMs) - at;
+    if (!Number.isFinite(age) || age < 0 || age > maxAgeMs) continue;  // saat kaymasında da atla
+    out.set(key, v.fp);
+  }
+  return out;
+}
+
+/** Hafızayı diske yazılacak biçime çevirir. Saf. */
+export function memorySnapshot(map, nowMs) {
+  const out = {};
+  for (const [key, fp] of map) out[key] = { fp, at: nowMs };
+  return out;
+}
+
+export async function loadSyncMemory(x) {
+  try {
+    const raw = JSON.parse((await getMeta(x, META_SYNC_MEM)) || '{}');
+    const fresh = usableMemory(raw, Date.now());
+    lastFingerprint.clear();
+    for (const [k, v] of fresh) lastFingerprint.set(k, v);
+  } catch (e) {
+    console.error('sync memory load', e);
+    lastFingerprint.clear();
+  }
+}
+
+async function persistSyncMemory(x) {
+  try { await setMeta(x, META_SYNC_MEM, JSON.stringify(memorySnapshot(lastFingerprint, Date.now()))); }
+  catch (e) { console.error('sync memory save', e); }
+}
+
 /** Klasör/hesap değişince hafıza geçersizdir — yoksa yanlışlıkla atlanır. */
 export function resetSyncMemory() {
   lastFingerprint.clear();
@@ -343,6 +483,11 @@ export async function syncNow(x, { folder, nowMs = Date.now(), onProgress, force
     const fingerprint = await syncFingerprint(x);
     await writeRemoteState(store, merged, fingerprint);
     lastFingerprint.set(key, fingerprint);
+    // Diske de yaz: bir sonraki AÇILIŞ bu turu tekrar yapmasın.
+    // BEKLENİYOR (fire-and-forget DEĞİL): uygulama turdan hemen sonra
+    // kapatılırsa yazma yarıda kalır ve bir sonraki açılış yine tam tur yapardı.
+    // persistSyncMemory kendi hatasını zaten yutuyor, bekleme riski yok.
+    await persistSyncMemory(x);
     step('done');
     return { pulled: countOf(remote), pushed: countOf(merged), applied, at: new Date(nowMs).toISOString() };
   } catch (e) {
@@ -600,13 +745,21 @@ export function resetRoundTiming() { lastRoundMs = 0; }
 export function startAutoSync(x, { onResult } = {}) {
   stopAutoSync();
   autoCtx = { x, onResult };
-  // Açılışta hafıza boş olmalı: önceki oturumdan kalan bir parmak izi, bu
-  // oturumda atlanmaması gereken bir turu atlatabilirdi.
-  resetSyncMemory();
-  // Tur süresi ölçümü de sıfırlanır: klasör değişmiş ya da cihaz başka
-  // olabilir, eski süreye göre geri çekilmek yanlış olurdu.
+  // Tur süresi ölçümü sıfırlanır: klasör değişmiş ya da cihaz başka olabilir,
+  // eski süreye göre geri çekilmek yanlış olurdu.
   resetRoundTiming();
-  firstTimer = setTimeout(() => { firstTimer = null; runAuto('startup', { force: true }); }, FIRST_SYNC_MS);
+  // Hafıza SIFIRLANMIYOR, DİSKTEN OKUNUYOR. Eskiden burada resetSyncMemory()
+  // vardı ve bu yüzden uygulama her açılışta TAM tur yapıyordu. Atlama kararı
+  // yalnızca bu parmak izine değil, uzak BAŞLIĞA da bakıyor (bkz. syncNow), o
+  // yüzden karşı cihaz bir şey yazdıysa tur yine çalışır.
+  resetSyncMemory();
+  // force YOK — artık kısa yol açık. Hafıza boşsa (ilk kurulum, eski hafıza)
+  // kısa yol zaten devreye giremez ve tam tur çalışır.
+  firstTimer = setTimeout(async () => {
+    firstTimer = null;
+    await loadSyncMemory(x);
+    runAuto('startup');
+  }, FIRST_SYNC_MS);
   periodTimer = setInterval(() => runAuto('timer'), PERIOD_MS);
   return stopAutoSync;
 }
@@ -639,7 +792,11 @@ export function syncOnResume(nowMs = Date.now()) {
   if (!autoCtx) return false;
   if (nowMs - lastResumeAt < RESUME_MIN_GAP_MS) return false;
   lastResumeAt = nowMs;
-  runAuto('resume', { force: true });
+  // force YOK. Doktor uygulamaya her döndüğünde 76 MB'lık tam tur başlatmak,
+  // "geri geldiğimde uygulama donuyor" şikâyetinin doğrudan sebebiydi. Kısa yol
+  // 33 ms sürer ve gerçekten bir değişiklik varsa (yerelde ya da karşı tarafta)
+  // tam turu zaten kendisi başlatır.
+  runAuto('resume');
   return true;
 }
 

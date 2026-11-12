@@ -16,6 +16,8 @@ import { iconHtml } from './icons.js';
 const PAGE_SIZE = 100;
 let pageOffset = 0;   // raw rows fetched so far via listPatientsPage (pre status-filter)
 let pageTotal = 0;    // countPatients(search) — NOT status-scoped, see note below
+/** Son yüklenen sayfa tam doldu mu? Sayım gelmeden "daha fazla var mı" kararı için. */
+let lastPageFull = false;
 let pageSearch = '';
 let pageLoading = false;
 
@@ -77,9 +79,25 @@ async function resetAndLoadFirstPage() {
   pageSearch = state.search.trim();
   renderedRows.clear();
   document.getElementById('patient-list').innerHTML = '';
-  pageTotal = await countPatients(state.exec, pageSearch);
+  // SIRA ÖNEMLİ: önce satırlar, SONRA sayım.
+  //
+  // countPatients, "%ara%" kalıpları yüzünden indeks kullanamaz ve 100.000
+  // satırın tamamını tarar. Eskiden bu tarama satırlardan ÖNCE bekleniyordu;
+  // yani doktor arama kutusuna her yazdığında, ilk sonuç görünmeden önce tam
+  // tablo taraması bitmek zorundaydı. Sonuç listesi zaten yalnızca 100 satır
+  // istiyor ve indeksli sıralamayla çok daha hızlı geliyor. Önce onu gösterip
+  // "Toplam N hasta" yazısını bir an sonra doldurmak, aynı işi yapıp aramayı
+  // anında hissettiriyor.
+  pageTotal = null;              // "sayılıyor" durumu
   updateListTotalLabel();
   await loadNextPage();
+  countPatients(state.exec, pageSearch).then(n => {
+    // Arama bu arada değiştiyse geç gelen sayımı YAZMA.
+    if (pageSearch !== state.search.trim()) return;
+    pageTotal = n;
+    updateListTotalLabel();
+    refreshListFooter();
+  }).catch(() => {});
 }
 
 async function loadNextPage() {
@@ -88,6 +106,7 @@ async function loadNextPage() {
   try {
     const rows = await listPatientsPage(state.exec, { limit: PAGE_SIZE, offset: pageOffset, search: pageSearch });
     pageOffset += rows.length;
+    lastPageFull = rows.length === PAGE_SIZE;
     // listPatientsPage/countPatients have no status parameter (repo.js is out
     // of scope for this feature), so a non-"all" filter is applied client-side
     // per page. SCALE LIMITATION: pageTotal/the "Daha fazla yükle" counter are
@@ -150,7 +169,10 @@ function refreshListFooter() {
   removeLoadMoreButton();
   removeEmptyMsg();
   const el = document.getElementById('patient-list');
-  const hasMore = pageOffset < pageTotal;
+  // Sayım henüz gelmediyse (null) "daha fazla var mı" sorusunu son sayfanın
+  // DOLU gelip gelmediğinden çıkarıyoruz. Yoksa `0 < null` false olur ve
+  // "Daha fazla yükle" düğmesi, aslında kayıt varken kaybolurdu.
+  const hasMore = pageTotal == null ? lastPageFull : pageOffset < pageTotal;
   if (renderedRows.size === 0) {
     const msg = document.createElement('p');
     msg.className = 'empty-msg muted';
@@ -165,7 +187,10 @@ function refreshListFooter() {
 
 function updateListTotalLabel() {
   const el = document.getElementById('list-total');
-  if (el) el.textContent = `Toplam ${pageTotal} hasta`;
+  if (!el) return;
+  // Sayım artık satırlardan SONRA geliyor; arada kısa bir an boş olabilir.
+  // "Toplam null hasta" yazmasın.
+  el.textContent = pageTotal == null ? 'Sayılıyor…' : `Toplam ${pageTotal} hasta`;
 }
 
 // ---------------------------------------------------------------------------

@@ -878,19 +878,83 @@ async function syncColumns(x, table, exclude) {
  * DÜŞERDİ. Eski davranış onu patient_uuid'siz de olsa taşıyordu; eşitlemenin
  * veri eksiltmesi yasak.
  */
-export async function buildSyncState(x) {
+/** Bir turda köprüden geçirilecek en fazla satır. */
+export const SYNC_PAGE = 2000;
+
+/**
+ * Sıradaki olaylara yer açan bekleme — arayüz donmasın diye.
+ *
+ * setTimeout(0) DEĞİL: tarayıcılar iç içe geçmiş zamanlayıcıları 4 ms'ye
+ * yuvarlar. Yüzlerce kez sıra verdiğimiz için bu tek başına eşitleme turuna
+ * saniyeler ekliyordu (ölçüldü: 3,6 sn -> 5,3 sn). MessageChannel gerçek bir
+ * makro görev sırası verir ve yuvarlama uygulanmaz. Bulunmadığı ortamlarda
+ * setTimeout'a düşer.
+ */
+export const tick = (() => {
+  if (typeof MessageChannel !== 'function') return () => new Promise(r => setTimeout(r, 0));
+  return () => new Promise(resolve => {
+    const ch = new MessageChannel();
+    ch.port1.onmessage = () => { ch.port1.close(); resolve(); };
+    ch.port2.postMessage(0);
+  });
+})();
+
+/**
+ * Büyük tabloyu PENCERE PENCERE okur ve pencereler arasında arayüze sıra verir.
+ *
+ * NEDEN SAYFALI: iPhone'da `db.query()` sonucun TAMAMINI Capacitor köprüsünden
+ * geçiriyor; 100.000 satırlık tek bir `SELECT *`, WKWebView'in ana iş
+ * parçacığında çözülen dev bir mesaj demek. Doktorun "dokunuyorum, geç tepki
+ * veriyor" şikâyetinin başlıca kaynağı buydu: tur boyunca arayüz hiçbir
+ * dokunuşu işleyemiyordu. Ölçüldü: tek parça okuma + tek parça metne çevirme
+ * 3911 ms KESİNTİSİZ donma (5 ms'lik kalp atışı sayacı o sürede bir kez bile
+ * çalışamadı); pencereli hâlde en uzun donma 126 ms.
+ *
+ * NEDEN OFFSET DEĞİL KİMLİK PENCERESİ: `LIMIT ? OFFSET ?` her sayfada atlanan
+ * satırları baştan sayar, yani toplam maliyet satır sayısının karesiyle büyür.
+ * İlk denemede bunu ölçtük: tur 3,9 sn'den 4,8 sn'ye ÇIKTI. Birincil anahtar
+ * üzerinde `id > ? AND id <= ?` pencereleri indeksten doğrudan gider; toplam
+ * maliyet satır sayısıyla doğrusal kalır.
+ *
+ * Pencere genişliği kayıt YOĞUNLUĞUNA göre ayarlanır: çok silme yapılmış bir
+ * tabloda kimlikler seyrekleşir ve sabit genişlik yüzlerce boş pencere üretirdi.
+ *
+ * DÜRÜST SINIR: bu tutarlı bir anlık görüntü DEĞİL. Tarama sürerken eklenen bir
+ * kayıt, penceresi henüz geçilmediyse girer, geçildiyse bir sonraki tura kalır.
+ * Veri kaybı değil: yerel veritabanı aslın kendisidir ve birleştirme uuid
+ * üzerinden yeniden uygulanabilir. Zaten eski hâlde de üç tablo üç ayrı
+ * sorguyla okunduğu için tablolar arası tutarlılık yoktu.
+ */
+export async function readPaged(x, { table, select, join = '', pageSize = SYNC_PAGE, onYield = tick }) {
+  const [range] = await x.query(`SELECT MIN(id) lo, MAX(id) hi, COUNT(*) n FROM ${table}`);
+  const n = Number(range?.n) || 0;
+  if (!n) return [];
+  const lo = Number(range.lo), hi = Number(range.hi);
+  const step = Math.max(1, Math.ceil(pageSize * (hi - lo + 1) / n));
+  const out = [];
+  for (let from = lo - 1; from < hi; from += step) {
+    const rows = await x.query(
+      `SELECT ${select} FROM ${table} c ${join} WHERE c.id > ? AND c.id <= ? ORDER BY c.id`,
+      [from, from + step]);
+    for (const r of rows) out.push(r);
+    if (onYield && from + step < hi) await onYield();
+  }
+  return out;
+}
+
+export async function buildSyncState(x, { pageSize = SYNC_PAGE, onYield = tick } = {}) {
   const pCols = await syncColumns(x, 'patients', ['id']);
   const oCols = await syncColumns(x, 'payments', ['id', 'patient_id']);
   const dCols = await syncColumns(x, 'deliveries', ['id', 'patient_id']);
   const join = (cols) => cols.map(c => `c.${c}`).join(', ');
+  const base = { pageSize, onYield };
+  const kid = 'LEFT JOIN patients p ON p.id = c.patient_id';
   return {
-    patients: await x.query(`SELECT ${pCols.join(', ')} FROM patients`),
-    payments: await x.query(
-      `SELECT ${join(oCols)}, p.uuid AS patient_uuid
-         FROM payments c LEFT JOIN patients p ON p.id = c.patient_id`),
-    deliveries: await x.query(
-      `SELECT ${join(dCols)}, p.uuid AS patient_uuid
-         FROM deliveries c LEFT JOIN patients p ON p.id = c.patient_id`),
+    patients: await readPaged(x, { ...base, table: 'patients', select: join(pCols) }),
+    payments: await readPaged(x, { ...base, table: 'payments', join: kid,
+      select: `${join(oCols)}, p.uuid AS patient_uuid` }),
+    deliveries: await readPaged(x, { ...base, table: 'deliveries', join: kid,
+      select: `${join(dCols)}, p.uuid AS patient_uuid` }),
     deletions: await getDeletions(x),
   };
 }
