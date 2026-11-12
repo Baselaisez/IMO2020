@@ -1,7 +1,57 @@
-function checksum(str) {
-  let h = 5381;
+import { tick } from './repo.js';
+
+const HASH_SEED = 5381;
+/** djb2'nin tek adımı — metin parçalar hâlinde geldiğinde de aynı sonucu verir. */
+function hashPush(h, str) {
   for (let i = 0; i < str.length; i++) h = ((h << 5) + h + str.charCodeAt(i)) >>> 0;
-  return h.toString(16);
+  return h;
+}
+function checksum(str) { return hashPush(HASH_SEED, str).toString(16); }
+
+/**
+ * Yedeği PARÇA PARÇA metne çevirir; parçalar arasında arayüze sıra verir.
+ *
+ * NEDEN: makeBackup + JSON.stringify ikilisi aynı veriyi İKİ KEZ metne
+ * çeviriyordu (biri sağlama toplamı için, biri dosya için) ve ikisi de ana iş
+ * parçacığını hiç bırakmıyordu. Bu iş yalnızca elle yedek alırken değil, veri
+ * değiştiğinde 10 dakikada bir ve uygulama ARKA PLANA GEÇERKEN de çalışıyor —
+ * yani doktor uygulamadan çıkarken telefon donuyordu. Eşitleme yükünde aynı
+ * düzeltme yapılmıştı (bkz. sync-file.serializeSyncPayloadAsync); burada da
+ * tek geçiş + yol boyunca sağlama.
+ *
+ * ÇIKTI BAYT BAYT AYNI: JSON.stringify(makeBackup(...)) ile birebir. Testi var.
+ */
+export const BACKUP_CHUNK = 2000;
+
+async function pushArray(out, rows, chunk, onYield, st) {
+  const list = rows || [];
+  const add = (s) => { out.push(s); st.h = hashPush(st.h, s); };
+  add('[');
+  for (let i = 0; i < list.length; i += chunk) {
+    add((i ? ',' : '') + JSON.stringify(list.slice(i, i + chunk)).slice(1, -1));
+    if (onYield && i + chunk < list.length) await onYield();
+  }
+  add(']');
+}
+
+export async function serializeBackupAsync(patients, payments, exportedAtIso, deliveries = [], deletions = [],
+                                           { chunk = BACKUP_CHUNK, onYield = tick } = {}) {
+  const out = [];
+  const st = { h: HASH_SEED };
+  const lit = (s) => { out.push(s); st.h = hashPush(st.h, s); };
+  lit('{"patients":');   await pushArray(out, patients, chunk, onYield, st);
+  lit(',"payments":');   await pushArray(out, payments, chunk, onYield, st);
+  lit(',"deliveries":'); await pushArray(out, deliveries, chunk, onYield, st);
+  lit(',"deletions":');  await pushArray(out, deletions, chunk, onYield, st);
+  lit('}');
+  const counts = { patients: (patients || []).length, payments: (payments || []).length,
+                   deliveries: (deliveries || []).length };
+  return '{"app":"hastakayit"'
+    + ',"version":7'
+    + `,"exported_at":${JSON.stringify(exportedAtIso)}`
+    + `,"counts":${JSON.stringify(counts)}`
+    + `,"checksum":${JSON.stringify(st.h.toString(16))}`
+    + `,"data":${out.join('')}}`;
 }
 
 export function makeBackup(patients, payments, exportedAtIso, deliveries = [], deletions = []) {

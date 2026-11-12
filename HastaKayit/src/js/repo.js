@@ -63,6 +63,15 @@ export const SCHEMA = [
   `CREATE INDEX IF NOT EXISTS idx_patients_name ON patients(name COLLATE NOCASE)`,
   // Teslimat hatırlatmaları planned_date'e göre süzülüyor.
   `CREATE INDEX IF NOT EXISTS idx_deliveries_planned ON deliveries(planned_date)`,
+  // uuid, eşitlemenin KAYIT KİMLİĞİDİR ve birleştirme her kaydı uuid'siyle
+  // arar. İndeks yokken bu arama tüm tabloyu tarıyordu; her kayıt için bir
+  // tarama, yani maliyet kayıt sayısının KARESİYLE büyüyordu. 20.000 hastalık
+  // bir defterde, hiçbir şey değişmemiş bir eşitleme turu 113 SANİYE sürüyordu.
+  // UNIQUE değil: mevcut bir veritabanında yinelenen uuid bulunursa UNIQUE
+  // indeks oluşturulamaz ve uygulama hiç açılmazdı. Arama hızı aynı.
+  `CREATE INDEX IF NOT EXISTS idx_patients_uuid ON patients(uuid)`,
+  `CREATE INDEX IF NOT EXISTS idx_payments_uuid ON payments(uuid)`,
+  `CREATE INDEX IF NOT EXISTS idx_deliveries_uuid ON deliveries(uuid)`,
 ];
 
 // uuid is the sync identity; a collision (e.g. a hand-built backup, or a
@@ -713,11 +722,19 @@ export async function listUpcoming(x, fromIso) {
   return { patients, deliveries, payments };
 }
 
-export async function allData(x) {
+/**
+ * Tüm veri — yedek ve dışa aktarma için. Pencereli okur (bkz. readPaged).
+ *
+ * Buradaki satırlar fotoğrafları da içerdiği için tek parça okumada köprüden
+ * geçen mesaj eşitleme yükünden bile büyük olabiliyordu. Çağrı yerleri
+ * değişmedi; varsayılanlar aynı sonucu verir.
+ */
+export async function allData(x, { pageSize = SYNC_PAGE, onYield = tick } = {}) {
+  const o = { pageSize, onYield };
   return {
-    patients: await x.query('SELECT * FROM patients ORDER BY id'),
-    payments: await x.query('SELECT * FROM payments ORDER BY id'),
-    deliveries: await x.query('SELECT * FROM deliveries ORDER BY id'),
+    patients: await readPaged(x, { ...o, table: 'patients', select: 'c.*' }),
+    payments: await readPaged(x, { ...o, table: 'payments', select: 'c.*' }),
+    deliveries: await readPaged(x, { ...o, table: 'deliveries', select: 'c.*' }),
     deletions: await getDeletions(x),
   };
 }
@@ -974,6 +991,27 @@ function newer(incomingUpdatedAt, localUpdatedAt) {
   return String(incomingUpdatedAt || '') > String(localUpdatedAt || '');
 }
 
+/**
+ * Bir tablonun TÜM uuid -> updated_at eşlemesi, tek geçişte.
+ *
+ * NEDEN: birleştirme uygulanırken her kayıt için ayrı bir
+ * `SELECT updated_at ... WHERE uuid=?` çalışıyordu. iPhone'da her sorgu bir
+ * Capacitor köprü gidiş-dönüşüdür; 100.000 hasta + 150.000 ödemede bu, HİÇBİR
+ * ŞEY DEĞİŞMEMİŞ bir turda bile çeyrek milyon gidiş-dönüş demekti. Sorguların
+ * kendisi hızlansa bile (uuid indeksi 113 sn'yi 454 ms'ye indirdi) köprü
+ * maliyeti kayıt sayısıyla doğru orantılı kalıyordu ve Node ölçümünde hiç
+ * görünmüyordu. Tek pencereli okumayla aynı bilgi ~50 çağrıda geliyor.
+ */
+async function uuidStamps(x, table) {
+  const m = new Map();
+  // onYield null: bu okuma transaction'ın İÇİNDE, sıra vermek transaction'ı
+  // gereksiz yere açık tutar ve "database is locked" riskini büyütür.
+  for (const r of await readPaged(x, { table, select: 'c.uuid, c.updated_at', onYield: null })) {
+    if (r.uuid != null) m.set(r.uuid, r.updated_at);
+  }
+  return m;
+}
+
 export async function applyMergedState(x, merged) {
   const patients = merged.patients || [];
   const payments = merged.payments || [];
@@ -983,12 +1021,17 @@ export async function applyMergedState(x, merged) {
   return withTx(x, async () => {
     let patientsUpserted = 0, paymentsUpserted = 0, deliveriesUpserted = 0, deleted = 0;
 
+    // Üç tablonun uuid -> updated_at haritası, kayıt başına sorgu YERİNE.
+    const pStamps = await uuidStamps(x, 'patients');
+    const oStamps = await uuidStamps(x, 'payments');
+    const dStamps = await uuidStamps(x, 'deliveries');
+
     for (const p of patients) {
       if (!p.uuid) continue; // no sync identity — can't upsert safely, skip
-      const cur = (await x.query('SELECT updated_at FROM patients WHERE uuid=?', [p.uuid]))[0];
-      if (cur && !newer(p.updated_at, cur.updated_at)) continue; // local wins
+      const exists = pStamps.has(p.uuid);
+      if (exists && !newer(p.updated_at, pStamps.get(p.uuid))) continue; // local wins
       assertPatientInput(p);
-      if (!cur) {
+      if (!exists) {
         await x.run(
           `INSERT INTO patients (uuid,name,mother_name,phone,diagnosis,referral,notes,start_date,end_date,next_appt,status,planned_sessions,residence,birth_date,appt_remind_min,created_at,updated_at)
            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
@@ -1017,17 +1060,21 @@ export async function applyMergedState(x, merged) {
 
     // patient_uuid -> local id map, built AFTER the patient upsert loop so it
     // reflects patients that just arrived in this same merge.
-    const patRows = await x.query('SELECT id, uuid FROM patients');
-    const idByUuid = Object.fromEntries(patRows.map(r => [r.uuid, r.id]));
+    // Tek dev mesaj yerine pencereli: 100.000 satırlık `SELECT id, uuid` de
+    // iPhone'da köprüden tek parça geçiyordu.
+    const idByUuid = new Map();
+    for (const r of await readPaged(x, { table: 'patients', select: 'c.id, c.uuid', onYield: null })) {
+      if (r.uuid != null) idByUuid.set(r.uuid, r.id);
+    }
 
     for (const o of payments) {
       if (!o.uuid) continue;
-      const patId = idByUuid[o.patient_uuid];
+      const patId = idByUuid.get(o.patient_uuid);
       if (!patId) continue; // parent not present locally (and not in this merge) — can't FK it, skip
-      const cur = (await x.query('SELECT updated_at FROM payments WHERE uuid=?', [o.uuid]))[0];
-      if (cur && !newer(o.updated_at, cur.updated_at)) continue; // local wins
+      const exists = oStamps.has(o.uuid);
+      if (exists && !newer(o.updated_at, oStamps.get(o.uuid))) continue; // local wins
       assertPaymentInput(o); // audit safety: never silently write bad money
-      if (!cur) {
+      if (!exists) {
         await x.run(
           `INSERT INTO payments (uuid,patient_id,pay_date,amount,description,status,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?)`,
           [o.uuid, patId, o.pay_date, Number(o.amount), o.description || 'Seans', o.status || 'paid', o.created_at || nowIso(), o.updated_at || nowIso()]
@@ -1045,12 +1092,12 @@ export async function applyMergedState(x, merged) {
 
     for (const d of deliveries) {
       if (!d.uuid) continue;
-      const patId = idByUuid[d.patient_uuid];
+      const patId = idByUuid.get(d.patient_uuid);
       if (!patId) continue; // parent not present locally — can't FK it, skip
-      const cur = (await x.query('SELECT updated_at FROM deliveries WHERE uuid=?', [d.uuid]))[0];
-      if (cur && !newer(d.updated_at, cur.updated_at)) continue; // local wins
+      const exists = dStamps.has(d.uuid);
+      if (exists && !newer(d.updated_at, dStamps.get(d.uuid))) continue; // local wins
       assertDeliveryInput(d);
-      if (!cur) {
+      if (!exists) {
         await x.run(
           `INSERT INTO deliveries (uuid,patient_id,method,tracking_no,planned_date,delivered,delivered_date,planned_time,remind_min,created_at,updated_at)
            VALUES (?,?,?,?,?,?,?,?,?,?,?)`,

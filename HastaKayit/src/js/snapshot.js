@@ -1,5 +1,5 @@
 import { allData, getMeta, setMeta, syncFingerprint } from './repo.js';
-import { makeBackup } from './backup.js';
+import { makeBackup, serializeBackupAsync } from './backup.js';
 import { writeSnapshotFile, writeDailyFile } from './files.js';
 import { isNative, isDesktop } from './platform.js';
 import { state, banner } from './ui.js';
@@ -73,12 +73,17 @@ export async function takeSnapshot({ force = false } = {}) {
     if (!force && !snapshotChanged(lastSnapshotFingerprint, fp)) return null;
 
     const data = await allData(state.exec);
-    const backup = makeBackup(data.patients, data.payments, new Date().toISOString(), data.deliveries, data.deletions);
-    const stamp = new Date().toISOString().replace(/[:.]/g, '-');
-    const r = await writeSnapshotFile(JSON.stringify(backup), stamp);
+    const exportedAt = new Date().toISOString();
+    // Parça parça: eskiden veri İKİ KEZ metne çevriliyordu (sağlama + dosya) ve
+    // ikisi de ana iş parçacığını hiç bırakmıyordu. Bu iş uygulama ARKA PLANA
+    // GEÇERKEN de çalıştığı için doktor uygulamadan çıkarken telefon donuyordu.
+    const text = await serializeBackupAsync(
+      data.patients, data.payments, exportedAt, data.deliveries, data.deletions);
+    const r = await writeSnapshotFile(text, exportedAt.replace(/[:.]/g, '-'));
     if (!r.skipped) {
       await setMeta(state.exec, 'last_snapshot', JSON.stringify({
-        at: backup.exported_at, patients: backup.counts.patients, payments: backup.counts.payments, deliveries: backup.counts.deliveries,
+        at: exportedAt, patients: data.patients.length,
+        payments: data.payments.length, deliveries: data.deliveries.length,
       }));
     }
     // Parmak izi ancak görüntü GERÇEKTEN yazıldıktan sonra hatırlanır: yazma
@@ -89,7 +94,7 @@ export async function takeSnapshot({ force = false } = {}) {
     // Own try/catch: a notification-scheduling failure must NOT masquerade as a
     // snapshot-write failure (the snapshot already succeeded above).
     try { await rescheduleNotifications(data.patients, data.deliveries, data.payments); } catch (e) { console.error('reschedule', e); }
-    return backup;
+    return { at: exportedAt, patients: data.patients.length };
   } catch (e) {
     console.error(e);
     banner(`YEDEK ANLIK GÖRÜNTÜSÜ YAZILAMADI — ${e.message || e}`, 'error', 0);
@@ -108,8 +113,9 @@ export async function dailyBackupIfDue() {
     const today = todayStr();
     if ((await getMeta(state.exec, 'last_daily')) === today) return;
     const data = await allData(state.exec);
-    const backup = makeBackup(data.patients, data.payments, new Date().toISOString(), data.deliveries, data.deletions);
-    const r = await writeDailyFile(`daily-${today}.json`, JSON.stringify(backup));
+    const text = await serializeBackupAsync(
+      data.patients, data.payments, new Date().toISOString(), data.deliveries, data.deletions);
+    const r = await writeDailyFile(`daily-${today}.json`, text);
     if (!r.skipped) await setMeta(state.exec, 'last_daily', today);
   } catch (e) { console.error('dailyBackup', e); }
 }
