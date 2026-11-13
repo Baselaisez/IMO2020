@@ -52,10 +52,10 @@ BAGIS_ALANLARI = [
      "aciklama": "Atalar ve Kurfalı medreselerimizde okuyan talebelerimizin kahvaltı ve yemek giderlerini hayırseverlerimizin desteğiyle karşılıyoruz. Dilediğiniz tutarla, ister bir kez ister her ay destek olabilirsiniz.",
      "iban": "TR15 0020 6001 4004 5144 1300 01", "irtibat": "0543 663 91 55",
      "tur": "serbest", "tutarlar": [500, 1000, 2500, 5000], "fiyat_yazi": "Dilediğiniz tutar"},
-    {"id": "maltepe", "baslik": "Maltepe medrese inşaatı", "kisa": "Maltepe inşaat", "etiket": "Medrese inşaatı",
+    {"id": "maltepe", "baslik": "Maltepe yeni külliyemiz", "kisa": "Maltepe külliye", "etiket": "Yeni külliye",
      "foto": "",
-     "ozet": "Bir metrekare hayırla yeni ilim yuvamıza ortak olun.",
-     "aciklama": "Menekşe Medresesi Külliyesi'nin Maltepe şubesi için inşaatımız sürüyor: dershaneleri, mescidi ve yemekhanesiyle yeni bir ilim yuvası. Her metrekaresi, orada okuyacak talebelerle birlikte sizin için de devam eden bir hayır olsun.",
+     "ozet": "1.000 m²'lik yeni külliyemizin tadilatına bir metrekare hayırla ortak olun.",
+     "aciklama": "Maltepe'de 1.000 m²'lik yeni külliyemizin sözleşmesi yapıldı. En az 100 talebenin aynı anda eğitim alabileceği bu medresenin tadilatına başlıyoruz inşallah: dershaneleri, mescidi ve yemekhanesiyle. Her metrekaresi, orada okuyacak talebelerle birlikte sizin için de devam eden bir hayır olsun.",
      "iban": "TR63 0020 6001 4004 5144 1300 10",
      "tur": "adet", "secenekler": [("Metrekare", 2500)], "birim": "m²", "hizli": [1, 2, 5, 10], "fiyat_yazi": "1 m² 2.500 TL"},
     {"id": "mushaf", "baslik": "Afrika'ya Mushaf-ı Şerif", "kisa": "Afrika Mushaf", "etiket": "Afrika",
@@ -79,20 +79,24 @@ BAGIS_ALANLARI = [
      "vekalet": True},
 ]
 
-MEDRESELER = [  # (ad, durum: "" açık, "yakinda", "insaat")
+MEDRESELER = [  # (ad, durum: "" açık, "kiz" kız medresesi, "yakinda", "yeni" yeni külliye)
     ("Atalar Medresesi", ""),
     ("Cevizli Medresesi", ""),
     ("Kurfalı Medresesi", ""),
+    ("Atalar Kız Medresesi", "kiz"),
+    ("Osmaniye Kız Medresesi", "kiz"),
     ("Topselvi Medresesi", "yakinda"),
-    ("Maltepe Külliyesi", "insaat"),
+    ("Maltepe Külliyesi", "yeni"),
 ]
+MALTEPE_M2 = "1.000"       # yeni külliyenin büyüklüğü
+MALTEPE_KISI = "100"       # aynı anda eğitim alabilecek talebe sayısı (en az)
 
 # Müfredat: (grup, arapça, grup açıklaması, [(ders, arapça, açıklama), ...])
 MUFREDAT = [
     ("Kur'an-ı Kerim", "القرآن الكريم",
      "Harfleri tanımaktan hafızlığa: Kur'an'ı doğru, güzel ve ezberden okumak.",
      [("Elif-Ba", "ألفبا", "Arap harflerini tanıma ve Kur'an okumaya ilk adım"),
-      ("Kur'an-ı Kerim", "القرآن الكريم", "Yüzünden akıcı okuma ve hafızlık"),
+      ("Kur'an-ı Kerim", "القرآن الكريم", "Yüzünden akıcı ve doğru okuma"),
       ("Tecvid", "تجويد", "Kur'an'ı kurallarına uygun, doğru okuma ilmi"),
       ("Kıraat", "قراءات", "Kur'an'ın okunuş usullerini öğreten ilim"),
       ("Talim ve Makam", "تعليم ومقام", "Hocayla birebir okuyuş ve Kur'an'ı güzel sesle okuma")]),
@@ -344,8 +348,8 @@ def sayfa_basi(baslik, aciklama, ar=""):
 """
 
 
-def video(v, kapak):
-    return (f'<video class="video" controls preload="none" playsinline poster="video/{kapak}.jpg" width="540" height="960">'
+def video(v, kapak, on_yukle="none"):
+    return (f'<video class="video" controls preload="{on_yukle}" playsinline poster="video/{kapak}.jpg" width="540" height="960">'
             f'<source src="video/{v}.mp4" type="video/mp4">'
             f'Tarayıcınız videoyu oynatamıyor. <a href="video/{v}.mp4">Videoyu indirin</a>.</video>')
 
@@ -385,12 +389,20 @@ HIZMET_KARTLARI = f"""
 
 
 def medrese_kart(ad, durum):
-    if durum == "insaat":
-        return (f'      <a class="medrese insaat" href="bagis.html#bagis-maltepe">{IKON["medrese"]}'
-                f'<div><h3>{ad}</h3><p>İnşaatı sürüyor · bir m² ile ortak olun</p></div></a>')
-    alt = "Çok yakında açılıyor" if durum == "yakinda" else "Kayıt ve bilgi için bizi arayın"
-    return (f'      <div class="medrese{" yakinda" if durum else ""}">{IKON["medrese"]}'
-            f'<div><h3>{ad}</h3><p>{alt}</p></div></div>')
+    if durum == "yeni":
+        return (f'      <a class="medrese yeni" href="bagis.html#bagis-maltepe">{IKON["medrese"]}'
+                f'<div><span class="etiket">Yeni külliyemiz</span><h3>{ad}</h3>'
+                f'<p>{MALTEPE_M2} m²\'lik yeni külliyemizde en az {MALTEPE_KISI} talebe aynı anda eğitim alacak. '
+                f'Sözleşmesi yapıldı, tadilatına başlıyoruz inşallah.</p></div>'
+                f'<span class="medrese-git">Ortak olun {IKON["ok"]}</span></a>')
+    if durum == "kiz":
+        return (f'      <div class="medrese kiz">{IKON["medrese"]}'
+                f'<div><h3>{ad}</h3><p>Kız talebelerimiz için</p></div></div>')
+    if durum == "yakinda":
+        return (f'      <div class="medrese yakinda">{IKON["medrese"]}'
+                f'<div><h3>{ad}</h3><p>Yakında açılıyor inşallah.</p></div></div>')
+    return (f'      <div class="medrese">{IKON["medrese"]}'
+            f'<div><h3>{ad}</h3><p>Kayıt ve bilgi için bizi arayın.</p></div></div>')
 
 
 def bagis_gorsel(a, yukle="lazy"):
@@ -413,8 +425,8 @@ def hayir_kart(a):
 MALTEPE = next(a for a in BAGIS_ALANLARI if a["id"] == "maltepe")
 HAYIR_VITRIN = f"""    <article class="hayir-vitrin koyu">
       <div class="vitrin-metin">
-        <span class="etiket">Medrese inşaatı · Maltepe</span>
-        <h3>Bir metrekare hayırla ilim yuvamıza ortak olun</h3>
+        <span class="etiket">Maltepe'de yeni külliyemiz</span>
+        <h3>Bir metrekare hayırla yeni ilim yuvamıza ortak olun</h3>
         <p>{MALTEPE['aciklama']}</p>
         <a class="btn btn-altin" href="bagis.html#bagis-maltepe">Metrekare bağışla {IKON['ok']}</a>
       </div>
@@ -431,7 +443,9 @@ SSS = [
     ("Hafta sonu ders var mı?",
      "Hayır. Eğitim haftamız Cumartesi öğlen biter, hafta sonu ders yapmıyoruz."),
     ("Medreseleriniz nerede?",
-     "Atalar, Cevizli ve Kurfalı medreselerimizde hizmet veriyoruz. Topselvi Medresemiz çok yakında açılıyor, Maltepe'de de Menekşe Medresesi Külliyemizin inşaatı sürüyor. Adres ve yol tarifi için bizi arayabilirsiniz."),
+     "Atalar, Cevizli ve Kurfalı medreselerimizde, Osmaniye ve Atalar'daki kız medreselerimizde hizmet veriyoruz. Topselvi Medresemiz ise yakında açılıyor. Maltepe'de de en az 100 talebenin aynı anda okuyabileceği 1.000 m²'lik yeni külliyemizin tadilatına başlıyoruz. Adres ve yol tarifi için bizi arayabilirsiniz."),
+    ("Kız talebeler için medreseniz var mı?",
+     "Evet. Osmaniye ve Atalar'da kız medreselerimiz var. Kayıt ve bilgi için bizi arayabilirsiniz."),
     ("Yetişkinler için bir programınız var mı?",
      "Medreselerimizin dışında cemaatimizle sohbet ve zikir halkalarında buluşuyoruz. Gün ve saatleri öğrenmek için bizi arayabilirsiniz."),
     ("Nasıl bağış yapabilirim?",
@@ -480,17 +494,32 @@ ANASAYFA = f"""
       <p class="rozet">{IKON['kalkan']} {KAMU_YARARI}</p>
     </div>
     <div class="giris-video">
-      {video("tanitim", "tanitim")}
+      {video("tanitim", "tanitim", "metadata")}
     </div>
   </div>
 </section>
 
 <section class="bakis" aria-label="Bir bakışta">
   <div class="kapsayici bakis-ic">
-    <div><b>3 medrese</b><span>Atalar, Cevizli, Kurfalı · yenileri yolda</span></div>
+    <div><b>5 medrese</b><span>Kız ve erkek talebelerimiz için</span></div>
     <div><b>Elif-Ba'dan Arapçaya</b><span>Kur'an, temel ilimler ve Arapça</span></div>
     <div><b>Gündüzlü ve yatılı</b><span>Ailenize uygun eğitim</span></div>
     <div><b>Kamu yararına</b><span>Cumhurbaşkanı Kararı ile</span></div>
+  </div>
+</section>
+
+<section class="mujde" aria-labelledby="mujde-baslik">
+  <div class="kapsayici mujde-ic">
+    <div class="mujde-rozet"><span class="ar" lang="ar">بشرى</span><b>Müjde</b></div>
+    <div class="mujde-metin">
+      <h2 id="mujde-baslik">Maltepe'de {MALTEPE_M2} m²'lik yeni külliyemiz geliyor</h2>
+      <p>Sözleşmesi yapıldı. En az {MALTEPE_KISI} talebenin aynı anda eğitim alabileceği medresemizin tadilatına başlıyoruz inşallah.</p>
+    </div>
+    <ul class="mujde-sayilar">
+      <li><b>{MALTEPE_M2} m²</b><span>yeni külliye</span></li>
+      <li><b>{MALTEPE_KISI}+</b><span>talebe aynı anda</span></li>
+    </ul>
+    <a class="btn btn-yesil" href="bagis.html#bagis-maltepe">Ortak olun {IKON['ok']}</a>
   </div>
 </section>
 
@@ -513,7 +542,7 @@ ANASAYFA = f"""
 
 <section class="bolum" id="medreselerimiz">
   <div class="kapsayici">
-    {bolum_basi("Medreselerimiz", "مدارسنا", "Atalar, Cevizli ve Kurfalı medreselerimizde hizmet veriyoruz. Topselvi Medresemizi çok yakında açıyoruz; Maltepe'de de yeni külliyemizin inşaatı sürüyor inşallah.")}
+    {bolum_basi("Medreselerimiz", "مدارسنا", "Atalar, Cevizli ve Kurfalı medreselerimizde, Osmaniye ve Atalar'daki kız medreselerimizde hizmet veriyoruz. Topselvi Medresemiz ise yakında açılıyor. Maltepe'de de büyük yeni külliyemizin tadilatına başlıyoruz inşallah.")}
     <div class="medreseler">
 {chr(10).join(medrese_kart(a, d) for a, d in MEDRESELER)}
     </div>
@@ -601,7 +630,7 @@ HAKKIMIZDA = sayfa_basi("Hakkımızda", "Mahallelerimizin çocuklarına Kur'an'�
   <div class="kapsayici yan-yana">
     <div class="yazi">
       <h2>Biz kimiz?</h2>
-      <p>{DERNEK}, çocuklarımızın ve gençlerimizin Kur'an-ı Kerim'le, ilimle ve güzel ahlakla yetişmesi için kuruldu. Bugün {MARKA} adıyla Atalar, Cevizli ve Kurfalı'da üç medresede hizmet veriyoruz. Topselvi Medresemizi yakında açıyor, Maltepe'de yeni külliyemizi inşa ediyoruz inşallah.</p>
+      <p>{DERNEK}, çocuklarımızın ve gençlerimizin Kur'an-ı Kerim'le, ilimle ve güzel ahlakla yetişmesi için kuruldu. Bugün {MARKA} adıyla Atalar, Cevizli ve Kurfalı medreselerimizde, Osmaniye ve Atalar'daki kız medreselerimizde hizmet veriyoruz. Topselvi Medresemiz ise yakında açılıyor. Maltepe'de de en az 100 talebenin aynı anda okuyabileceği 1.000 m²'lik yeni külliyemizin tadilatına başlıyoruz inşallah.</p>
       <p>{HOCA_METNI}</p>
       <p>Talebelerimiz Elif-Ba ile başlıyor, Kur'an-ı Kerim'i tecvid ve kıraatiyle öğreniyor; İlm-i Hal, Siyer ve Arapça derslerle temel İslami ilimleri tahsil ediyor.</p>
     </div>
@@ -681,7 +710,13 @@ EGITIMLER = sayfa_basi("Eğitimlerimiz", "Temel İslami ilimler, farz-ı ayn bil
   <div class="kapsayici">
     {bolum_basi("Derslerimiz", "دروسنا", "Kur'an-ı Kerim'den Arapçaya; medrese usulüyle, klasik kitaplardan ve ehil hocalardan.")}
 {chr(10).join(ders_grubu(*g) for g in MUFREDAT)}
-    <p class="alinti">"Hafızlık sadece ezber değildir. Sabrı öğrenmek, disiplini kazanmak, kardeşliği yaşamak ve Allah'ın kelamıyla büyümektir."</p>
+    <div class="ders-grubu">
+      <div class="ders-grubu-baslik"><h3>Hafızlık</h3><span class="ar" lang="ar">حفظ القرآن الكريم</span><p>Talebelerimiz bütün bu derslerin yanında Kur'an-ı Kerim'i ezberler.</p></div>
+      <ul class="dersler">
+        <li class="ders hafizlik"><span class="ar" lang="ar">حافظ</span><b>Hafızlık</b><span>Kur'an-ı Kerim'in tamamını ezberleme</span></li>
+      </ul>
+      <p class="alinti">"Hafızlık sadece ezber değildir. Sabrı öğrenmek, disiplini kazanmak, kardeşliği yaşamak ve Allah'ın kelamıyla büyümektir."</p>
+    </div>
   </div>
 </section>
 
@@ -880,7 +915,7 @@ ILETISIM = sayfa_basi("İletişim", "Kayıt, bilgi ya da sadece hal hatır için
       </ul>
       <h2 style="font-size:1.4rem">Medreselerimiz</h2>
       <ul class="medrese-liste">
-{chr(10).join(f'        <li><b>{a}</b>{ {"yakinda": " · çok yakında", "insaat": " · inşaatı sürüyor"}.get(d, "") }</li>' for a, d in MEDRESELER)}
+{chr(10).join(f'        <li><b>{a}</b>{ {"kiz": " (kız medresesi)", "yakinda": " (yakında açılıyor)", "yeni": " (yeni külliye, tadilatı başlıyor)"}.get(d, "") }</li>' for a, d in MEDRESELER)}
       </ul>
       <p class="alt-not">Adres ve yol tarifi için bizi arayabilirsiniz.</p>
     </div>
@@ -930,7 +965,7 @@ SAYFALAR = [  # (dosya, önizleme kimliği, başlık, açıklama, gövde, ek hea
      "Menekşe İlim Kültür Okuma Derneği ve Menekşe Medreseleri hakkında: kimiz, neye inanıyoruz, sohbet ve zikir halkalarımız, dernek bilgilerimiz.",
      HAKKIMIZDA, ""),
     ("egitimlerimiz.html", "egitimlerimiz", f"Eğitimlerimiz | {MARKA}",
-     "Gündüzlü ve yatılı eğitim; Elif-Ba, Kur'an-ı Kerim, Tecvid, Kıraat, İlm-i Hal, Siyer, Emsile, Binâ, Maksûd, Avâmil ve İzhâr dersleri.",
+     "Gündüzlü ve yatılı eğitim; Elif-Ba, Kur'an-ı Kerim, Tecvid, Kıraat, İlm-i Hal, Siyer, Emsile, Binâ, Maksûd, Avâmil, İzhâr ve hafızlık.",
      EGITIMLER, ""),
     ("heyetimiz.html", "heyetimiz", f"Heyetimiz | {MARKA}",
      "Menekşe İlim Kültür Okuma Derneği yönetim kurulu heyeti ve eğitim heyeti.",

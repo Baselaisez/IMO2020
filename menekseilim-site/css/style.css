@@ -17,6 +17,7 @@
   --altin: #B5975A;
   --altin-acik: #DCC690;
   --altin-koyu: #7A6130;
+  --kirmizi: #870826;
   --zemin: #FFFFFF;
   --metin: #1B2723;
   --metin-soluk: #55625C;
@@ -127,7 +128,7 @@ html.acilis-kapandi .acilis { display: none; }
   .ana-menu a.aktif { box-shadow: inset 4px 0 0 var(--altin); background: var(--yesil-acik); border-radius: var(--radius-kucuk); }
   .ana-menu .menu-cta { margin: .75rem 0 0; }
   .ana-menu .menu-cta a { text-align: center; }
-  .perde { display: block; position: fixed; inset: 0; background: rgba(12, 30, 26, .45); z-index: 940; opacity: 0; pointer-events: none; transition: opacity .25s ease; }
+  .perde { display: block; position: fixed; inset: 0; background: rgba(12, 30, 26, .45); z-index: 890; opacity: 0; pointer-events: none; transition: opacity .25s ease; }
   .perde.acik { opacity: 1; pointer-events: auto; }
 }
 @media (max-width: 480px) { .baslik-ic { min-height: 68px; } .marka img { height: 42px; } }
@@ -227,6 +228,9 @@ html.acilis-kapandi .acilis { display: none; }
 .ders b { font-family: var(--baslik); font-size: 1.15rem; font-weight: 600; color: var(--yesil-koyu); }
 .ders span { color: var(--metin-soluk); font-size: 1rem; }
 .ders small { color: var(--altin-koyu); font-weight: 700; font-size: .78rem; letter-spacing: .08em; text-transform: uppercase; }
+.ders.hafizlik .ar, .ders.hafizlik b, .ders.hafizlik span { color: var(--kirmizi); }
+.ders.hafizlik::after { background: linear-gradient(90deg, var(--kirmizi), var(--altin)); }
+.ders-grubu .alinti { margin-top: 1.5rem; }
 .alinti { font-family: var(--baslik); font-style: italic; font-size: 1.25rem; color: var(--yesil-koyu); border-left: 3px solid var(--altin); padding-left: 1.1rem; margin: 2.25rem 0 0; max-width: 42em; }
 
 /* ---------- medreseler ---------- */
@@ -236,13 +240,39 @@ html.acilis-kapandi .acilis { display: none; }
 .medrese p { margin: .1rem 0 0; color: var(--metin-soluk); font-size: .95rem; }
 .medrese.yakinda { border-style: dashed; background: var(--bej-acik); }
 .medrese.yakinda svg { fill: var(--altin); }
-.medreseler { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap: 1rem; }
-.medreseler .medrese { flex-direction: column; align-items: flex-start; gap: .8rem; min-width: 0; padding: 1.35rem; }
-@media (max-width: 520px) { .medreseler .medrese { flex-direction: row; align-items: center; } }
-.medrese.insaat { border-color: var(--altin); background: linear-gradient(135deg, #fff 30%, #F6EED9); color: inherit; text-decoration: none; transition: box-shadow var(--gecis), transform var(--gecis); }
-.medrese.insaat:hover { box-shadow: var(--golge); transform: translateY(-2px); }
-.medrese.insaat svg { fill: var(--altin-koyu); }
-.medrese.insaat p { color: var(--altin-koyu); font-weight: 600; }
+.medreseler { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
+@media (max-width: 900px) { .medreseler { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 560px) { .medreseler { grid-template-columns: 1fr; } }
+.medreseler .medrese { min-width: 0; }
+.medrese.kiz { border-color: #E9CFD5; background: linear-gradient(135deg, #fff 40%, #FBF1F3); }
+.medrese.kiz svg { fill: var(--kirmizi); }
+.medrese.yeni { grid-column: 1 / -1; position: relative; isolation: isolate; overflow: hidden; gap: 1.25rem; padding: 1.5rem 1.75rem; border: 0; background: var(--yesil-koyu); color: #fff; text-decoration: none; box-shadow: var(--golge); transition: transform var(--gecis), box-shadow var(--gecis); }
+.medrese.yeni::before { content: ""; position: absolute; inset: 0; z-index: -1; background: url(../img/desen-altin.svg) center / 96px 96px; opacity: .13; }
+.medrese.yeni:hover { transform: translateY(-2px); box-shadow: var(--golge-guclu); color: #fff; }
+.medrese.yeni svg { width: 54px; height: 54px; fill: var(--altin-acik); }
+.medrese.yeni h3 { color: #fff; font-size: 1.35rem; margin: .45rem 0 .2rem; }
+.medrese.yeni p { color: var(--metin-acik); font-size: 1rem; max-width: 46em; }
+.medrese.yeni > div { flex: 1; min-width: 0; }
+.medrese-git { display: inline-flex; align-items: center; gap: .45rem; flex: none; background: var(--altin-acik); color: var(--yesil-koyu); border-radius: 999px; padding: .65rem 1.2rem; font-weight: 700; }
+.medrese-git svg { width: 1.1em !important; height: 1.1em !important; fill: currentColor !important; }
+@media (max-width: 700px) { .medrese.yeni { flex-direction: column; align-items: flex-start; } }
+
+/* ---------- müjde bandı (Maltepe külliyesi) ---------- */
+.mujde { background: linear-gradient(90deg, #F6EED9, var(--bej-acik) 60%, #F6EED9); border-bottom: 1px solid var(--cizgi); }
+.mujde-ic { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; align-items: center; gap: 1.75rem; padding-block: 1.75rem; }
+.mujde-rozet { position: relative; isolation: isolate; width: 104px; height: 104px; display: grid; place-content: center; justify-items: center; text-align: center; line-height: 1.1; color: #fff; }
+.mujde-rozet::before, .mujde-rozet::after { content: ""; position: absolute; inset: 15px; z-index: -1; background: var(--yesil); border-radius: 6px; }
+.mujde-rozet::after { transform: rotate(45deg); }
+.mujde-rozet .ar { font-family: var(--hat); font-weight: 700; font-size: 1.15rem; color: var(--altin-acik); }
+.mujde-rozet b { font-family: var(--baslik); font-weight: 600; font-size: 1.05rem; }
+.mujde-metin h2 { font-size: clamp(1.35rem, 2.4vw, 1.75rem); margin-bottom: .3rem; }
+.mujde-metin p { color: var(--metin-soluk); font-size: 1.05rem; }
+.mujde-sayilar { list-style: none; margin: 0; padding: 0; display: flex; gap: 1.5rem; }
+.mujde-sayilar li { display: grid; text-align: center; line-height: 1.2; border-left: 2px solid var(--altin); padding-left: 1rem; }
+.mujde-sayilar b { font-family: var(--baslik); font-weight: 600; font-size: 1.6rem; color: var(--kirmizi); white-space: nowrap; }
+.mujde-sayilar span { font-size: .9rem; color: var(--metin-soluk); }
+@media (max-width: 1000px) { .mujde-ic { grid-template-columns: auto minmax(0, 1fr); } .mujde-sayilar { grid-column: 2; } .mujde .btn { grid-column: 2; justify-self: start; } }
+@media (max-width: 560px) { .mujde-ic { grid-template-columns: 1fr; gap: 1rem; } .mujde-sayilar, .mujde .btn { grid-column: auto; } .mujde-rozet { width: 88px; height: 88px; } .mujde-rozet::before, .mujde-rozet::after { inset: 13px; } }
 
 /* ---------- videolar ---------- */
 .video { width: 100%; aspect-ratio: 9 / 16; object-fit: cover; border-radius: var(--radius); background: var(--yesil-koyu); box-shadow: var(--golge); }

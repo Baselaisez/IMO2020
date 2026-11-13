@@ -42,7 +42,8 @@ isterseniz" kısmına bakın).
 | Diğer hocalarımızın fotoğrafları (isteğe bağlı) | Heyetimiz → Eğitim heyetimiz | Sınıf hocalarımızın fotoğrafı, adı ve görevi |
 | Salih Gedik Hocamızın fotoğrafı | Heyetimiz | Tanıtım videosundan alınan karenin gerçekten Salih Gedik Hocamız olduğunun teyidi, varsa daha net bir fotoğraf |
 | WhatsApp teyidi | Bağış sayfası → Dekontu iletin | Dekont için WhatsApp düğmesi 0536 976 99 78'e (talebe sofrası için 0543 663 91 55'e) gider. Bu numaralarda WhatsApp yoksa `BAGIS_WHATSAPP = False` yapın |
-| Topselvi ve Maltepe | Medreselerimiz | Topselvi Medresesi ile Maltepe Külliyesi ayrı yerler mi? Sitede ayrı gösteriliyor |
+| Kız medreselerinin adı | Medreselerimiz | Sitede "Atalar Kız Medresesi" ve "Osmaniye Kız Medresesi" yazıyor; resmî adları farklıysa `MEDRESELER` listesinden düzeltin |
+| Maltepe Külliyesi | Anasayfa (Müjde bandı), Medreselerimiz, Bağış | 1.000 m², en az 100 talebe, tadilat başlıyor. Rakamlar `MALTEPE_M2` ve `MALTEPE_KISI` ayarlarında |
 | Yardım toplama izni (varsa) | Bağış sayfası | Valilikten izin alındıysa izin numarası (`YARDIM_TOPLAMA_IZIN`); aşağıdaki Yasal hatırlatmalar'a bakın |
 | Osmanlıca yazının teyidi | Açılış ekranı | Açılışta "منكشه درنكی" (Menekşe Derneği) yazıyor; yazımı uygun mu? |
 | Medrese adresleri | İletişim sayfası | Atalar, Cevizli, Kurfalı (ve açılınca Topselvi) medreselerinin açık adresi |

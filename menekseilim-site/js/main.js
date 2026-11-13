@@ -60,11 +60,20 @@
   }
 
   // ---------------------------------------------------------------- Tek dosyalık önizleme: sayfa geçişleri
+  // Bağlantılar adres çubuğuna bırakılmadan burada açılır: önizleme bir çerçeve
+  // (iframe) içinde gösterildiğinde bazı tarayıcılar (iPhone Safari) # bağlantılarında
+  // hiçbir şey yapmıyor.
+  var bagisSec = null; // bağış sihirbazı kurulunca doldurulur
+  var spaGit = null;
   if (spa) {
     var sayfalar = Array.prototype.slice.call(document.querySelectorAll(".spa-sayfa"));
     var anaBaslik = document.title;
-    function goster(hash, ilk) {
-      var ad = (hash || "").replace(/^#/, "") || "anasayfa";
+    var yukari = function () {
+      window.scrollTo(0, 0);
+      if (document.scrollingElement) document.scrollingElement.scrollTop = 0;
+    };
+    var goster = function (ad, ilk) {
+      ad = (ad || "").replace(/^#/, "") || "anasayfa";
       var sayfa = document.getElementById("sayfa-" + ad);
       var hedef = null;
       if (!sayfa) {
@@ -80,9 +89,23 @@
         if (aktif) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current");
       });
       document.title = sayfa.getAttribute("data-baslik") || anaBaslik;
+      if (hedef && /^bagis-/.test(ad) && bagisSec) bagisSec(ad.slice(6));
       if (hedef) { hedef.scrollIntoView(); }
-      else if (!ilk) { window.scrollTo(0, 0); }
-    }
+      else if (!ilk) { yukari(); }
+    };
+    spaGit = goster;
+    document.addEventListener("click", function (e) {
+      if (e.defaultPrevented || e.button > 0 || e.metaKey || e.ctrlKey || e.shiftKey) return;
+      var a = e.target.closest ? e.target.closest("a[href^='#']") : null;
+      if (!a) return;
+      var ad = a.getAttribute("href").slice(1);
+      if (!ad || ad === "icerik") return;
+      e.preventDefault();
+      menuDurum(false, false);
+      goster(ad);
+      try { history.pushState(null, "", "#" + ad); } catch (err) { /* çerçevede izin yoksa yoksay */ }
+    });
+    window.addEventListener("popstate", function () { goster(location.hash); });
     window.addEventListener("hashchange", function () { goster(location.hash); });
     goster(location.hash, true);
   }
@@ -110,6 +133,7 @@
     secimler.forEach(function (r) {
       r.addEventListener("change", function () { sec(r.value, dar()); });
     });
+    bagisSec = function (id) { return sec(id, false); };
     var hashten = function () {
       var m = /^#bagis-([a-z0-9-]+)$/.exec(location.hash);
       return m ? sec(m[1], true) : false;
