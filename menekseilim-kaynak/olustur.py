@@ -35,24 +35,56 @@ INSTAGRAM = "https://www.instagram.com/menekseilim/"
 KAMU_YARARI = "Cumhurbaşkanı Kararı ile kamu yararına çalışan dernek"
 KAMU_YARARI_KARAR = ""   # biliniyorsa: "12.03.2024 tarihli ve 1234 sayılı Cumhurbaşkanı Kararı"
 
-# Bağış alanları: her biri ayrı bir kart olarak gösterilir. IBAN'lar gelince doldurun,
-# yeni alan için listeye bir sözlük daha ekleyin.
-BAGIS_HESAPLARI = [
-    {
-        "id": "genel",
-        "baslik": "Genel bağış",
-        "ar": "صدقة",
-        "aciklama": "Medreselerimizin en acil ihtiyacına harcanır: talebelerimizin eğitimi, iaşesi ve medreselerimizin giderleri.",
-        "banka": "[Banka ve şube adı]",
-        "iban": "TR00 0000 0000 0000 0000 0000 00",
-    },
+# ---- Bağış
+BANKA = "Türkiye Finans Katılım Bankası"
+BAGIS_TELEFON = "0536 976 99 78"   # bağış ve dekont için irtibat (afişlerdeki numara)
+BAGIS_WHATSAPP = True              # dekont WhatsApp'tan iletilebilsin mi
+YARDIM_TOPLAMA_IZIN = ""           # izin alınırsa: "İstanbul Valiliği, izin no 2026/123" gibi; bağış sayfasında yazılır
+
+# Bağış alanları: her biri bağış sayfasında ayrı bir seçenek olur ve kendi hesabıyla görünür.
+#   tur "adet":    secenekler [(ad, birim fiyat TL)], birim, hizli (hazır adetler)
+#   tur "serbest": tutarlar (hazır tutarlar); bağışçı dilediği tutarı da yazabilir
+# Yeni alan eklemek için listeye bir sözlük daha ekleyin; foto yoksa simge gösterilir.
+BAGIS_ALANLARI = [
+    {"id": "talebe", "baslik": "Talebelerimizin sofrası", "kisa": "Talebe sofrası", "etiket": "Medreselerimiz",
+     "foto": "img/bagis/kahvalti.jpg",
+     "ozet": "Talebelerimizin aylık kahvaltı ve yemek bedeline ortak olun.",
+     "aciklama": "Atalar ve Kurfalı medreselerimizde okuyan talebelerimizin kahvaltı ve yemek giderlerini hayırseverlerimizin desteğiyle karşılıyoruz. Dilediğiniz tutarla, ister bir kez ister her ay destek olabilirsiniz.",
+     "iban": "TR15 0020 6001 4004 5144 1300 01", "irtibat": "0543 663 91 55",
+     "tur": "serbest", "tutarlar": [500, 1000, 2500, 5000], "fiyat_yazi": "Dilediğiniz tutar"},
+    {"id": "maltepe", "baslik": "Maltepe medrese inşaatı", "kisa": "Maltepe inşaat", "etiket": "Medrese inşaatı",
+     "foto": "",
+     "ozet": "Bir metrekare hayırla yeni ilim yuvamıza ortak olun.",
+     "aciklama": "Menekşe Medresesi Külliyesi'nin Maltepe şubesi için inşaatımız sürüyor: dershaneleri, mescidi ve yemekhanesiyle yeni bir ilim yuvası. Her metrekaresi, orada okuyacak talebelerle birlikte sizin için de devam eden bir hayır olsun.",
+     "iban": "TR63 0020 6001 4004 5144 1300 10",
+     "tur": "adet", "secenekler": [("Metrekare", 2500)], "birim": "m²", "hizli": [1, 2, 5, 10], "fiyat_yazi": "1 m² 2.500 TL"},
+    {"id": "mushaf", "baslik": "Afrika'ya Mushaf-ı Şerif", "kisa": "Afrika Mushaf", "etiket": "Afrika",
+     "foto": "img/bagis/mushaf.jpg",
+     "ozet": "Bir Kur'ân nice gönülleri aydınlatır.",
+     "aciklama": "Afrika'da Kur'an okumayı öğrenen kardeşlerimize Mushaf-ı Şerif hediye ediyoruz. Hediye ettiğiniz her Mushaf, okundukça sevabı size de ulaşan bir hayırdır.",
+     "iban": "TR90 0020 6001 4004 5144 1300 09",
+     "tur": "adet", "secenekler": [("Mushaf-ı Şerif", 200)], "birim": "adet", "hizli": [1, 5, 10, 20], "fiyat_yazi": "1 Mushaf 200 TL"},
+    {"id": "gazze", "baslik": "Gazze'ye bir sofra", "kisa": "Gazze yemek", "etiket": "Gazze",
+     "foto": "img/bagis/gazze.jpg",
+     "ozet": "Bir öğün, bir kardeşlik. Gazze'deki kardeşlerimize sıcak yemek.",
+     "aciklama": "Gazze'deki kardeşlerimize sıcak yemek ulaştırıyoruz. Bir öğünlük bağışınız, savaşın ortasındaki bir aileye hem karın tokluğu hem de yalnız olmadıklarını gösteren bir selamdır.",
+     "iban": "TR20 0020 6001 4004 5144 1300 08",
+     "tur": "adet", "secenekler": [("Öğün", 200)], "birim": "öğün", "hizli": [1, 5, 10, 25], "fiyat_yazi": "1 öğün 200 TL"},
+    {"id": "kurban", "baslik": "Afrika'da kurban", "kisa": "Afrika kurban", "etiket": "Afrika",
+     "foto": "img/bagis/kurban.jpg",
+     "ozet": "Kurban paylaşmaktır, kurban kardeşliktir.",
+     "aciklama": "Kurban Bayramı'nda kurbanlarınızı Afrika'daki ihtiyaç sahibi ailelerle buluşturuyoruz. Vekâletiniz için açıklamaya adınızı ve soyadınızı yazmayı unutmayın.",
+     "iban": "TR47 0020 6001 4004 5144 1300 07",
+     "tur": "adet", "secenekler": [("Koyun", 5000), ("Keçi", 4000)], "birim": "adet", "hizli": [1, 2, 3], "fiyat_yazi": "Koyun 5.000 · Keçi 4.000 TL",
+     "vekalet": True},
 ]
 
-MEDRESELER = [  # (ad, yakında mı)
-    ("Atalar Medresesi", False),
-    ("Cevizli Medresesi", False),
-    ("Kurfalı Medresesi", False),
-    ("Topselvi Medresesi", True),
+MEDRESELER = [  # (ad, durum: "" açık, "yakinda", "insaat")
+    ("Atalar Medresesi", ""),
+    ("Cevizli Medresesi", ""),
+    ("Kurfalı Medresesi", ""),
+    ("Topselvi Medresesi", "yakinda"),
+    ("Maltepe Külliyesi", "insaat"),
 ]
 
 # Müfredat: (grup, arapça, grup açıklaması, [(ders, arapça, açıklama), ...])
@@ -128,7 +160,24 @@ IKON = {
     "gunes": '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/></svg>',
     "ay": '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.2A8.5 8.5 0 1 1 9.8 3.5a6.8 6.8 0 0 0 10.7 10.7z"/><path d="m17 4 .7 1.6 1.6.7-1.6.7L17 8.6l-.7-1.6-1.6-.7 1.6-.7z"/></svg>',
     "cemaat": '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="7.5" r="3.5"/><path d="M2.5 20.5v-1.5a5 5 0 0 1 5-5h3a5 5 0 0 1 5 5v1.5"/><path d="M16 4.3a3.5 3.5 0 0 1 0 6.4M18.5 14.4a5 5 0 0 1 3 4.6v1.5"/></svg>',
+    "kopya": '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3h11a2 2 0 0 1 2 2v11h-2V5H8V3zM5 7h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2zm0 2v10h10V9H5z"/></svg>',
+    "whatsapp": '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 2a8 8 0 1 1-4.1 14.9l-.4-.2-2.9.8.8-2.8-.2-.4A8 8 0 0 1 12 4zM8.9 7.6c-.2 0-.5 0-.8.4-.3.3-1 1-1 2.3s1 2.6 1.1 2.8c.1.2 2 3.1 4.9 4.3 2.4 1 2.9.8 3.4.7.5 0 1.7-.7 1.9-1.4.2-.7.2-1.2.2-1.4l-.6-.3-1.9-.9c-.3-.1-.4-.1-.6.1l-.9 1.1c-.2.2-.3.2-.6.1a7.3 7.3 0 0 1-3.6-3.2c-.3-.5.3-.4.8-1.4.1-.2 0-.3 0-.5l-.9-2.1c-.2-.5-.4-.5-.6-.5h-.8z"/></svg>',
+    "tabak": '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="6.5"/><circle cx="12" cy="13" r="3.5"/><path d="M3 4v5a2 2 0 0 0 2 2M5 4v18M21 4c-1.5 1-2.2 3-2.2 5.5S19.5 13 21 13v9"/></svg>',
 }
+
+
+def tl(n):
+    """5000 -> '5.000 TL'"""
+    return f"{n:,}".replace(",", ".") + " TL"
+
+
+def tel_link(t):
+    return "+90" + re.sub(r"\D", "", t)[1:]
+
+
+def wa_link(t, mesaj=""):
+    from urllib.parse import quote
+    return "https://wa.me/90" + re.sub(r"\D", "", t)[1:] + (("?text=" + quote(mesaj)) if mesaj else "")
 
 DESEN_ALTIN = """<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96">
   <g fill="none" stroke="#DCC690" stroke-width="1.2">
@@ -251,6 +300,7 @@ def son(kok=""):
       <h2>Bize ulaşın</h2>
       <ul>
         <li><a href="tel:{TELEFON_LINK}">{TELEFON}</a></li>
+        <li>Bağış hattı: <a href="tel:{tel_link(BAGIS_TELEFON)}">{BAGIS_TELEFON}</a></li>
         <li><a href="mailto:{EPOSTA}">{EPOSTA}</a></li>
         <li><a href="{INSTAGRAM}" target="_blank" rel="noopener">Instagram</a> · <a href="{FACEBOOK}" target="_blank" rel="noopener">Facebook</a></li>
       </ul>
@@ -334,10 +384,43 @@ HIZMET_KARTLARI = f"""
     <p class="alt-not">Hafta sonu ders yapmıyoruz; eğitim haftamız Cumartesi öğlen sona erer.</p>"""
 
 
-def medrese_kart(ad, yakinda):
-    alt = "Çok yakında açılıyor" if yakinda else "Kayıt ve bilgi için bizi arayın"
-    return (f'      <div class="medrese{" yakinda" if yakinda else ""}">{IKON["medrese"]}'
+def medrese_kart(ad, durum):
+    if durum == "insaat":
+        return (f'      <a class="medrese insaat" href="bagis.html#bagis-maltepe">{IKON["medrese"]}'
+                f'<div><h3>{ad}</h3><p>İnşaatı sürüyor · bir m² ile ortak olun</p></div></a>')
+    alt = "Çok yakında açılıyor" if durum == "yakinda" else "Kayıt ve bilgi için bizi arayın"
+    return (f'      <div class="medrese{" yakinda" if durum else ""}">{IKON["medrese"]}'
             f'<div><h3>{ad}</h3><p>{alt}</p></div></div>')
+
+
+def bagis_gorsel(a, yukle="lazy"):
+    if a["foto"]:
+        return f'<img src="{a["foto"]}" alt="" width="600" height="450" loading="{yukle}">'
+    return f'<span class="gorsel-simge">{IKON["medrese"]}</span>'
+
+
+def hayir_kart(a):
+    return f"""      <article class="hayir-kart">
+        <div class="hayir-foto">{bagis_gorsel(a)}<span class="etiket">{a['etiket']}</span></div>
+        <div class="hayir-ic">
+          <h3><a class="kart-link" href="bagis.html#bagis-{a['id']}">{a['baslik']}</a></h3>
+          <p>{a['ozet']}</p>
+          <p class="hayir-fiyat"><span>{a['fiyat_yazi']}</span><span class="git" aria-hidden="true">{IKON['ok']}</span></p>
+        </div>
+      </article>"""
+
+
+MALTEPE = next(a for a in BAGIS_ALANLARI if a["id"] == "maltepe")
+HAYIR_VITRIN = f"""    <article class="hayir-vitrin koyu">
+      <div class="vitrin-metin">
+        <span class="etiket">Medrese inşaatı · Maltepe</span>
+        <h3>Bir metrekare hayırla ilim yuvamıza ortak olun</h3>
+        <p>{MALTEPE['aciklama']}</p>
+        <a class="btn btn-altin" href="bagis.html#bagis-maltepe">Metrekare bağışla {IKON['ok']}</a>
+      </div>
+      <div class="vitrin-fiyat"><span class="ar" lang="ar">صدقة جارية</span><b>1 m²</b><span>{tl(MALTEPE['secenekler'][0][1])}</span></div>
+    </article>"""
+HAYIR_KARTLARI = "\n".join(hayir_kart(a) for a in BAGIS_ALANLARI if a["id"] != "maltepe")
 
 
 SSS = [
@@ -348,9 +431,11 @@ SSS = [
     ("Hafta sonu ders var mı?",
      "Hayır. Eğitim haftamız Cumartesi öğlen biter, hafta sonu ders yapmıyoruz."),
     ("Medreseleriniz nerede?",
-     "Atalar, Cevizli ve Kurfalı medreselerimizde hizmet veriyoruz. Topselvi Medresemiz çok yakında açılıyor. Adres ve yol tarifi için bizi arayabilirsiniz."),
+     "Atalar, Cevizli ve Kurfalı medreselerimizde hizmet veriyoruz. Topselvi Medresemiz çok yakında açılıyor, Maltepe'de de Menekşe Medresesi Külliyemizin inşaatı sürüyor. Adres ve yol tarifi için bizi arayabilirsiniz."),
     ("Yetişkinler için bir programınız var mı?",
      "Medreselerimizin dışında cemaatimizle sohbet ve zikir halkalarında buluşuyoruz. Gün ve saatleri öğrenmek için bizi arayabilirsiniz."),
+    ("Nasıl bağış yapabilirim?",
+     "Bağış sayfamızda bağış alanını seçin ve tutarı belirleyin. IBAN'ı kopyalayıp banka uygulamanızdan havale ya da EFT ile göndermeniz yeterli. Banka dekontunuz bağış makbuzu yerine geçer."),
     ("Bağışım vergiden düşülür mü?",
      "Evet. Derneğimiz Cumhurbaşkanı Kararı ile kamu yararına çalışan dernek statüsündedir. Makbuz karşılığı yaptığınız bağışlar, kanunda belirtilen sınırlar içinde vergi matrahınızdan indirilebilir. Ayrıntılar Bağış sayfamızda."),
     ("Kayıt için ne yapmalıyım?",
@@ -402,7 +487,7 @@ ANASAYFA = f"""
 
 <section class="bakis" aria-label="Bir bakışta">
   <div class="kapsayici bakis-ic">
-    <div><b>3 medrese</b><span>Atalar, Cevizli, Kurfalı · Topselvi yakında</span></div>
+    <div><b>3 medrese</b><span>Atalar, Cevizli, Kurfalı · yenileri yolda</span></div>
     <div><b>Elif-Ba'dan Arapçaya</b><span>Kur'an, temel ilimler ve Arapça</span></div>
     <div><b>Gündüzlü ve yatılı</b><span>Ailenize uygun eğitim</span></div>
     <div><b>Kamu yararına</b><span>Cumhurbaşkanı Kararı ile</span></div>
@@ -428,9 +513,19 @@ ANASAYFA = f"""
 
 <section class="bolum" id="medreselerimiz">
   <div class="kapsayici">
-    {bolum_basi("Medreselerimiz", "مدارسنا", "Atalar, Cevizli ve Kurfalı medreselerimizde hizmet veriyoruz. Topselvi Medresemizi de çok yakında açıyoruz inşallah.")}
-    <div class="izgara dort">
-{chr(10).join(medrese_kart(a, y) for a, y in MEDRESELER)}
+    {bolum_basi("Medreselerimiz", "مدارسنا", "Atalar, Cevizli ve Kurfalı medreselerimizde hizmet veriyoruz. Topselvi Medresemizi çok yakında açıyoruz; Maltepe'de de yeni külliyemizin inşaatı sürüyor inşallah.")}
+    <div class="medreseler">
+{chr(10).join(medrese_kart(a, d) for a, d in MEDRESELER)}
+    </div>
+  </div>
+</section>
+
+<section class="bolum bolum-bej" id="hayir">
+  <div class="kapsayici">
+    {bolum_basi("Hayra ortak olun", "أبواب الخير", "Medreselerimizden Gazze'ye ve Afrika'ya uzanan hayır kapılarımız. Her birinin ayrı bir hesabı var; bağışınızı dilediğiniz işe yönlendirebilirsiniz.")}
+{HAYIR_VITRIN}
+    <div class="hayir-izgara">
+{HAYIR_KARTLARI}
     </div>
   </div>
 </section>
@@ -506,7 +601,7 @@ HAKKIMIZDA = sayfa_basi("Hakkımızda", "Mahallelerimizin çocuklarına Kur'an'�
   <div class="kapsayici yan-yana">
     <div class="yazi">
       <h2>Biz kimiz?</h2>
-      <p>{DERNEK}, çocuklarımızın ve gençlerimizin Kur'an-ı Kerim'le, ilimle ve güzel ahlakla yetişmesi için kuruldu. Bugün {MARKA} adıyla Atalar, Cevizli ve Kurfalı'da üç medresede hizmet veriyoruz; Topselvi Medresemizi de yakında açıyoruz inşallah.</p>
+      <p>{DERNEK}, çocuklarımızın ve gençlerimizin Kur'an-ı Kerim'le, ilimle ve güzel ahlakla yetişmesi için kuruldu. Bugün {MARKA} adıyla Atalar, Cevizli ve Kurfalı'da üç medresede hizmet veriyoruz. Topselvi Medresemizi yakında açıyor, Maltepe'de yeni külliyemizi inşa ediyoruz inşallah.</p>
       <p>{HOCA_METNI}</p>
       <p>Talebelerimiz Elif-Ba ile başlıyor, Kur'an-ı Kerim'i tecvid ve kıraatiyle öğreniyor; İlm-i Hal, Siyer ve Arapça derslerle temel İslami ilimleri tahsil ediyor.</p>
     </div>
@@ -524,7 +619,7 @@ HAKKIMIZDA = sayfa_basi("Hakkımızda", "Mahallelerimizin çocuklarına Kur'an'�
 </section>
 
 <section class="bolum">
-  <div class="kapsayici izgara iki">
+  <div class="kapsayici izgara uc">
     <article class="kart">
       <div class="kart-ikon">{IKON['cemaat']}</div>
       <h3>Sohbet ve zikir halkalarımız</h3>
@@ -534,6 +629,12 @@ HAKKIMIZDA = sayfa_basi("Hakkımızda", "Mahallelerimizin çocuklarına Kur'an'�
       <div class="kart-ikon">{IKON['kalp']}</div>
       <h3>Sosyal etkinliklerimiz</h3>
       <p>Talebelerimiz sadece derste değil, birlikte vakit geçirirken de büyür. Yıl içinde sosyal etkinlikler yapıyor, eğitim yılını ailelerimizle birlikte yıl sonu merasimiyle tamamlıyoruz.</p>
+    </article>
+    <article class="kart">
+      <div class="kart-ikon">{IKON['tabak']}</div>
+      <h3>Hayır çalışmalarımız</h3>
+      <p>Medreselerimizin yanında Gazze'deki kardeşlerimize sıcak yemek, Afrika'ya Mushaf-ı Şerif ve kurban ulaştırıyoruz.</p>
+      <p><a href="bagis.html">Hayra ortak olun</a></p>
     </article>
   </div>
 </section>
@@ -623,28 +724,119 @@ HEYETIMIZ = sayfa_basi("Heyetimiz", "Derneğimizi ve medreselerimizi yürüten y
 
 
 # ================================================================ BAĞIŞ
-def bagis_kart(h):
-    return f"""      <article class="bagis-kart" id="bagis-{h['id']}">
-        <span class="ar" lang="ar">{h['ar']}</span>
-        <h3>{h['baslik']}</h3>
-        <p>{h['aciklama']}</p>
-        <dl>
-          <dt>Hesap adı</dt><dd>{DERNEK}</dd>
-          <dt>Banka</dt><dd>{h['banka']}</dd>
-          <dt>IBAN</dt><dd><code id="iban-{h['id']}">{h['iban']}</code></dd>
-        </dl>
-        <button class="btn btn-yesil btn-kucuk" type="button" data-kopyala="#iban-{h['id']}">IBAN'ı kopyala</button>
-      </article>"""
+def bagis_secim(a, i):
+    return f"""        <label class="alan-secim">
+          <input type="radio" name="bagis-alani" id="alan-{a['id']}" value="{a['id']}"{" checked" if i == 0 else ""}>
+          <span class="secim-gorsel">{bagis_gorsel(a, "eager")}</span>
+          <span class="secim-metin"><b>{a['baslik']}</b><small>{a['fiyat_yazi']}</small></span>
+          <span class="secim-isaret" aria-hidden="true"></span>
+        </label>"""
 
 
-BAGIS = sayfa_basi("Bağış", "Bir talebenin öğrendiği her harf, sizin için de devam eden bir hayırdır.", "صدقة جارية") + f"""
-<section class="bolum" id="bagis-alanlari">
+def kopya_btn(hedef, etiket, bosluksuz=False):
+    return (f'<button class="kopya" type="button" data-kopyala="#{hedef}"{" data-bosluksuz" if bosluksuz else ""} '
+            f'aria-label="{etiket}">{IKON["kopya"]}<span>Kopyala</span></button>')
+
+
+def bagis_panel(a):
+    k = a["id"]
+    tel = a.get("irtibat", BAGIS_TELEFON)
+    if a["tur"] == "adet":
+        coklu = len(a["secenekler"]) > 1
+        ad0, fiyat0 = a["secenekler"][0]
+        toplam0 = fiyat0
+        aciklama0 = f"{a['kisa']} 1 {ad0.lower() if coklu else a['birim']}"
+        secenekler = ""
+        if coklu:
+            secenekler = '\n          <div class="secenekler">' + "".join(
+                f'<label class="secenek"><input type="radio" name="tur-{k}" value="{ad}" data-fiyat="{f}"{" checked" if j == 0 else ""}>'
+                f'<span><b>{ad}</b>{tl(f)}</span></label>' for j, (ad, f) in enumerate(a["secenekler"])) + "</div>"
+        birim_not = "" if coklu else f' <small>(1 {a["birim"]} {tl(fiyat0)})</small>'
+        hizli = "".join(f'<button type="button" class="hizli-btn" data-adet="{n}" aria-pressed="{"true" if n == 1 else "false"}">{n} {a["birim"]}</button>' for n in a["hizli"])
+        miktar = f"""{secenekler}
+          <div class="adet-satir">
+            <div class="adet-sec">
+              <button type="button" class="adet-btn" data-adim="-1" aria-label="Azalt">−</button>
+              <input type="number" class="adet" value="1" min="1" max="999" inputmode="numeric" aria-label="Adet">
+              <button type="button" class="adet-btn" data-adim="1" aria-label="Artır">+</button>
+            </div>
+            <span class="birim">{a['birim']}{birim_not}</span>
+          </div>
+          <div class="hizli">{hizli}</div>"""
+        veri = f' data-fiyat="{fiyat0}" data-birim="{a["birim"]}"'
+        ipucu = ""
+    else:
+        toplam0 = a["tutarlar"][0]
+        aciklama0 = a["kisa"]
+        tutarlar = "".join(f'<button type="button" class="tutar-btn{" secili" if j == 0 else ""}" data-tutar="{n}" aria-pressed="{"true" if j == 0 else "false"}">{tl(n)}</button>'
+                           for j, n in enumerate(a["tutarlar"]))
+        miktar = f"""
+          <div class="tutarlar">{tutarlar}</div>
+          <label class="diger-tutar"><span>Başka bir tutar</span><span class="tl-giris"><input type="number" class="tutar-gir" min="1" max="10000000" inputmode="numeric" placeholder="Örn. 750"><span>TL</span></span></label>"""
+        veri = ""
+        ipucu = '\n          <p class="ipucu">Her ay düzenli destek olmak isterseniz banka uygulamanızdan <b>düzenli transfer talimatı</b> verebilirsiniz.</p>'
+    if a.get("vekalet"):
+        aciklama0 += " (vekâlet)"
+    wa = ""
+    if BAGIS_WHATSAPP:
+        wa = (f'<a class="btn btn-yesil whatsapp" href="{wa_link(tel, "Selamün aleyküm. " + a["baslik"] + " için " + tl(toplam0) + " bağış gönderdim, dekontum ekte.")}" '
+              f'target="_blank" rel="noopener">{IKON["whatsapp"]} WhatsApp\'tan gönder</a>\n            ')
+    return f"""      <div class="bagis-panel" id="bagis-{k}" data-tur="{a['tur']}" data-kisa="{a['kisa']}" data-baslik="{a['baslik']}"{veri}{" data-vekalet" if a.get("vekalet") else ""}>
+        <div class="panel-bas">
+          <div class="panel-gorsel">{bagis_gorsel(a)}</div>
+          <div class="panel-yazi">
+            <span class="etiket">{a['etiket']}</span>
+            <h3>{a['baslik']}</h3>
+            <p>{a['aciklama']}</p>
+          </div>
+        </div>
+        <div class="panel-adim">
+          <h4><span class="adim-no">2</span> Ne kadar bağışlamak istersiniz?</h4>{miktar}
+          <p class="toplam">Toplam bağışınız <output class="toplam-tutar">{tl(toplam0)}</output></p>
+        </div>
+        <div class="panel-adim">
+          <h4><span class="adim-no">3</span> Banka uygulamanızdan gönderin</h4>
+          <p class="ipucu">Uygulamanızda <b>Para gönder → IBAN'a</b> adımını açın; bu bilgileri kopyalayıp yapıştırmanız yeterli.</p>
+          <dl class="hesap">
+            <div class="hesap-satir hesap-iban"><dt>IBAN</dt><dd><code id="iban-{k}">{a['iban']}</code>{kopya_btn(f"iban-{k}", "IBAN'ı kopyala", True)}</dd></div>
+            <div class="hesap-satir"><dt>Alıcı adı</dt><dd><span id="alici-{k}">{DERNEK}</span>{kopya_btn(f"alici-{k}", "Alıcı adını kopyala")}</dd></div>
+            <div class="hesap-satir"><dt>Tutar</dt><dd><b class="toplam-tutar">{tl(toplam0)}</b></dd></div>
+            <div class="hesap-satir"><dt>Açıklama</dt><dd><span id="aciklama-{k}" class="aciklama-yaz">{aciklama0}</span>{kopya_btn(f"aciklama-{k}", "Açıklamayı kopyala")}</dd></div>
+            <div class="hesap-satir"><dt>Banka</dt><dd>{BANKA}</dd></div>
+          </dl>
+          <label class="ad-gir"><span>Adınız soyadınız <small>(isteğe bağlı; açıklamaya eklenir, bize gönderilmez)</small></span><input type="text" class="ad" autocomplete="name" maxlength="60"></label>{ipucu}
+        </div>
+        <div class="panel-adim">
+          <h4><span class="adim-no">4</span> Dekontu bize iletin <small>isteğe bağlı</small></h4>
+          <p>Banka dekontunuz bağış makbuzu yerine geçer. Bize iletirseniz bağışınızı kayda geçiririz; isterseniz adınıza makbuz da düzenleriz.</p>
+          <div class="butonlar">
+            {wa}<a class="btn btn-cizgi" href="tel:{tel_link(tel)}">{IKON['tel']} {tel}</a>
+          </div>
+        </div>
+      </div>"""
+
+
+IZIN_SATIRI = (f'\n    <p class="alt-not">Yardım toplama izni: {YARDIM_TOPLAMA_IZIN}</p>' if YARDIM_TOPLAMA_IZIN else "")
+
+BAGIS = sayfa_basi("Bağış", "Bir talebenin sofrasından Gazze'deki bir çocuğun tabağına; hayrınızı dilediğiniz kapıdan ulaştırın.", "صدقة جارية") + f"""
+<section class="bolum" id="bagis-yap">
   <div class="kapsayici">
-    {bolum_basi("Bağış alanlarımız", aciklama="Bağışınızı dilediğiniz alana yapabilirsiniz. Her alanın kendi hesabı vardır; açıklamaya adınızı ve soyadınızı yazmanız yeterli.")}
-    <div class="bagis-alanlari">
-{chr(10).join(bagis_kart(h) for h in BAGIS_HESAPLARI)}
+    {bolum_basi("Bağışınızı birkaç dokunuşla yapın", aciklama="Bağış alanını seçin, tutarı belirleyin, bilgileri kopyalayıp banka uygulamanızdan gönderin. Hepsi bu kadar.")}
+    <div class="bagis-kutu" data-bagis>
+      <fieldset class="alan-listesi">
+        <legend><span class="adim-no">1</span> Bağış alanını seçin</legend>
+{chr(10).join(bagis_secim(a, i) for i, a in enumerate(BAGIS_ALANLARI))}
+      </fieldset>
+      <div class="bagis-paneller">
+{chr(10).join(bagis_panel(a) for a in BAGIS_ALANLARI)}
+      </div>
     </div>
-    <p class="alt-not">Bağışınız için dernek makbuzu veriyoruz. Dekontu bize telefonla ya da e-postayla iletmeniz yeterli: <a href="tel:{TELEFON_LINK}">{TELEFON}</a> · <a href="mailto:{EPOSTA}">{EPOSTA}</a></p>
+    <ul class="guven">
+      <li>{IKON['kalkan']}<span><b>Kamu yararına dernek</b>Cumhurbaşkanı Kararı ile</span></li>
+      <li>{IKON['yildiz']}<span><b>Her hayrın ayrı hesabı</b>Bağışınızı dilediğiniz işe yönlendirin</span></li>
+      <li>{IKON['kalp']}<span><b>Dekontunuz makbuzdur</b>Banka dekontu alındı belgesi yerine geçer</span></li>
+      <li>{IKON['yildiz']}<span><b>Vergiden düşülebilir</b>Kanuni sınırlar içinde</span></li>
+    </ul>{IZIN_SATIRI}
   </div>
 </section>
 
@@ -665,12 +857,12 @@ BAGIS = sayfa_basi("Bağış", "Bir talebenin öğrendiği her harf, sizin için
   <div class="kapsayici dar">
     <article class="kart">
       <h2 style="font-size:1.5rem">Bağışınız vergiden düşülebilir</h2>
-      <p>Derneğimiz Cumhurbaşkanı Kararı ile kamu yararına çalışan dernek statüsündedir. Bu yüzden makbuz karşılığında yaptığınız bağışlar vergi matrahınızdan indirilebilir:</p>
+      <p>Derneğimiz Cumhurbaşkanı Kararı ile kamu yararına çalışan dernek statüsündedir. Bu yüzden belgeli bağışlarınız (banka dekontu ya da dernek makbuzu) vergi matrahınızdan indirilebilir:</p>
       <ul>
         <li><strong>Gelir vergisi beyannamesi verenler:</strong> yıl içindeki bağışlarınızın, beyan ettiğiniz gelirin %5'ine kadar olan kısmı (kalkınmada öncelikli yörelerde %10'una kadar). <em>193 sayılı Gelir Vergisi Kanunu, madde 89/4</em></li>
         <li><strong>Şirketler:</strong> bağışların, o yılın kurum kazancının %5'ine kadar olan kısmı. <em>5520 sayılı Kurumlar Vergisi Kanunu, madde 10/1-c</em></li>
       </ul>
-      <p>Bunun için bağış makbuzunuzu saklayıp mali müşavirinize iletmeniz yeterli. Kendi durumunuz için mali müşavirinize danışmanızı öneririz.</p>
+      <p>Bunun için dekontunuzu ya da makbuzunuzu saklayıp mali müşavirinize iletmeniz yeterli. Kendi durumunuz için mali müşavirinize danışmanızı öneririz.</p>
     </article>
   </div>
 </section>
@@ -688,7 +880,7 @@ ILETISIM = sayfa_basi("İletişim", "Kayıt, bilgi ya da sadece hal hatır için
       </ul>
       <h2 style="font-size:1.4rem">Medreselerimiz</h2>
       <ul class="medrese-liste">
-{chr(10).join(f'        <li><b>{a}</b>{" · çok yakında" if y else ""}</li>' for a, y in MEDRESELER)}
+{chr(10).join(f'        <li><b>{a}</b>{ {"yakinda": " · çok yakında", "insaat": " · inşaatı sürüyor"}.get(d, "") }</li>' for a, d in MEDRESELER)}
       </ul>
       <p class="alt-not">Adres ve yol tarifi için bizi arayabilirsiniz.</p>
     </div>
@@ -724,6 +916,7 @@ KVKK = sayfa_basi("KVKK Aydınlatma Metni", "Kişisel verileriniz hakkında kıs
     <h2>Haklarınız</h2>
     <p>6698 sayılı Kanun'un 11. maddesi gereği bilgilerinizin işlenip işlenmediğini öğrenebilir, düzeltilmesini ya da silinmesini isteyebilirsiniz. Bunun için {EPOSTA} adresine yazabilirsiniz.</p>
     <p>Sitemiz reklam veya takip çerezi kullanmaz. Yazı tipleri kendi sunucumuzdan yüklenir; ziyaret bilgileriniz üçüncü taraflara aktarılmaz.</p>
+    <p>Bağış sayfasındaki ad alanı yalnızca tarayıcınızda açıklama metni hazırlamak için kullanılır; bize ya da başka bir yere gönderilmez. Dekontunuzu WhatsApp'tan iletirseniz mesajınız WhatsApp'ın kendi gizlilik koşullarına tabidir.</p>
   </div>
 </section>
 """
@@ -743,7 +936,7 @@ SAYFALAR = [  # (dosya, önizleme kimliği, başlık, açıklama, gövde, ek hea
      "Menekşe İlim Kültür Okuma Derneği yönetim kurulu heyeti ve eğitim heyeti.",
      HEYETIMIZ, ""),
     ("bagis.html", "bagis", f"Bağış | {MARKA}",
-     "Menekşe Medreseleri'ne bağış: bağış alanlarımız, banka hesaplarımız ve kamu yararına dernek bağışlarında vergi indirimi.",
+     "Menekşe Medreseleri'ne bağış: talebe sofrası, Maltepe medrese inşaatı, Afrika'ya Mushaf ve kurban, Gazze'ye yemek. Her hayrın ayrı IBAN'ı; kolay havale ve EFT.",
      BAGIS, ""),
     ("iletisim.html", "iletisim", f"İletişim | {MARKA}",
      f"Menekşe Medreseleri iletişim: telefon {TELEFON}, e-posta ve medreselerimiz.",

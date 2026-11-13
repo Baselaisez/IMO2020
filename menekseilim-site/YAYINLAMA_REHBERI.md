@@ -41,7 +41,9 @@ isterseniz" kısmına bakın).
 | Yönetim kurulu isim ve görevleri | Heyetimiz sayfası ve anasayfa | Gönderdiğiniz 4 fotoğraf sitede; her birinin adı ve görevi (başkan, başkan yardımcısı, sayman gibi). Şu an hepsinde "Yönetim Kurulu Üyesi" yazıyor |
 | Diğer hocalarımızın fotoğrafları (isteğe bağlı) | Heyetimiz → Eğitim heyetimiz | Sınıf hocalarımızın fotoğrafı, adı ve görevi |
 | Salih Gedik Hocamızın fotoğrafı | Heyetimiz | Tanıtım videosundan alınan karenin gerçekten Salih Gedik Hocamız olduğunun teyidi, varsa daha net bir fotoğraf |
-| Bağış alanları ve IBAN'lar | Bağış sayfası | Her bağış alanı için (ör. genel bağış, zekât, kurban, talebe bursu) ayrı IBAN, banka ve şube adı. Şu an tek bir örnek kart var |
+| WhatsApp teyidi | Bağış sayfası → Dekontu iletin | Dekont için WhatsApp düğmesi 0536 976 99 78'e (talebe sofrası için 0543 663 91 55'e) gider. Bu numaralarda WhatsApp yoksa `BAGIS_WHATSAPP = False` yapın |
+| Topselvi ve Maltepe | Medreselerimiz | Topselvi Medresesi ile Maltepe Külliyesi ayrı yerler mi? Sitede ayrı gösteriliyor |
+| Yardım toplama izni (varsa) | Bağış sayfası | Valilikten izin alındıysa izin numarası (`YARDIM_TOPLAMA_IZIN`); aşağıdaki Yasal hatırlatmalar'a bakın |
 | Osmanlıca yazının teyidi | Açılış ekranı | Açılışta "منكشه درنكی" (Menekşe Derneği) yazıyor; yazımı uygun mu? |
 | Medrese adresleri | İletişim sayfası | Atalar, Cevizli, Kurfalı (ve açılınca Topselvi) medreselerinin açık adresi |
 | Sohbet ve zikir günleri | Anasayfa ve Hakkımızda | İsterseniz gün ve saatleri yazarız; şu an "bizi arayın" yazıyor |
@@ -82,15 +84,38 @@ python3 menekseilim-kaynak/olustur.py
 
 İsim boş bırakılırsa yalnızca görev yazılır.
 
-**Bağış alanları ve IBAN'lar:** `BAGIS_HESAPLARI` listesindeki her sözlük
-Bağış sayfasında ayrı bir kart olur. Yeni alan eklemek için bir sözlük daha
-yazın:
+**Bağış alanları ve IBAN'lar:** `BAGIS_ALANLARI` listesindeki her sözlük hem
+anasayfadaki "Hayra ortak olun" kartı hem de Bağış sayfasındaki bir seçenek
+olur. Şu an beş alan var: talebe sofrası, Maltepe medrese inşaatı, Afrika'ya
+Mushaf, Gazze'ye yemek, Afrika'da kurban (IBAN'lar afişlerden alındı ve
+sağlama kontrolünden geçti). Yeni alan için bir sözlük daha ekleyin:
 
 ```python
-{"id": "burs", "baslik": "Talebe bursu", "ar": "منحة",
- "aciklama": "Bir talebemizin eğitim ve iaşe giderlerine destek olur.",
- "banka": "Örnek Bankası, Kadıköy şubesi", "iban": "TR00 0000 0000 0000 0000 0000 00"},
+{"id": "burs", "baslik": "Talebe bursu", "kisa": "Talebe bursu", "etiket": "Medreselerimiz",
+ "foto": "img/bagis/burs.jpg",          # yoksa "" bırakın, simge görünür
+ "ozet": "Kartta görünen kısa cümle.",
+ "aciklama": "Bağış sayfasında görünen açıklama.",
+ "iban": "TR.. .... .... .... .... .... ..",
+ "tur": "adet", "secenekler": [("Aylık burs", 1500)], "birim": "ay", "hizli": [1, 3, 6, 12],
+ "fiyat_yazi": "Aylık 1.500 TL"},
+# Serbest tutarlı alan için: "tur": "serbest", "tutarlar": [500, 1000, 2500]
 ```
+
+Fiyat değişince yalnızca `secenekler` içindeki rakamı değiştirin; toplam,
+açıklama ve WhatsApp mesajı kendiliğinden güncellenir.
+
+**Bağış sayfası nasıl çalışır?** Bağışçı alanı seçer, adedi ya da tutarı
+belirler. Sayfa toplamı ve havale açıklamasını hazırlar (ör. "Gazze yemek
+10 öğün"). IBAN, alıcı adı ve açıklama tek dokunuşla kopyalanır; IBAN
+boşluksuz kopyalanır ki her banka uygulamasına yapışsın. Bağışçının yazdığı ad
+yalnızca kendi tarayıcısında kalır, hiçbir yere gönderilmez.
+
+**Kartla online bağış (ileride):** Mümkün ve güvenli bir şekilde eklenebilir.
+Bunun için derneğin lisanslı bir ödeme kuruluşuyla (ör. iyzico, PayTR) ya da
+bankasıyla (Türkiye Finans sanal POS) sözleşme yapması gerekir. Kart bilgileri
+bizim sunucumuza hiç uğramaz, ödeme kuruluşunun 3D Secure'lu sayfasında
+alınır. Sözleşme ve API anahtarları gelince sihirbaza "Kartla öde" adımı
+eklenir; anahtarlar sunucuda, herkese açık klasörün dışında saklanır.
 
 **Dersler:** `MUFREDAT` listesi Eğitimlerimiz sayfasındaki ders kartlarını,
 `YOLCULUK` listesi anasayfadaki dört adımı üretir.
@@ -479,12 +504,18 @@ gelir. Teknik bir yakınınız varsa iyi bir seçenektir.
   kaldırıldı. Tanıtım ve yıl sonu merasimi videoları dernek kararıyla sitede
   kalıyor. Videolarda talebelerin yüzleri göründüğü için velilerin yazılı
   izinlerini dernek dosyasında saklayın; bir veli isterse ilgili video kaldırılır.
-* **Bağış:** Dernekler, bağışları alındı belgesi (makbuz) karşılığında kabul
-  eder. Kamuya açık yardım kampanyası (SMS, kumbara, geniş çaplı çağrı) 2860
-  sayılı Yardım Toplama Kanunu kapsamında valilik izni gerektirebilir; web
-  sitesinde yalnızca hesap numarası duyurmak genel uygulamada izin
-  gerektirmez, ancak kampanya başlatmadan önce il sivil toplumla ilişkiler
-  müdürlüğüne danışmanızı öneririm.
+* **Bağış ve dekont:** Bağış banka aracılığıyla alındığında banka dekontu
+  alındı belgesi (makbuz) yerine geçer (Dernekler Yönetmeliği m.38).
+* **Yardım toplama izni:** Derneğe tüzüğündeki amaçlar için yapılan bağışlar
+  Yardım Toplama Kanunu'nun kapsamı dışındadır (2860 sayılı Kanun m.2). Tüzükte
+  yer almayan amaçlar için ya da geniş çaplı kampanyayla yardım toplamak valilik
+  izni gerektirir (m.6). İzinsiz internet kampanyası 24 saat içinde kaldırılabilir
+  ve erişime engellenebilir. İzin alınırsa izin numarasının sitede ve afişlerde
+  yazılması zorunludur (Yardım Toplama Esas ve Usulleri Hakkında Yönetmelik
+  m.7). Cumhurbaşkanınca izinsiz yardım toplayabileceği kararlaştırılan
+  dernekler ise kararın yılını ve sayısını yazar. **Gazze ve Afrika
+  çalışmalarının tüzüğünüzde yer aldığını kontrol edin**; emin değilseniz il
+  sivil toplumla ilişkiler müdürlüğüne danışın.
 * **Alan adı yenileme:** Her iki alan adının bitiş tarihi **05.10.2027**.
   Panelde otomatik yenilemeyi açın; süresi dolan `.com.tr` alan adını geri
   almak zordur.
@@ -497,7 +528,7 @@ menekseilim-site/          ← sunucuya (public_html) yüklenen klasör
 ├── hakkimizda.html        Biz kimiz, değerlerimiz, sohbet/zikir, sosyal etkinlikler, dernek bilgileri
 ├── egitimlerimiz.html     Gündüzlü/yatılı programlar, bütün dersler (Elif-Ba'dan İzhâr'a), kayıt
 ├── heyetimiz.html         Yönetim kurulu heyeti ve eğitim heyeti
-├── bagis.html             Bağış alanları (her biri ayrı IBAN), vergi indirimi
+├── bagis.html             Bağış sihirbazı: alan seç, tutar belirle, IBAN/açıklama kopyala, dekont ilet
 ├── iletisim.html          Telefon, e-posta, medreseler ve iletişim formu
 ├── kvkk.html              KVKK aydınlatma metni
 ├── 404.html               Bulunamayan sayfa
@@ -510,6 +541,7 @@ menekseilim-site/          ← sunucuya (public_html) yüklenen klasör
 ├── fonts/                 Lora, Source Sans 3, Aref Ruqaa (hat), Amiri (Arapça) ve lisansları
 ├── js/main.js             Açılış ekranı, menü, form, IBAN kopyalama
 ├── img/                   logo.svg, logo-acik.svg, muhur.svg, desen-altin.svg, medrese-ders.jpg, og-gorsel.png
+│   ├── bagis/             Bağış alanı fotoğrafları (afişlerden kırpıldı)
 │   ├── heyet/             Yönetim kurulu fotoğrafları
 │   └── hocalar/           Hoca fotoğrafları (salih-gedik.jpg)
 └── video/                 Tanıtım ve yıl sonu merasimi videoları (.mp4) ve kapakları (.jpg)

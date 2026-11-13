@@ -87,16 +87,133 @@
     goster(location.hash, true);
   }
 
-  // ---------------------------------------------------------------- IBAN kopyala
+  // ---------------------------------------------------------------- Bağış sihirbazı
+  var bagis = document.querySelector("[data-bagis]");
+  if (bagis) {
+    var bicim = function (n) { return n.toLocaleString("tr-TR") + " TL"; };
+    var dar = function () { return window.matchMedia("(max-width: 900px)").matches; };
+    var paneller = Array.prototype.slice.call(bagis.querySelectorAll(".bagis-panel"));
+    var secimler = Array.prototype.slice.call(bagis.querySelectorAll("input[name=bagis-alani]"));
+    bagis.classList.add("hazir");
+
+    var sec = function (id, kaydir) {
+      var panel = document.getElementById("bagis-" + id);
+      if (!panel || paneller.indexOf(panel) === -1) return false;
+      paneller.forEach(function (p) { p.hidden = p !== panel; });
+      secimler.forEach(function (r) {
+        r.checked = r.value === id;
+        r.closest(".alan-secim").classList.toggle("secili", r.checked);
+      });
+      if (kaydir) panel.scrollIntoView({ behavior: "smooth", block: "start" });
+      return true;
+    };
+    secimler.forEach(function (r) {
+      r.addEventListener("change", function () { sec(r.value, dar()); });
+    });
+    var hashten = function () {
+      var m = /^#bagis-([a-z0-9-]+)$/.exec(location.hash);
+      return m ? sec(m[1], true) : false;
+    };
+    if (!hashten()) {
+      var ilk = secimler.filter(function (r) { return r.checked; })[0] || secimler[0];
+      if (ilk) sec(ilk.value, false);
+    }
+    window.addEventListener("hashchange", hashten);
+
+    paneller.forEach(function (p) {
+      var tur = p.getAttribute("data-tur");
+      var adet = p.querySelector("input.adet");
+      var tutarGir = p.querySelector("input.tutar-gir");
+      var adGir = p.querySelector("input.ad");
+      var wa = p.querySelector("a.whatsapp");
+      var waTaban = wa ? wa.getAttribute("href").split("?")[0] : "";
+      var secilenTutar = 0;
+      var ilkTutar = p.querySelector(".tutar-btn.secili");
+      if (ilkTutar) secilenTutar = +ilkTutar.getAttribute("data-tutar");
+      var sinirla = function (v) { return Math.max(1, Math.min(999, parseInt(v, 10) || 1)); };
+
+      var guncelle = function () {
+        var toplam, metin;
+        if (tur === "adet") {
+          var n = sinirla(adet.value);
+          var secenek = p.querySelector(".secenek input:checked");
+          var fiyat = secenek ? +secenek.getAttribute("data-fiyat") : +p.getAttribute("data-fiyat");
+          var birim = secenek ? secenek.value.toLocaleLowerCase("tr-TR") : p.getAttribute("data-birim");
+          toplam = n * fiyat;
+          metin = p.getAttribute("data-kisa") + " " + n + " " + birim;
+          p.querySelectorAll(".hizli-btn").forEach(function (b) {
+            b.setAttribute("aria-pressed", +b.getAttribute("data-adet") === n ? "true" : "false");
+          });
+        } else {
+          var serbest = parseInt(tutarGir.value, 10);
+          toplam = serbest > 0 ? serbest : secilenTutar;
+          metin = p.getAttribute("data-kisa");
+        }
+        if (p.hasAttribute("data-vekalet")) metin += " (vekâlet)";
+        var ad = adGir ? adGir.value.trim() : "";
+        if (ad) metin = ad + " - " + metin;
+        p.querySelectorAll(".toplam-tutar").forEach(function (el) { el.textContent = bicim(toplam); });
+        var aciklama = p.querySelector(".aciklama-yaz");
+        if (aciklama) aciklama.textContent = metin;
+        if (wa) {
+          wa.href = waTaban + "?text=" + encodeURIComponent("Selamün aleyküm. " + p.getAttribute("data-baslik") +
+            " için " + bicim(toplam) + " bağış gönderdim, dekontum ekte." + (ad ? " " + ad : ""));
+        }
+      };
+
+      if (adet) {
+        p.querySelectorAll(".adet-btn").forEach(function (b) {
+          b.addEventListener("click", function () {
+            adet.value = sinirla(sinirla(adet.value) + +b.getAttribute("data-adim"));
+            guncelle();
+          });
+        });
+        adet.addEventListener("input", guncelle);
+        adet.addEventListener("change", function () { adet.value = sinirla(adet.value); guncelle(); });
+        p.querySelectorAll(".hizli-btn").forEach(function (b) {
+          b.addEventListener("click", function () { adet.value = b.getAttribute("data-adet"); guncelle(); });
+        });
+        p.querySelectorAll(".secenek input").forEach(function (r) { r.addEventListener("change", guncelle); });
+      }
+      if (tutarGir) {
+        var tutarIsaretle = function () {
+          var serbestVar = parseInt(tutarGir.value, 10) > 0;
+          p.querySelectorAll(".tutar-btn").forEach(function (x) {
+            var secili = !serbestVar && +x.getAttribute("data-tutar") === secilenTutar;
+            x.classList.toggle("secili", secili);
+            x.setAttribute("aria-pressed", secili ? "true" : "false");
+          });
+        };
+        p.querySelectorAll(".tutar-btn").forEach(function (b) {
+          b.addEventListener("click", function () {
+            secilenTutar = +b.getAttribute("data-tutar");
+            tutarGir.value = "";
+            tutarIsaretle();
+            guncelle();
+          });
+        });
+        tutarGir.addEventListener("input", function () { tutarIsaretle(); guncelle(); });
+      }
+      if (adGir) adGir.addEventListener("input", guncelle);
+      guncelle();
+    });
+  }
+
+  // ---------------------------------------------------------------- Kopyala (IBAN, alıcı, açıklama)
   document.querySelectorAll("[data-kopyala]").forEach(function (btn) {
     btn.addEventListener("click", function () {
       var hedef = document.querySelector(btn.getAttribute("data-kopyala"));
       if (!hedef) return;
       var metin = hedef.textContent.replace(/\s+/g, " ").trim();
-      var eski = btn.textContent;
+      if (btn.hasAttribute("data-bosluksuz")) metin = metin.replace(/\s+/g, "");
+      var yazi = btn.querySelector("span") || btn;
+      var eski = yazi.getAttribute("data-eski") || yazi.textContent;
+      yazi.setAttribute("data-eski", eski);
       var bitti = function () {
-        btn.textContent = "Kopyalandı";
-        setTimeout(function () { btn.textContent = eski; }, 1800);
+        yazi.textContent = "Kopyalandı";
+        btn.classList.add("kopyalandi");
+        clearTimeout(btn._zaman);
+        btn._zaman = setTimeout(function () { yazi.textContent = eski; btn.classList.remove("kopyalandi"); }, 1800);
       };
       if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(metin).then(bitti, function () { secVeKopyala(hedef); bitti(); });

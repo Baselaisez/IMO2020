@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Bağış | Menekşe Medreseleri</title>
-<meta name="description" content="Menekşe Medreseleri'ne bağış: bağış alanlarımız, banka hesaplarımız ve kamu yararına dernek bağışlarında vergi indirimi.">
+<meta name="description" content="Menekşe Medreseleri'ne bağış: talebe sofrası, Maltepe medrese inşaatı, Afrika'ya Mushaf ve kurban, Gazze'ye yemek. Her hayrın ayrı IBAN'ı; kolay havale ve EFT.">
 <link rel="canonical" href="https://menekseilim.com.tr/bagis.html">
 <meta property="og:site_name" content="Menekşe Medreseleri">
 <meta property="og:title" content="Bağış | Menekşe Medreseleri">
-<meta property="og:description" content="Menekşe Medreseleri'ne bağış: bağış alanlarımız, banka hesaplarımız ve kamu yararına dernek bağışlarında vergi indirimi.">
+<meta property="og:description" content="Menekşe Medreseleri'ne bağış: talebe sofrası, Maltepe medrese inşaatı, Afrika'ya Mushaf ve kurban, Gazze'ye yemek. Her hayrın ayrı IBAN'ı; kolay havale ve EFT.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://menekseilim.com.tr/bagis.html">
 <meta property="og:image" content="https://menekseilim.com.tr/img/og-gorsel.png">
@@ -53,27 +53,266 @@
 <section class="sayfa-basi koyu">
   <div class="kapsayici">
     <span class="ar-ust" lang="ar">صدقة جارية</span><h1>Bağış</h1>
-    <p>Bir talebenin öğrendiği her harf, sizin için de devam eden bir hayırdır.</p>
+    <p>Bir talebenin sofrasından Gazze'deki bir çocuğun tabağına; hayrınızı dilediğiniz kapıdan ulaştırın.</p>
   </div>
 </section>
 
-<section class="bolum" id="bagis-alanlari">
+<section class="bolum" id="bagis-yap">
   <div class="kapsayici">
-    <div class="bolum-basi"><h2>Bağış alanlarımız</h2><div class="sus"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12.00 1.00 L15.22 4.22 L19.78 4.22 L19.78 8.78 L23.00 12.00 L19.78 15.22 L19.78 19.78 L15.22 19.78 L12.00 23.00 L8.78 19.78 L4.22 19.78 L4.22 15.22 L1.00 12.00 L4.22 8.78 L4.22 4.22 L8.78 4.22Z"/></svg></div><p>Bağışınızı dilediğiniz alana yapabilirsiniz. Her alanın kendi hesabı vardır; açıklamaya adınızı ve soyadınızı yazmanız yeterli.</p></div>
-    <div class="bagis-alanlari">
-      <article class="bagis-kart" id="bagis-genel">
-        <span class="ar" lang="ar">صدقة</span>
-        <h3>Genel bağış</h3>
-        <p>Medreselerimizin en acil ihtiyacına harcanır: talebelerimizin eğitimi, iaşesi ve medreselerimizin giderleri.</p>
-        <dl>
-          <dt>Hesap adı</dt><dd>Menekşe İlim Kültür Okuma Derneği</dd>
-          <dt>Banka</dt><dd>[Banka ve şube adı]</dd>
-          <dt>IBAN</dt><dd><code id="iban-genel">TR00 0000 0000 0000 0000 0000 00</code></dd>
-        </dl>
-        <button class="btn btn-yesil btn-kucuk" type="button" data-kopyala="#iban-genel">IBAN'ı kopyala</button>
-      </article>
+    <div class="bolum-basi"><h2>Bağışınızı birkaç dokunuşla yapın</h2><div class="sus"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12.00 1.00 L15.22 4.22 L19.78 4.22 L19.78 8.78 L23.00 12.00 L19.78 15.22 L19.78 19.78 L15.22 19.78 L12.00 23.00 L8.78 19.78 L4.22 19.78 L4.22 15.22 L1.00 12.00 L4.22 8.78 L4.22 4.22 L8.78 4.22Z"/></svg></div><p>Bağış alanını seçin, tutarı belirleyin, bilgileri kopyalayıp banka uygulamanızdan gönderin. Hepsi bu kadar.</p></div>
+    <div class="bagis-kutu" data-bagis>
+      <fieldset class="alan-listesi">
+        <legend><span class="adim-no">1</span> Bağış alanını seçin</legend>
+        <label class="alan-secim">
+          <input type="radio" name="bagis-alani" id="alan-talebe" value="talebe" checked>
+          <span class="secim-gorsel"><img src="img/bagis/kahvalti.jpg" alt="" width="600" height="450" loading="eager"></span>
+          <span class="secim-metin"><b>Talebelerimizin sofrası</b><small>Dilediğiniz tutar</small></span>
+          <span class="secim-isaret" aria-hidden="true"></span>
+        </label>
+        <label class="alan-secim">
+          <input type="radio" name="bagis-alani" id="alan-maltepe" value="maltepe">
+          <span class="secim-gorsel"><span class="gorsel-simge"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 4c.6 0 1 .4 1 1v3.1c5.7 1.2 10 6.1 10 12V22h3a1 1 0 0 1 1 1v19h3v2H6v-2h3V23a1 1 0 0 1 1-1h3v-1.9c0-5.9 4.3-10.8 10-12V5c0-.6.4-1 1-1zm0 6c-5 0-9 4-9 9v3h18v-3c0-5-4-9-9-9zm-3 22v10h6V32a3 3 0 0 0-6 0zm-8-6v4h4v-4h-4zm18 0v4h4v-4h-4z"/></svg></span></span>
+          <span class="secim-metin"><b>Maltepe medrese inşaatı</b><small>1 m² 2.500 TL</small></span>
+          <span class="secim-isaret" aria-hidden="true"></span>
+        </label>
+        <label class="alan-secim">
+          <input type="radio" name="bagis-alani" id="alan-mushaf" value="mushaf">
+          <span class="secim-gorsel"><img src="img/bagis/mushaf.jpg" alt="" width="600" height="450" loading="eager"></span>
+          <span class="secim-metin"><b>Afrika'ya Mushaf-ı Şerif</b><small>1 Mushaf 200 TL</small></span>
+          <span class="secim-isaret" aria-hidden="true"></span>
+        </label>
+        <label class="alan-secim">
+          <input type="radio" name="bagis-alani" id="alan-gazze" value="gazze">
+          <span class="secim-gorsel"><img src="img/bagis/gazze.jpg" alt="" width="600" height="450" loading="eager"></span>
+          <span class="secim-metin"><b>Gazze'ye bir sofra</b><small>1 öğün 200 TL</small></span>
+          <span class="secim-isaret" aria-hidden="true"></span>
+        </label>
+        <label class="alan-secim">
+          <input type="radio" name="bagis-alani" id="alan-kurban" value="kurban">
+          <span class="secim-gorsel"><img src="img/bagis/kurban.jpg" alt="" width="600" height="450" loading="eager"></span>
+          <span class="secim-metin"><b>Afrika'da kurban</b><small>Koyun 5.000 · Keçi 4.000 TL</small></span>
+          <span class="secim-isaret" aria-hidden="true"></span>
+        </label>
+      </fieldset>
+      <div class="bagis-paneller">
+      <div class="bagis-panel" id="bagis-talebe" data-tur="serbest" data-kisa="Talebe sofrası" data-baslik="Talebelerimizin sofrası">
+        <div class="panel-bas">
+          <div class="panel-gorsel"><img src="img/bagis/kahvalti.jpg" alt="" width="600" height="450" loading="lazy"></div>
+          <div class="panel-yazi">
+            <span class="etiket">Medreselerimiz</span>
+            <h3>Talebelerimizin sofrası</h3>
+            <p>Atalar ve Kurfalı medreselerimizde okuyan talebelerimizin kahvaltı ve yemek giderlerini hayırseverlerimizin desteğiyle karşılıyoruz. Dilediğiniz tutarla, ister bir kez ister her ay destek olabilirsiniz.</p>
+          </div>
+        </div>
+        <div class="panel-adim">
+          <h4><span class="adim-no">2</span> Ne kadar bağışlamak istersiniz?</h4>
+          <div class="tutarlar"><button type="button" class="tutar-btn secili" data-tutar="500" aria-pressed="true">500 TL</button><button type="button" class="tutar-btn" data-tutar="1000" aria-pressed="false">1.000 TL</button><button type="button" class="tutar-btn" data-tutar="2500" aria-pressed="false">2.500 TL</button><button type="button" class="tutar-btn" data-tutar="5000" aria-pressed="false">5.000 TL</button></div>
+          <label class="diger-tutar"><span>Başka bir tutar</span><span class="tl-giris"><input type="number" class="tutar-gir" min="1" max="10000000" inputmode="numeric" placeholder="Örn. 750"><span>TL</span></span></label>
+          <p class="toplam">Toplam bağışınız <output class="toplam-tutar">500 TL</output></p>
+        </div>
+        <div class="panel-adim">
+          <h4><span class="adim-no">3</span> Banka uygulamanızdan gönderin</h4>
+          <p class="ipucu">Uygulamanızda <b>Para gönder → IBAN'a</b> adımını açın; bu bilgileri kopyalayıp yapıştırmanız yeterli.</p>
+          <dl class="hesap">
+            <div class="hesap-satir hesap-iban"><dt>IBAN</dt><dd><code id="iban-talebe">TR15 0020 6001 4004 5144 1300 01</code><button class="kopya" type="button" data-kopyala="#iban-talebe" data-bosluksuz aria-label="IBAN'ı kopyala"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3h11a2 2 0 0 1 2 2v11h-2V5H8V3zM5 7h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2zm0 2v10h10V9H5z"/></svg><span>Kopyala</span></button></dd></div>
+            <div class="hesap-satir"><dt>Alıcı adı</dt><dd><span id="alici-talebe">Menekşe İlim Kültür Okuma Derneği</span><button class="kopya" type="button" data-kopyala="#alici-talebe" aria-label="Alıcı adını kopyala"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3h11a2 2 0 0 1 2 2v11h-2V5H8V3zM5 7h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2zm0 2v10h10V9H5z"/></svg><span>Kopyala</span></button></dd></div>
+            <div class="hesap-satir"><dt>Tutar</dt><dd><b class="toplam-tutar">500 TL</b></dd></div>
+            <div class="hesap-satir"><dt>Açıklama</dt><dd><span id="aciklama-talebe" class="aciklama-yaz">Talebe sofrası</span><button class="kopya" type="button" data-kopyala="#aciklama-talebe" aria-label="Açıklamayı kopyala"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3h11a2 2 0 0 1 2 2v11h-2V5H8V3zM5 7h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2zm0 2v10h10V9H5z"/></svg><span>Kopyala</span></button></dd></div>
+            <div class="hesap-satir"><dt>Banka</dt><dd>Türkiye Finans Katılım Bankası</dd></div>
+          </dl>
+          <label class="ad-gir"><span>Adınız soyadınız <small>(isteğe bağlı; açıklamaya eklenir, bize gönderilmez)</small></span><input type="text" class="ad" autocomplete="name" maxlength="60"></label>
+          <p class="ipucu">Her ay düzenli destek olmak isterseniz banka uygulamanızdan <b>düzenli transfer talimatı</b> verebilirsiniz.</p>
+        </div>
+        <div class="panel-adim">
+          <h4><span class="adim-no">4</span> Dekontu bize iletin <small>isteğe bağlı</small></h4>
+          <p>Banka dekontunuz bağış makbuzu yerine geçer. Bize iletirseniz bağışınızı kayda geçiririz; isterseniz adınıza makbuz da düzenleriz.</p>
+          <div class="butonlar">
+            <a class="btn btn-yesil whatsapp" href="https://wa.me/905436639155?text=Selam%C3%BCn%20aleyk%C3%BCm.%20Talebelerimizin%20sofras%C4%B1%20i%C3%A7in%20500%20TL%20ba%C4%9F%C4%B1%C5%9F%20g%C3%B6nderdim%2C%20dekontum%20ekte." target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 2a8 8 0 1 1-4.1 14.9l-.4-.2-2.9.8.8-2.8-.2-.4A8 8 0 0 1 12 4zM8.9 7.6c-.2 0-.5 0-.8.4-.3.3-1 1-1 2.3s1 2.6 1.1 2.8c.1.2 2 3.1 4.9 4.3 2.4 1 2.9.8 3.4.7.5 0 1.7-.7 1.9-1.4.2-.7.2-1.2.2-1.4l-.6-.3-1.9-.9c-.3-.1-.4-.1-.6.1l-.9 1.1c-.2.2-.3.2-.6.1a7.3 7.3 0 0 1-3.6-3.2c-.3-.5.3-.4.8-1.4.1-.2 0-.3 0-.5l-.9-2.1c-.2-.5-.4-.5-.6-.5h-.8z"/></svg> WhatsApp'tan gönder</a>
+            <a class="btn btn-cizgi" href="tel:+905436639155"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25c1.1.37 2.3.57 3.6.57a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1L6.6 10.8z"/></svg> 0543 663 91 55</a>
+          </div>
+        </div>
+      </div>
+      <div class="bagis-panel" id="bagis-maltepe" data-tur="adet" data-kisa="Maltepe inşaat" data-baslik="Maltepe medrese inşaatı" data-fiyat="2500" data-birim="m²">
+        <div class="panel-bas">
+          <div class="panel-gorsel"><span class="gorsel-simge"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 4c.6 0 1 .4 1 1v3.1c5.7 1.2 10 6.1 10 12V22h3a1 1 0 0 1 1 1v19h3v2H6v-2h3V23a1 1 0 0 1 1-1h3v-1.9c0-5.9 4.3-10.8 10-12V5c0-.6.4-1 1-1zm0 6c-5 0-9 4-9 9v3h18v-3c0-5-4-9-9-9zm-3 22v10h6V32a3 3 0 0 0-6 0zm-8-6v4h4v-4h-4zm18 0v4h4v-4h-4z"/></svg></span></div>
+          <div class="panel-yazi">
+            <span class="etiket">Medrese inşaatı</span>
+            <h3>Maltepe medrese inşaatı</h3>
+            <p>Menekşe Medresesi Külliyesi'nin Maltepe şubesi için inşaatımız sürüyor: dershaneleri, mescidi ve yemekhanesiyle yeni bir ilim yuvası. Her metrekaresi, orada okuyacak talebelerle birlikte sizin için de devam eden bir hayır olsun.</p>
+          </div>
+        </div>
+        <div class="panel-adim">
+          <h4><span class="adim-no">2</span> Ne kadar bağışlamak istersiniz?</h4>
+          <div class="adet-satir">
+            <div class="adet-sec">
+              <button type="button" class="adet-btn" data-adim="-1" aria-label="Azalt">−</button>
+              <input type="number" class="adet" value="1" min="1" max="999" inputmode="numeric" aria-label="Adet">
+              <button type="button" class="adet-btn" data-adim="1" aria-label="Artır">+</button>
+            </div>
+            <span class="birim">m² <small>(1 m² 2.500 TL)</small></span>
+          </div>
+          <div class="hizli"><button type="button" class="hizli-btn" data-adet="1" aria-pressed="true">1 m²</button><button type="button" class="hizli-btn" data-adet="2" aria-pressed="false">2 m²</button><button type="button" class="hizli-btn" data-adet="5" aria-pressed="false">5 m²</button><button type="button" class="hizli-btn" data-adet="10" aria-pressed="false">10 m²</button></div>
+          <p class="toplam">Toplam bağışınız <output class="toplam-tutar">2.500 TL</output></p>
+        </div>
+        <div class="panel-adim">
+          <h4><span class="adim-no">3</span> Banka uygulamanızdan gönderin</h4>
+          <p class="ipucu">Uygulamanızda <b>Para gönder → IBAN'a</b> adımını açın; bu bilgileri kopyalayıp yapıştırmanız yeterli.</p>
+          <dl class="hesap">
+            <div class="hesap-satir hesap-iban"><dt>IBAN</dt><dd><code id="iban-maltepe">TR63 0020 6001 4004 5144 1300 10</code><button class="kopya" type="button" data-kopyala="#iban-maltepe" data-bosluksuz aria-label="IBAN'ı kopyala"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3h11a2 2 0 0 1 2 2v11h-2V5H8V3zM5 7h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2zm0 2v10h10V9H5z"/></svg><span>Kopyala</span></button></dd></div>
+            <div class="hesap-satir"><dt>Alıcı adı</dt><dd><span id="alici-maltepe">Menekşe İlim Kültür Okuma Derneği</span><button class="kopya" type="button" data-kopyala="#alici-maltepe" aria-label="Alıcı adını kopyala"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3h11a2 2 0 0 1 2 2v11h-2V5H8V3zM5 7h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2zm0 2v10h10V9H5z"/></svg><span>Kopyala</span></button></dd></div>
+            <div class="hesap-satir"><dt>Tutar</dt><dd><b class="toplam-tutar">2.500 TL</b></dd></div>
+            <div class="hesap-satir"><dt>Açıklama</dt><dd><span id="aciklama-maltepe" class="aciklama-yaz">Maltepe inşaat 1 m²</span><button class="kopya" type="button" data-kopyala="#aciklama-maltepe" aria-label="Açıklamayı kopyala"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3h11a2 2 0 0 1 2 2v11h-2V5H8V3zM5 7h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2zm0 2v10h10V9H5z"/></svg><span>Kopyala</span></button></dd></div>
+            <div class="hesap-satir"><dt>Banka</dt><dd>Türkiye Finans Katılım Bankası</dd></div>
+          </dl>
+          <label class="ad-gir"><span>Adınız soyadınız <small>(isteğe bağlı; açıklamaya eklenir, bize gönderilmez)</small></span><input type="text" class="ad" autocomplete="name" maxlength="60"></label>
+        </div>
+        <div class="panel-adim">
+          <h4><span class="adim-no">4</span> Dekontu bize iletin <small>isteğe bağlı</small></h4>
+          <p>Banka dekontunuz bağış makbuzu yerine geçer. Bize iletirseniz bağışınızı kayda geçiririz; isterseniz adınıza makbuz da düzenleriz.</p>
+          <div class="butonlar">
+            <a class="btn btn-yesil whatsapp" href="https://wa.me/905369769978?text=Selam%C3%BCn%20aleyk%C3%BCm.%20Maltepe%20medrese%20in%C5%9Faat%C4%B1%20i%C3%A7in%202.500%20TL%20ba%C4%9F%C4%B1%C5%9F%20g%C3%B6nderdim%2C%20dekontum%20ekte." target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 2a8 8 0 1 1-4.1 14.9l-.4-.2-2.9.8.8-2.8-.2-.4A8 8 0 0 1 12 4zM8.9 7.6c-.2 0-.5 0-.8.4-.3.3-1 1-1 2.3s1 2.6 1.1 2.8c.1.2 2 3.1 4.9 4.3 2.4 1 2.9.8 3.4.7.5 0 1.7-.7 1.9-1.4.2-.7.2-1.2.2-1.4l-.6-.3-1.9-.9c-.3-.1-.4-.1-.6.1l-.9 1.1c-.2.2-.3.2-.6.1a7.3 7.3 0 0 1-3.6-3.2c-.3-.5.3-.4.8-1.4.1-.2 0-.3 0-.5l-.9-2.1c-.2-.5-.4-.5-.6-.5h-.8z"/></svg> WhatsApp'tan gönder</a>
+            <a class="btn btn-cizgi" href="tel:+905369769978"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25c1.1.37 2.3.57 3.6.57a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1L6.6 10.8z"/></svg> 0536 976 99 78</a>
+          </div>
+        </div>
+      </div>
+      <div class="bagis-panel" id="bagis-mushaf" data-tur="adet" data-kisa="Afrika Mushaf" data-baslik="Afrika'ya Mushaf-ı Şerif" data-fiyat="200" data-birim="adet">
+        <div class="panel-bas">
+          <div class="panel-gorsel"><img src="img/bagis/mushaf.jpg" alt="" width="600" height="450" loading="lazy"></div>
+          <div class="panel-yazi">
+            <span class="etiket">Afrika</span>
+            <h3>Afrika'ya Mushaf-ı Şerif</h3>
+            <p>Afrika'da Kur'an okumayı öğrenen kardeşlerimize Mushaf-ı Şerif hediye ediyoruz. Hediye ettiğiniz her Mushaf, okundukça sevabı size de ulaşan bir hayırdır.</p>
+          </div>
+        </div>
+        <div class="panel-adim">
+          <h4><span class="adim-no">2</span> Ne kadar bağışlamak istersiniz?</h4>
+          <div class="adet-satir">
+            <div class="adet-sec">
+              <button type="button" class="adet-btn" data-adim="-1" aria-label="Azalt">−</button>
+              <input type="number" class="adet" value="1" min="1" max="999" inputmode="numeric" aria-label="Adet">
+              <button type="button" class="adet-btn" data-adim="1" aria-label="Artır">+</button>
+            </div>
+            <span class="birim">adet <small>(1 adet 200 TL)</small></span>
+          </div>
+          <div class="hizli"><button type="button" class="hizli-btn" data-adet="1" aria-pressed="true">1 adet</button><button type="button" class="hizli-btn" data-adet="5" aria-pressed="false">5 adet</button><button type="button" class="hizli-btn" data-adet="10" aria-pressed="false">10 adet</button><button type="button" class="hizli-btn" data-adet="20" aria-pressed="false">20 adet</button></div>
+          <p class="toplam">Toplam bağışınız <output class="toplam-tutar">200 TL</output></p>
+        </div>
+        <div class="panel-adim">
+          <h4><span class="adim-no">3</span> Banka uygulamanızdan gönderin</h4>
+          <p class="ipucu">Uygulamanızda <b>Para gönder → IBAN'a</b> adımını açın; bu bilgileri kopyalayıp yapıştırmanız yeterli.</p>
+          <dl class="hesap">
+            <div class="hesap-satir hesap-iban"><dt>IBAN</dt><dd><code id="iban-mushaf">TR90 0020 6001 4004 5144 1300 09</code><button class="kopya" type="button" data-kopyala="#iban-mushaf" data-bosluksuz aria-label="IBAN'ı kopyala"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3h11a2 2 0 0 1 2 2v11h-2V5H8V3zM5 7h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2zm0 2v10h10V9H5z"/></svg><span>Kopyala</span></button></dd></div>
+            <div class="hesap-satir"><dt>Alıcı adı</dt><dd><span id="alici-mushaf">Menekşe İlim Kültür Okuma Derneği</span><button class="kopya" type="button" data-kopyala="#alici-mushaf" aria-label="Alıcı adını kopyala"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3h11a2 2 0 0 1 2 2v11h-2V5H8V3zM5 7h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2zm0 2v10h10V9H5z"/></svg><span>Kopyala</span></button></dd></div>
+            <div class="hesap-satir"><dt>Tutar</dt><dd><b class="toplam-tutar">200 TL</b></dd></div>
+            <div class="hesap-satir"><dt>Açıklama</dt><dd><span id="aciklama-mushaf" class="aciklama-yaz">Afrika Mushaf 1 adet</span><button class="kopya" type="button" data-kopyala="#aciklama-mushaf" aria-label="Açıklamayı kopyala"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3h11a2 2 0 0 1 2 2v11h-2V5H8V3zM5 7h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2zm0 2v10h10V9H5z"/></svg><span>Kopyala</span></button></dd></div>
+            <div class="hesap-satir"><dt>Banka</dt><dd>Türkiye Finans Katılım Bankası</dd></div>
+          </dl>
+          <label class="ad-gir"><span>Adınız soyadınız <small>(isteğe bağlı; açıklamaya eklenir, bize gönderilmez)</small></span><input type="text" class="ad" autocomplete="name" maxlength="60"></label>
+        </div>
+        <div class="panel-adim">
+          <h4><span class="adim-no">4</span> Dekontu bize iletin <small>isteğe bağlı</small></h4>
+          <p>Banka dekontunuz bağış makbuzu yerine geçer. Bize iletirseniz bağışınızı kayda geçiririz; isterseniz adınıza makbuz da düzenleriz.</p>
+          <div class="butonlar">
+            <a class="btn btn-yesil whatsapp" href="https://wa.me/905369769978?text=Selam%C3%BCn%20aleyk%C3%BCm.%20Afrika%27ya%20Mushaf-%C4%B1%20%C5%9Eerif%20i%C3%A7in%20200%20TL%20ba%C4%9F%C4%B1%C5%9F%20g%C3%B6nderdim%2C%20dekontum%20ekte." target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 2a8 8 0 1 1-4.1 14.9l-.4-.2-2.9.8.8-2.8-.2-.4A8 8 0 0 1 12 4zM8.9 7.6c-.2 0-.5 0-.8.4-.3.3-1 1-1 2.3s1 2.6 1.1 2.8c.1.2 2 3.1 4.9 4.3 2.4 1 2.9.8 3.4.7.5 0 1.7-.7 1.9-1.4.2-.7.2-1.2.2-1.4l-.6-.3-1.9-.9c-.3-.1-.4-.1-.6.1l-.9 1.1c-.2.2-.3.2-.6.1a7.3 7.3 0 0 1-3.6-3.2c-.3-.5.3-.4.8-1.4.1-.2 0-.3 0-.5l-.9-2.1c-.2-.5-.4-.5-.6-.5h-.8z"/></svg> WhatsApp'tan gönder</a>
+            <a class="btn btn-cizgi" href="tel:+905369769978"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25c1.1.37 2.3.57 3.6.57a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1L6.6 10.8z"/></svg> 0536 976 99 78</a>
+          </div>
+        </div>
+      </div>
+      <div class="bagis-panel" id="bagis-gazze" data-tur="adet" data-kisa="Gazze yemek" data-baslik="Gazze'ye bir sofra" data-fiyat="200" data-birim="öğün">
+        <div class="panel-bas">
+          <div class="panel-gorsel"><img src="img/bagis/gazze.jpg" alt="" width="600" height="450" loading="lazy"></div>
+          <div class="panel-yazi">
+            <span class="etiket">Gazze</span>
+            <h3>Gazze'ye bir sofra</h3>
+            <p>Gazze'deki kardeşlerimize sıcak yemek ulaştırıyoruz. Bir öğünlük bağışınız, savaşın ortasındaki bir aileye hem karın tokluğu hem de yalnız olmadıklarını gösteren bir selamdır.</p>
+          </div>
+        </div>
+        <div class="panel-adim">
+          <h4><span class="adim-no">2</span> Ne kadar bağışlamak istersiniz?</h4>
+          <div class="adet-satir">
+            <div class="adet-sec">
+              <button type="button" class="adet-btn" data-adim="-1" aria-label="Azalt">−</button>
+              <input type="number" class="adet" value="1" min="1" max="999" inputmode="numeric" aria-label="Adet">
+              <button type="button" class="adet-btn" data-adim="1" aria-label="Artır">+</button>
+            </div>
+            <span class="birim">öğün <small>(1 öğün 200 TL)</small></span>
+          </div>
+          <div class="hizli"><button type="button" class="hizli-btn" data-adet="1" aria-pressed="true">1 öğün</button><button type="button" class="hizli-btn" data-adet="5" aria-pressed="false">5 öğün</button><button type="button" class="hizli-btn" data-adet="10" aria-pressed="false">10 öğün</button><button type="button" class="hizli-btn" data-adet="25" aria-pressed="false">25 öğün</button></div>
+          <p class="toplam">Toplam bağışınız <output class="toplam-tutar">200 TL</output></p>
+        </div>
+        <div class="panel-adim">
+          <h4><span class="adim-no">3</span> Banka uygulamanızdan gönderin</h4>
+          <p class="ipucu">Uygulamanızda <b>Para gönder → IBAN'a</b> adımını açın; bu bilgileri kopyalayıp yapıştırmanız yeterli.</p>
+          <dl class="hesap">
+            <div class="hesap-satir hesap-iban"><dt>IBAN</dt><dd><code id="iban-gazze">TR20 0020 6001 4004 5144 1300 08</code><button class="kopya" type="button" data-kopyala="#iban-gazze" data-bosluksuz aria-label="IBAN'ı kopyala"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3h11a2 2 0 0 1 2 2v11h-2V5H8V3zM5 7h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2zm0 2v10h10V9H5z"/></svg><span>Kopyala</span></button></dd></div>
+            <div class="hesap-satir"><dt>Alıcı adı</dt><dd><span id="alici-gazze">Menekşe İlim Kültür Okuma Derneği</span><button class="kopya" type="button" data-kopyala="#alici-gazze" aria-label="Alıcı adını kopyala"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3h11a2 2 0 0 1 2 2v11h-2V5H8V3zM5 7h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2zm0 2v10h10V9H5z"/></svg><span>Kopyala</span></button></dd></div>
+            <div class="hesap-satir"><dt>Tutar</dt><dd><b class="toplam-tutar">200 TL</b></dd></div>
+            <div class="hesap-satir"><dt>Açıklama</dt><dd><span id="aciklama-gazze" class="aciklama-yaz">Gazze yemek 1 öğün</span><button class="kopya" type="button" data-kopyala="#aciklama-gazze" aria-label="Açıklamayı kopyala"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3h11a2 2 0 0 1 2 2v11h-2V5H8V3zM5 7h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2zm0 2v10h10V9H5z"/></svg><span>Kopyala</span></button></dd></div>
+            <div class="hesap-satir"><dt>Banka</dt><dd>Türkiye Finans Katılım Bankası</dd></div>
+          </dl>
+          <label class="ad-gir"><span>Adınız soyadınız <small>(isteğe bağlı; açıklamaya eklenir, bize gönderilmez)</small></span><input type="text" class="ad" autocomplete="name" maxlength="60"></label>
+        </div>
+        <div class="panel-adim">
+          <h4><span class="adim-no">4</span> Dekontu bize iletin <small>isteğe bağlı</small></h4>
+          <p>Banka dekontunuz bağış makbuzu yerine geçer. Bize iletirseniz bağışınızı kayda geçiririz; isterseniz adınıza makbuz da düzenleriz.</p>
+          <div class="butonlar">
+            <a class="btn btn-yesil whatsapp" href="https://wa.me/905369769978?text=Selam%C3%BCn%20aleyk%C3%BCm.%20Gazze%27ye%20bir%20sofra%20i%C3%A7in%20200%20TL%20ba%C4%9F%C4%B1%C5%9F%20g%C3%B6nderdim%2C%20dekontum%20ekte." target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 2a8 8 0 1 1-4.1 14.9l-.4-.2-2.9.8.8-2.8-.2-.4A8 8 0 0 1 12 4zM8.9 7.6c-.2 0-.5 0-.8.4-.3.3-1 1-1 2.3s1 2.6 1.1 2.8c.1.2 2 3.1 4.9 4.3 2.4 1 2.9.8 3.4.7.5 0 1.7-.7 1.9-1.4.2-.7.2-1.2.2-1.4l-.6-.3-1.9-.9c-.3-.1-.4-.1-.6.1l-.9 1.1c-.2.2-.3.2-.6.1a7.3 7.3 0 0 1-3.6-3.2c-.3-.5.3-.4.8-1.4.1-.2 0-.3 0-.5l-.9-2.1c-.2-.5-.4-.5-.6-.5h-.8z"/></svg> WhatsApp'tan gönder</a>
+            <a class="btn btn-cizgi" href="tel:+905369769978"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25c1.1.37 2.3.57 3.6.57a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1L6.6 10.8z"/></svg> 0536 976 99 78</a>
+          </div>
+        </div>
+      </div>
+      <div class="bagis-panel" id="bagis-kurban" data-tur="adet" data-kisa="Afrika kurban" data-baslik="Afrika'da kurban" data-fiyat="5000" data-birim="adet" data-vekalet>
+        <div class="panel-bas">
+          <div class="panel-gorsel"><img src="img/bagis/kurban.jpg" alt="" width="600" height="450" loading="lazy"></div>
+          <div class="panel-yazi">
+            <span class="etiket">Afrika</span>
+            <h3>Afrika'da kurban</h3>
+            <p>Kurban Bayramı'nda kurbanlarınızı Afrika'daki ihtiyaç sahibi ailelerle buluşturuyoruz. Vekâletiniz için açıklamaya adınızı ve soyadınızı yazmayı unutmayın.</p>
+          </div>
+        </div>
+        <div class="panel-adim">
+          <h4><span class="adim-no">2</span> Ne kadar bağışlamak istersiniz?</h4>
+          <div class="secenekler"><label class="secenek"><input type="radio" name="tur-kurban" value="Koyun" data-fiyat="5000" checked><span><b>Koyun</b>5.000 TL</span></label><label class="secenek"><input type="radio" name="tur-kurban" value="Keçi" data-fiyat="4000"><span><b>Keçi</b>4.000 TL</span></label></div>
+          <div class="adet-satir">
+            <div class="adet-sec">
+              <button type="button" class="adet-btn" data-adim="-1" aria-label="Azalt">−</button>
+              <input type="number" class="adet" value="1" min="1" max="999" inputmode="numeric" aria-label="Adet">
+              <button type="button" class="adet-btn" data-adim="1" aria-label="Artır">+</button>
+            </div>
+            <span class="birim">adet</span>
+          </div>
+          <div class="hizli"><button type="button" class="hizli-btn" data-adet="1" aria-pressed="true">1 adet</button><button type="button" class="hizli-btn" data-adet="2" aria-pressed="false">2 adet</button><button type="button" class="hizli-btn" data-adet="3" aria-pressed="false">3 adet</button></div>
+          <p class="toplam">Toplam bağışınız <output class="toplam-tutar">5.000 TL</output></p>
+        </div>
+        <div class="panel-adim">
+          <h4><span class="adim-no">3</span> Banka uygulamanızdan gönderin</h4>
+          <p class="ipucu">Uygulamanızda <b>Para gönder → IBAN'a</b> adımını açın; bu bilgileri kopyalayıp yapıştırmanız yeterli.</p>
+          <dl class="hesap">
+            <div class="hesap-satir hesap-iban"><dt>IBAN</dt><dd><code id="iban-kurban">TR47 0020 6001 4004 5144 1300 07</code><button class="kopya" type="button" data-kopyala="#iban-kurban" data-bosluksuz aria-label="IBAN'ı kopyala"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3h11a2 2 0 0 1 2 2v11h-2V5H8V3zM5 7h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2zm0 2v10h10V9H5z"/></svg><span>Kopyala</span></button></dd></div>
+            <div class="hesap-satir"><dt>Alıcı adı</dt><dd><span id="alici-kurban">Menekşe İlim Kültür Okuma Derneği</span><button class="kopya" type="button" data-kopyala="#alici-kurban" aria-label="Alıcı adını kopyala"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3h11a2 2 0 0 1 2 2v11h-2V5H8V3zM5 7h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2zm0 2v10h10V9H5z"/></svg><span>Kopyala</span></button></dd></div>
+            <div class="hesap-satir"><dt>Tutar</dt><dd><b class="toplam-tutar">5.000 TL</b></dd></div>
+            <div class="hesap-satir"><dt>Açıklama</dt><dd><span id="aciklama-kurban" class="aciklama-yaz">Afrika kurban 1 koyun (vekâlet)</span><button class="kopya" type="button" data-kopyala="#aciklama-kurban" aria-label="Açıklamayı kopyala"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3h11a2 2 0 0 1 2 2v11h-2V5H8V3zM5 7h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2zm0 2v10h10V9H5z"/></svg><span>Kopyala</span></button></dd></div>
+            <div class="hesap-satir"><dt>Banka</dt><dd>Türkiye Finans Katılım Bankası</dd></div>
+          </dl>
+          <label class="ad-gir"><span>Adınız soyadınız <small>(isteğe bağlı; açıklamaya eklenir, bize gönderilmez)</small></span><input type="text" class="ad" autocomplete="name" maxlength="60"></label>
+        </div>
+        <div class="panel-adim">
+          <h4><span class="adim-no">4</span> Dekontu bize iletin <small>isteğe bağlı</small></h4>
+          <p>Banka dekontunuz bağış makbuzu yerine geçer. Bize iletirseniz bağışınızı kayda geçiririz; isterseniz adınıza makbuz da düzenleriz.</p>
+          <div class="butonlar">
+            <a class="btn btn-yesil whatsapp" href="https://wa.me/905369769978?text=Selam%C3%BCn%20aleyk%C3%BCm.%20Afrika%27da%20kurban%20i%C3%A7in%205.000%20TL%20ba%C4%9F%C4%B1%C5%9F%20g%C3%B6nderdim%2C%20dekontum%20ekte." target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 2a8 8 0 1 1-4.1 14.9l-.4-.2-2.9.8.8-2.8-.2-.4A8 8 0 0 1 12 4zM8.9 7.6c-.2 0-.5 0-.8.4-.3.3-1 1-1 2.3s1 2.6 1.1 2.8c.1.2 2 3.1 4.9 4.3 2.4 1 2.9.8 3.4.7.5 0 1.7-.7 1.9-1.4.2-.7.2-1.2.2-1.4l-.6-.3-1.9-.9c-.3-.1-.4-.1-.6.1l-.9 1.1c-.2.2-.3.2-.6.1a7.3 7.3 0 0 1-3.6-3.2c-.3-.5.3-.4.8-1.4.1-.2 0-.3 0-.5l-.9-2.1c-.2-.5-.4-.5-.6-.5h-.8z"/></svg> WhatsApp'tan gönder</a>
+            <a class="btn btn-cizgi" href="tel:+905369769978"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25c1.1.37 2.3.57 3.6.57a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1L6.6 10.8z"/></svg> 0536 976 99 78</a>
+          </div>
+        </div>
+      </div>
+      </div>
     </div>
-    <p class="alt-not">Bağışınız için dernek makbuzu veriyoruz. Dekontu bize telefonla ya da e-postayla iletmeniz yeterli: <a href="tel:+905511647464">0551 164 74 64</a> · <a href="mailto:menekseilim@gmail.com">menekseilim@gmail.com</a></p>
+    <ul class="guven">
+      <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 4 5v6c0 5 3.4 9.7 8 11 4.6-1.3 8-6 8-11V5l-8-3zm-1.2 14.2-3.5-3.5 1.4-1.4 2.1 2.1 4.9-4.9 1.4 1.4-6.3 6.3z"/></svg><span><b>Kamu yararına dernek</b>Cumhurbaşkanı Kararı ile</span></li>
+      <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12.00 1.00 L15.22 4.22 L19.78 4.22 L19.78 8.78 L23.00 12.00 L19.78 15.22 L19.78 19.78 L15.22 19.78 L12.00 23.00 L8.78 19.78 L4.22 19.78 L4.22 15.22 L1.00 12.00 L4.22 8.78 L4.22 4.22 L8.78 4.22Z"/></svg><span><b>Her hayrın ayrı hesabı</b>Bağışınızı dilediğiniz işe yönlendirin</span></li>
+      <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.7 4.5c2 0 3.6 1.1 4.3 2.6h2c.7-1.5 2.3-2.6 4.3-2.6 3.7 0 5.8 3.9 4.3 7.3C19.5 16.4 12 21 12 21z"/></svg><span><b>Dekontunuz makbuzdur</b>Banka dekontu alındı belgesi yerine geçer</span></li>
+      <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12.00 1.00 L15.22 4.22 L19.78 4.22 L19.78 8.78 L23.00 12.00 L19.78 15.22 L19.78 19.78 L15.22 19.78 L12.00 23.00 L8.78 19.78 L4.22 19.78 L4.22 15.22 L1.00 12.00 L4.22 8.78 L4.22 4.22 L8.78 4.22Z"/></svg><span><b>Vergiden düşülebilir</b>Kanuni sınırlar içinde</span></li>
+    </ul>
   </div>
 </section>
 
@@ -94,12 +333,12 @@
   <div class="kapsayici dar">
     <article class="kart">
       <h2 style="font-size:1.5rem">Bağışınız vergiden düşülebilir</h2>
-      <p>Derneğimiz Cumhurbaşkanı Kararı ile kamu yararına çalışan dernek statüsündedir. Bu yüzden makbuz karşılığında yaptığınız bağışlar vergi matrahınızdan indirilebilir:</p>
+      <p>Derneğimiz Cumhurbaşkanı Kararı ile kamu yararına çalışan dernek statüsündedir. Bu yüzden belgeli bağışlarınız (banka dekontu ya da dernek makbuzu) vergi matrahınızdan indirilebilir:</p>
       <ul>
         <li><strong>Gelir vergisi beyannamesi verenler:</strong> yıl içindeki bağışlarınızın, beyan ettiğiniz gelirin %5'ine kadar olan kısmı (kalkınmada öncelikli yörelerde %10'una kadar). <em>193 sayılı Gelir Vergisi Kanunu, madde 89/4</em></li>
         <li><strong>Şirketler:</strong> bağışların, o yılın kurum kazancının %5'ine kadar olan kısmı. <em>5520 sayılı Kurumlar Vergisi Kanunu, madde 10/1-c</em></li>
       </ul>
-      <p>Bunun için bağış makbuzunuzu saklayıp mali müşavirinize iletmeniz yeterli. Kendi durumunuz için mali müşavirinize danışmanızı öneririz.</p>
+      <p>Bunun için dekontunuzu ya da makbuzunuzu saklayıp mali müşavirinize iletmeniz yeterli. Kendi durumunuz için mali müşavirinize danışmanızı öneririz.</p>
     </article>
   </div>
 </section>
@@ -133,6 +372,7 @@
       <h2>Bize ulaşın</h2>
       <ul>
         <li><a href="tel:+905511647464">0551 164 74 64</a></li>
+        <li>Bağış hattı: <a href="tel:+905369769978">0536 976 99 78</a></li>
         <li><a href="mailto:menekseilim@gmail.com">menekseilim@gmail.com</a></li>
         <li><a href="https://www.instagram.com/menekseilim/" target="_blank" rel="noopener">Instagram</a> · <a href="https://www.facebook.com/menekseilimkulturokumadernegi/" target="_blank" rel="noopener">Facebook</a></li>
       </ul>
