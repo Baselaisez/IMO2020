@@ -65,9 +65,20 @@ async function renderToday() {
   const appts = todaysAppointments(rows, todayIso());
   if (!appts.length) { el.classList.add('hidden'); return; }
   el.classList.remove('hidden');
+  // Hasta adları artık TIKLANABİLİR.
+  //
+  // NEDEN: hemen altındaki "Son açılanlar" şeridi tıklanabilir çiplerden
+  // oluşuyordu, "Bugün" ise düz yazıydı. Doktor bugünkü randevuyu ekranda
+  // görüyor ama hastayı açmak için adını arama kutusuna yazmak zorunda
+  // kalıyordu — 100.000 kayıtlık bir listede en çok ihtiyaç duyulan kayıtlar
+  // tam da bunlar. İki şerit artık aynı şekilde çalışıyor.
   el.innerHTML = '<b>Bugün:</b> ' + appts
-    .map(p => `${esc(p.name)} ${esc((p.next_appt || '').split(' ')[1] || '')}`)
-    .join(' · ');
+    .map(p => `<button type="button" class="today-chip" data-id="${p.id}">`
+      + `${esc(p.name)} <span class="chip-time">${esc((p.next_appt || '').split(' ')[1] || '')}</span></button>`)
+    .join(' ');
+  for (const b of el.querySelectorAll('.today-chip')) {
+    b.addEventListener('click', () => openCard(Number(b.dataset.id)));
+  }
 }
 
 // ---------------------------------------------------------------------------

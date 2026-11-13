@@ -105,3 +105,38 @@ test('alt panel kaydırılabilir (ödeme panelinde Kaydet ekran altında kalmas�
   // iOS'ta 100vh yalan söyler; gerçek görünür alan dvh ile ölçülür.
   assert.match(CSS, /html\[data-platform="ios"\] \.sheet \{[^}]*100dvh/s);
 });
+
+// ---------------------------------------------------------------------------
+// "Bugün" ve "Son açılanlar" şeritleri
+//
+// İki şerit yan yana duruyordu ama farklı çalışıyordu: "Son açılanlar"
+// tıklanabilir çiplerdi, "Bugün" düz yazıydı. Doktor bugünkü randevuyu ekranda
+// görüyor ama hastayı açmak için adını arama kutusuna yazmak zorundaydı —
+// 100.000 kayıtlık bir listede en çok ihtiyaç duyulan kayıtlar tam da bunlar.
+// Ayrıca iki şeridin çipleri 24px yüksekliğindeydi; dokunma alanı düzeltmesi
+// bu ikisini atlamıştı.
+// ---------------------------------------------------------------------------
+
+test('"Bugün" şeridindeki hastalar TIKLANABİLİR', () => {
+  const src = readFileSync(join(ROOT, 'src/js/ui-home.js'), 'utf8');
+  const fn = src.slice(src.indexOf('async function renderToday'), src.indexOf('async function resetAndLoadFirstPage'));
+  assert.match(fn, /class="today-chip" data-id="\$\{p\.id\}"/, 'her randevu bir düğme olmalı');
+  assert.match(fn, /querySelectorAll\('\.today-chip'\)/, 'çiplere tıklama bağlanmalı');
+  assert.match(fn, /openCard\(Number\(b\.dataset\.id\)\)/, 'tıklayınca hasta kartı açılmalı');
+});
+
+test('şerit çipleri parmakla vurulabilir ve şerit ekranı kaplamaz', () => {
+  // Masaüstünde fare piksel hassasiyetinde; 44px yalnızca dokunmatikte.
+  const cips = CSS.match(/\.recent-chip, \.today-chip \{[^}]*\}/s);
+  assert.ok(cips, '.recent-chip/.today-chip kuralı bulunamadı');
+  assert.match(cips[0], /min-height:\s*32px/, 'masaüstünde bile 24px çok küçüktü');
+  assert.match(CSS, /html\[data-platform="ios"\] \.recent-chip[^{]*\{[^}]*min-height:\s*44px/s,
+    'dokunmatik platformda 44px olmalı');
+  assert.match(CSS, /html\[data-platform="android"\] \.today-chip/,
+    'Android da dokunmatik — aynı kural geçerli');
+  // Çipler büyüdüğü için yoğun bir günde şerit ekranı kaplayabilirdi.
+  const serit = CSS.match(/\.today \{[^}]*\}/s);
+  assert.ok(serit, '.today kuralı bulunamadı');
+  assert.match(serit[0], /max-height:/, 'şeridin yüksekliği sınırlı olmalı');
+  assert.match(serit[0], /overflow-y:\s*auto/, 'sınırı aşan randevulara kaydırarak ulaşılmalı');
+});
