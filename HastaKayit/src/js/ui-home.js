@@ -65,18 +65,33 @@ async function renderToday() {
   const appts = todaysAppointments(rows, todayIso());
   if (!appts.length) { el.classList.add('hidden'); return; }
   el.classList.remove('hidden');
-  // Hasta adları artık TIKLANABİLİR.
+
+  // NEDEN BU BİÇİM: şerit eskiden düz yazıydı ("Bugün: Ad 14:07"), sonra
+  // tıklanabilir çip oldu. Doktorun asıl ihtiyacı ikisi de değilmiş: randevuyu
+  // görüyor ama hastayı ARAMAK için adına tıklayıp kartı açmak, oradan numarayı
+  // bulmak zorunda kalıyordu. Artık numara EKRANDA ve numaranın kendisi arama
+  // bağlantısı — iPhone'da dokununca çevirici açılır, Mac'te sistem telefon
+  // uygulamasına gider (electron/main.cjs dış şemaları openExternal'a veriyor).
   //
-  // NEDEN: hemen altındaki "Son açılanlar" şeridi tıklanabilir çiplerden
-  // oluşuyordu, "Bugün" ise düz yazıydı. Doktor bugünkü randevuyu ekranda
-  // görüyor ama hastayı açmak için adını arama kutusuna yazmak zorunda
-  // kalıyordu — 100.000 kayıtlık bir listede en çok ihtiyaç duyulan kayıtlar
-  // tam da bunlar. İki şerit artık aynı şekilde çalışıyor.
-  el.innerHTML = '<b>Bugün:</b> ' + appts
-    .map(p => `<button type="button" class="today-chip" data-id="${p.id}">`
-      + `${esc(p.name)} <span class="chip-time">${esc((p.next_appt || '').split(' ')[1] || '')}</span></button>`)
-    .join(' ');
-  for (const b of el.querySelectorAll('.today-chip')) {
+  // Saat solda ve tabular rakamla: günü yukarıdan aşağı taramak kolay olsun.
+  // Telefonu olmayan hasta için bağlantı yerine sessiz bir uyarı var; boş bir
+  // satır bırakmak "numara yok" bilgisini gizlerdi.
+  el.innerHTML = '<b>Bugün</b><div class="today-list">' + appts.map(p => {
+    const saat = esc((p.next_appt || '').split(' ')[1] || '');
+    const tel = String(p.phone || '').trim();
+    const arama = tel
+      ? `<a class="today-call" href="tel:${esc(tel.replace(/\s+/g, ''))}" aria-label="${esc(p.name)} — ara: ${esc(tel)}">`
+        + `${iconHtml('phone', 15)}${esc(tel)}</a>`
+      : '<span class="today-nophone">telefon kayıtlı değil</span>';
+    return '<div class="today-row">'
+      + `<span class="today-time">${saat}</span>`
+      + '<div class="today-main">'
+      + `<button type="button" class="today-name" data-id="${p.id}">${esc(p.name)}</button>`
+      + arama
+      + '</div></div>';
+  }).join('') + '</div>';
+
+  for (const b of el.querySelectorAll('.today-name')) {
     b.addEventListener('click', () => openCard(Number(b.dataset.id)));
   }
 }

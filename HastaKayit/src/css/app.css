@@ -222,6 +222,15 @@ html[data-platform="ios"] .recent-chip, html[data-platform="ios"] .today-chip,
 html[data-platform="android"] .recent-chip, html[data-platform="android"] .today-chip {
   min-height: 44px; padding-inline: 14px;
 }
+/* Dokunmatik: ad ve telefon ayrı ayrı 44px hedef olmalı; ikisi üst üste
+   duruyor ve yanlış olana basmak ya gereksiz kart açar ya da yanlışlıkla
+   arama başlatır. */
+html[data-platform="ios"] .today-name, html[data-platform="android"] .today-name,
+html[data-platform="ios"] .today-call, html[data-platform="android"] .today-call,
+html[data-platform="ios"] .today-nophone, html[data-platform="android"] .today-nophone,
+html[data-platform="ios"] .today-time, html[data-platform="android"] .today-time {
+  min-height: 44px;
+}
 html[data-platform="ios"] .form,
 html[data-platform="ios"] .plist { padding-left: calc(8px + env(safe-area-inset-left)); padding-right: calc(8px + env(safe-area-inset-right)); }
 /* iOS'ta bir <input>'un yazı boyu 16px'in altına düşerse Safari odaklanınca
@@ -333,8 +342,34 @@ html[data-platform="ios"] .fab-mini { bottom: calc(92px + env(safe-area-inset-bo
   min-height: 32px;
 }
 .recent-chip:hover, .today-chip:hover { background: #eff6ff; }
-/* Randevu saati adın yanında, ama daha sakin. */
-.today-chip .chip-time { color: #6b7685; margin-left: 6px; font-variant-numeric: tabular-nums; }
+/* --- "Bugün" şeridi: saat · ad · telefon ---------------------------------
+   Doktor randevuyu görüp hastayı ARAMAK istiyordu ama numara yalnızca hasta
+   kartında vardı. Artık numara ekranda ve kendisi arama bağlantısı. Satır
+   düzeni iki hedefi ayırıyor: ada dokunmak kartı açar, numaraya dokunmak
+   arar — ikisi yanlışlıkla birbirinin yerine basılmasın diye ayrı satırda. */
+#today-strip { max-height: 40vh; }
+.today-list { display: grid; gap: 6px; margin-top: 8px; }
+.today-row {
+  /* align-items: start — saat, iki satırlık bloğa göre DEĞİL adla aynı bantta
+     dursun. Ortalanınca saatle ad hizasız görünüyor ve solda boşluk kalıyordu. */
+  display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: start;
+  background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 6px 10px;
+}
+.today-time { font-weight: 700; color: var(--blue); font-variant-numeric: tabular-nums;
+  display: flex; align-items: center; min-height: 28px; }
+.today-main { display: flex; flex-direction: column; align-items: flex-start; min-width: 0; gap: 2px; }
+.today-name {
+  background: none; border: 0; padding: 2px 0; font: inherit; font-weight: 600;
+  color: var(--blue); text-align: left; cursor: pointer; min-height: 28px;
+  max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.today-call {
+  display: inline-flex; align-items: center; gap: 2px; color: var(--green);
+  text-decoration: none; font-size: 14px; min-height: 28px;
+  font-variant-numeric: tabular-nums;
+}
+.today-call:hover { text-decoration: underline; }
+.today-nophone { color: #8a94a3; font-size: 13px; min-height: 28px; display: inline-flex; align-items: center; }
 
 /* Otomatik kayıt satırı mükerrer uyarısı verdiğinde: yeşil değil, sarı. */
 .autosave-line.warn {

@@ -669,7 +669,10 @@ export async function listDeliveries(x) {
  */
 export async function listTodayAppointments(x, todayIso) {
   return x.query(
-    `SELECT id, name, next_appt FROM patients
+    // phone DAHİL: "Bugün" şeridi telefonu GÖSTERİYOR ve oradan aranabiliyor.
+    // Doktorun şikâyeti tam buydu — randevuyu görüyor ama numarayı görmek için
+    // hasta kartını açmak zorunda kalıyordu.
+    `SELECT id, name, phone, next_appt FROM patients
       WHERE status = 'active' AND next_appt IS NOT NULL AND next_appt <> ''
         AND substr(next_appt, 1, 10) = ?
       ORDER BY next_appt`,

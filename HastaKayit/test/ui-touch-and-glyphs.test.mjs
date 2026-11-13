@@ -117,12 +117,32 @@ test('alt panel kaydırılabilir (ödeme panelinde Kaydet ekran altında kalmas�
 // bu ikisini atlamıştı.
 // ---------------------------------------------------------------------------
 
-test('"Bugün" şeridindeki hastalar TIKLANABİLİR', () => {
+test('"Bugün" şeridi: telefon GÖRÜNÜR ve oradan ARANABİLİR', () => {
+  // Doktorun şikâyeti: "randevuyu görüyorum ama numarayı görmek ve aramak için
+  // hastanın adına tıklayıp kartı açmam gerekiyor." Numara artık şeritte.
   const src = readFileSync(join(ROOT, 'src/js/ui-home.js'), 'utf8');
-  const fn = src.slice(src.indexOf('async function renderToday'), src.indexOf('async function resetAndLoadFirstPage'));
-  assert.match(fn, /class="today-chip" data-id="\$\{p\.id\}"/, 'her randevu bir düğme olmalı');
-  assert.match(fn, /querySelectorAll\('\.today-chip'\)/, 'çiplere tıklama bağlanmalı');
-  assert.match(fn, /openCard\(Number\(b\.dataset\.id\)\)/, 'tıklayınca hasta kartı açılmalı');
+  const bas = src.indexOf('async function renderToday');
+  const fn = src.slice(bas, src.indexOf('async function resetAndLoadFirstPage', bas));
+  assert.match(fn, /class="today-name" data-id="\$\{p\.id\}"/, 'ad bir düğme olmalı (kartı açar)');
+  assert.match(fn, /openCard\(Number\(b\.dataset\.id\)\)/, 'ada tıklayınca hasta kartı açılmalı');
+  assert.match(fn, /href="tel:/, 'numara arama bağlantısı olmalı');
+  assert.match(fn, /today-nophone/, 'telefonu olmayan hasta için bunu SÖYLEMELİ, boş bırakmamalı');
+  // Numara tel: içine boşluksuz yazılmalı, yoksa bazı çeviriciler açılmaz.
+  assert.match(fn, /replace\(\/\\s\+\/g, ''\)/, 'tel: bağlantısında boşluklar temizlenmeli');
+  // Sorgu numarayı gerçekten getiriyor mu?
+  const repo = readFileSync(join(ROOT, 'src/js/repo.js'), 'utf8');
+  const q = repo.slice(repo.indexOf('export async function listTodayAppointments'), repo.indexOf('export async function listTodayAppointments') + 600);
+  assert.match(q, /SELECT id, name, phone, next_appt FROM patients/, 'telefon sorguda seçilmeli');
+});
+
+test('"Bugün" şeridinde ad ve telefon AYRI dokunma hedefi', () => {
+  // İkisi üst üste duruyor; yanlış olana basmak ya gereksiz kart açar ya da
+  // istemeden arama başlatır.
+  assert.match(CSS, /\.today-name \{[^}]*min-height:\s*28px/s);
+  assert.match(CSS, /html\[data-platform="ios"\] \.today-name[^{]*\{[^}]*min-height:\s*44px/s,
+    'dokunmatikte 44px olmalı');
+  assert.match(CSS, /\.today-call \{[^}]*text-decoration:\s*none/s);
+  assert.match(CSS, /#today-strip \{[^}]*max-height:/s, 'yoğun günde şerit ekranı kaplamamalı');
 });
 
 test('şerit çipleri parmakla vurulabilir ve şerit ekranı kaplamaz', () => {
