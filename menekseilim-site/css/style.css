@@ -166,7 +166,8 @@ html.acilis-kapandi .acilis { display: none; }
 .sayfa-basi-ic { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr); gap: 3rem; align-items: center; }
 .sayfa-basi-gorsel { margin: 0; position: relative; justify-self: end; width: min(100%, 460px); }
 .sayfa-basi-gorsel::before { content: ""; position: absolute; inset: -10px; border: 1.5px solid rgba(220, 198, 144, .5); border-radius: calc(var(--radius) + 8px); }
-.sayfa-basi-gorsel img { position: relative; width: 100%; aspect-ratio: 835 / 600; object-fit: cover; border-radius: var(--radius); box-shadow: var(--golge-guclu); }
+.sayfa-basi-gorsel img { position: relative; width: 100%; height: auto; border-radius: var(--radius); box-shadow: var(--golge-guclu); }
+.sayfa-basi-gorsel.dikey { width: min(100%, 300px); }
 @media (max-width: 820px) { .sayfa-basi-ic { grid-template-columns: 1fr; gap: 2rem; } .sayfa-basi-gorsel { justify-self: start; width: min(100% - 20px, 420px); margin-left: 10px; } }
 .ar-ust { display: inline-block; font-family: var(--hat); font-weight: 700; font-size: 1.6rem; line-height: 1.4; color: var(--altin); margin-bottom: .1rem; }
 .koyu .ar-ust { color: var(--altin-acik); }
@@ -328,6 +329,22 @@ html.acilis-kapandi .acilis { display: none; }
 @media (max-width: 820px) { .yan-yana { grid-template-columns: 1fr; gap: 2rem; } }
 .yazi { max-width: 40em; }
 .yazi p { font-size: 1.15rem; }
+
+/* ---------- cemaat (Hakkımızda) ve kapı (İletişim) ---------- */
+.cemaat-izgara { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 1.5rem; align-items: stretch; }
+.cemaat-foto { margin: 0; position: relative; min-height: 320px; }
+.cemaat-foto img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border-radius: var(--radius); box-shadow: var(--golge); }
+.cemaat-foto figcaption { position: absolute; left: 1rem; bottom: 1rem; background: rgba(18, 60, 65, .86); color: #fff; font-weight: 600; font-size: .95rem; padding: .4rem .9rem; border-radius: 999px; }
+.cemaat-kartlar { display: grid; gap: 1rem; min-width: 0; }
+.cemaat-kartlar .kart { display: grid; grid-template-columns: 52px minmax(0, 1fr); column-gap: 1rem; padding: 1.25rem 1.4rem; align-items: start; }
+.cemaat-kartlar .kart-ikon { grid-row: span 3; margin: 0; }
+.cemaat-kartlar .kart p { font-size: 1rem; margin-bottom: .4rem; }
+@media (max-width: 900px) { .cemaat-izgara { grid-template-columns: 1fr; } .cemaat-foto { min-height: 0; aspect-ratio: 960 / 816; } }
+.iletisim-sag { display: grid; gap: 1.5rem; min-width: 0; }
+.kapi-foto { margin: 0; display: grid; grid-template-columns: 170px minmax(0, 1fr); gap: 1.25rem; align-items: center; background: var(--bej-acik); border-radius: var(--radius); padding: 1rem; }
+.kapi-foto img { border-radius: var(--radius-kucuk); box-shadow: var(--golge); }
+.kapi-foto figcaption { margin: 0 !important; font-family: var(--baslik); font-size: 1.2rem !important; color: var(--yesil-koyu) !important; }
+.kapi-foto figcaption { margin-top: .6rem; color: var(--metin-soluk); font-size: .95rem; }
 
 /* ---------- sadaka-i câriye bandı ---------- */
 .sadaka-ic { display: grid; grid-template-columns: 1.3fr .7fr; gap: 3rem; align-items: center; }
@@ -502,6 +519,7 @@ html.acilis-kapandi .acilis { display: none; }
 .bilgi small { display: block; color: var(--metin-soluk); font-size: .9rem; }
 .bilgi a { font-weight: 600; text-decoration: none; font-variant-numeric: tabular-nums; }
 .medrese-liste { list-style: none; padding: 0; margin: 0; display: grid; gap: .5rem; }
+.medrese-liste li { font-size: 1.02rem; }
 .medrese-liste li { padding: .7rem 1rem; background: var(--bej-acik); border-radius: var(--radius-kucuk); }
 .form { background: #fff; border: 1px solid var(--cizgi); border-radius: var(--radius); padding: 2rem; box-shadow: var(--golge); }
 .alan { display: flex; flex-direction: column; gap: .35rem; margin-bottom: 1rem; }

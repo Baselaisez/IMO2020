@@ -64,6 +64,10 @@ Sitede kullanılan bilgiler ve kaynakları:
 * **Kitap görselleri** (tezhipli Mushaf, Mecmûatü's-Sarf, Mecmûatü'n-Nahv)
   dernek tarafından gönderildi; `GRUP_KITAPLARI` ve `EGITIM_GORSELI` ayarlarında.
   Yayınevinin ürün görseli iseler kullanım için yayınevinin onayını almanız iyi olur.
+* **Kürsü fotoğrafı:** Salih Gedik Hocamızın kürsüdeki fotoğrafından Hocamız
+  çıkarılarak (arka plan arma çerçevesinin simetrisinden ve ahşap duvardan
+  tamamlanarak) sembol görsel yapıldı.
+* **Cemaat fotoğrafında** sol taraftaki çocuklar ve tarih damgası kırpıldı.
 * **Ders kartlarındaki kapaklar** telifli görsel kullanmamak için klasik cilt sanatından
   (şemse, köşebent, cetvel) esinlenerek çizildi (`kitap()` fonksiyonu).
 * **Talebe fotoğrafları** hukuki nedenlerle siteden kaldırıldı.
@@ -545,6 +549,7 @@ menekseilim-site/          ← sunucuya (public_html) yüklenen klasör
 ├── js/main.js             Açılış ekranı, menü, form, IBAN kopyalama
 ├── img/                   logo.svg, logo-acik.svg, muhur.svg, desen-altin.svg, medrese-ders.jpg, og-gorsel.png
 │   ├── bagis/             Bağış alanı fotoğrafları (afişlerden kırpıldı)
+│   ├── dernek/            Kürsü (Hakkımızda), cemaat sofrası (Hakkımızda), dernek kapısı (İletişim)
 │   ├── heyet/             Yönetim heyeti fotoğrafları
 │   └── kitaplar/          Mushaf ve Mecmûa kitap görselleri (Eğitimlerimiz sayfası)
 └── video/                 Tanıtım ve yıl sonu merasimi videoları (.mp4) ve kapakları (.jpg)

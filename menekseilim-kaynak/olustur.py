@@ -120,10 +120,11 @@ MUFREDAT = [
 
 # Ders gruplarının yanında gösterilen kitap fotoğrafları: grup adı -> (dosya, kitap adı, açıklama)
 GRUP_KITAPLARI = {
-    "Arapça: Sarf": ("img/kitaplar/mecmuatus-sarf.jpg", "Mecmûatü's-Sarf", "Emsile, Binâ, Maksûd ve İzzî bir arada"),
-    "Arapça: Nahiv": ("img/kitaplar/mecmuatun-nahv.jpg", "Mecmûatü'n-Nahv", "Avâmil, İzhâr ve Kâfiye bir arada"),
+    "Arapça: Sarf": ("img/kitaplar/mecmuatus-sarf.jpg", "Mecmûatü's-Sarf", "Emsile, Binâ ve Maksûd bu mecmuadan okunur"),
+    "Arapça: Nahiv": ("img/kitaplar/mecmuatun-nahv.jpg", "Mecmûatü'n-Nahv", "Avâmil ve İzhâr bu mecmuadan okunur"),
 }
 EGITIM_GORSELI = ("img/kitaplar/mushaf.jpg", "Tezhipli bir Mushaf-ı Şerif'in Fâtiha ve Bakara sayfaları")
+HAKKIMIZDA_GORSELI = ("img/dernek/kursu.jpg", "Medresemizdeki kürsü; arkasında Osmanlı arması, yanında Allah lafzı yazılı levha", "dikey")
 
 YOLCULUK = [  # anasayfadaki dört adım: (kapak yazısı, kapak rengi, başlık, açıklama)
     ("ألفبا", "yesil", "Elif-Ba", "Harfleri tanır, Kur'an okumaya ilk adımı atar."),
@@ -161,7 +162,7 @@ def yildiz_yolu(cx=12, cy=12, R=11):
 IKON = {
     "tel": '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25c1.1.37 2.3.57 3.6.57a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1L6.6 10.8z"/></svg>',
     "mail": '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1zm1 2.4V17h16V7.4l-8 5-8-5zM4.6 7l7.4 4.6L19.4 7H4.6z"/></svg>',
-    "ig": '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 7.3a4.7 4.7 0 1 1 0 9.4 4.7 4.7 0 0 1 0-9.4zm0 1.8a2.9 2.9 0 1 0 0 5.8 2.9 2.9 0 0 0 0-5.8zm5-2.1a1.1 1.1 0 1 1 0 2.2 1.1 1.1 0 0 1 0-2.2zM12 3c2.5 0 2.8 0 3.8.05 2.6.12 4 1.5 4.15 4.15.05 1 .05 1.3.05 3.8s0 2.8-.05 3.8c-.12 2.65-1.5 4.03-4.15 4.15-1 .05-1.3.05-3.8.05s-2.8 0-3.8-.05c-2.65-.12-4.03-1.5-4.15-4.15C4 13.8 4 13.5 4 11s0-2.8.05-3.8C4.17 4.55 5.55 3.17 8.2 3.05 9.2 3 9.5 3 12 3z"/></svg>',
+    "ig": '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M8 3h8a5 5 0 0 1 5 5v8a5 5 0 0 1-5 5H8a5 5 0 0 1-5-5V8a5 5 0 0 1 5-5zM8.4 4.8h7.2a3.6 3.6 0 0 1 3.6 3.6v7.2a3.6 3.6 0 0 1-3.6 3.6H8.4a3.6 3.6 0 0 1-3.6-3.6V8.4a3.6 3.6 0 0 1 3.6-3.6zM12 7.7a4.3 4.3 0 1 1 0 8.6 4.3 4.3 0 0 1 0-8.6zM12 9.4a2.6 2.6 0 1 0 0 5.2 2.6 2.6 0 0 0 0-5.2zM17.2 5.7a1.1 1.1 0 1 1 0 2.2 1.1 1.1 0 0 1 0-2.2z"/></svg>',
     "ok": '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13.2 5.3 19.9 12l-6.7 6.7-1.4-1.4 4.3-4.3H4v-2h12.1l-4.3-4.3 1.4-1.4z"/></svg>',
     "menu": '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>',
     "kapat": '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6.4 5 12.6 12.6-1.4 1.4L5 6.4 6.4 5zm12.6 1.4L6.4 19 5 17.6 17.6 5 19 6.4z"/></svg>',
@@ -359,7 +360,7 @@ def sayfa_basi(baslik, aciklama, ar="", gorsel=None):
   <div class="kapsayici sayfa-basi-ic">
     <div>{ust}<h1>{baslik}</h1>
     <p>{aciklama}</p></div>
-    <figure class="sayfa-basi-gorsel"><img src="{gorsel[0]}" alt="{gorsel[1]}" width="{g}" height="{b}"></figure>
+    <figure class="sayfa-basi-gorsel{(" " + gorsel[2]) if len(gorsel) > 2 else ""}"><img src="{gorsel[0]}" alt="{gorsel[1]}" width="{g}" height="{b}"></figure>
   </div>
 </section>
 """
@@ -667,7 +668,7 @@ DEGERLER = [
     ("خدمة", "Hizmet", "Kapımız her aileye açık. Cemaatimize de sohbet ve zikir halkalarıyla hizmet ederiz."),
 ]
 
-HAKKIMIZDA = sayfa_basi("Hakkımızda", "Mahallelerimizin çocuklarına Kur'an'ı, ilmi ve edebi öğretmek için çalışan bir sivil toplum kuruluşuyuz.", "من نحن") + f"""
+HAKKIMIZDA = sayfa_basi("Hakkımızda", "Mahallelerimizin çocuklarına Kur'an'ı, ilmi ve edebi öğretmek için çalışan bir sivil toplum kuruluşuyuz. Kürsümüz ilme, kapımız herkese açık.", "من نحن", HAKKIMIZDA_GORSELI) + f"""
 <section class="bolum">
   <div class="kapsayici yan-yana">
     <div class="yazi">
@@ -689,8 +690,12 @@ HAKKIMIZDA = sayfa_basi("Hakkımızda", "Mahallelerimizin çocuklarına Kur'an'�
   </div>
 </section>
 
-<section class="bolum">
-  <div class="kapsayici izgara uc">
+<section class="bolum" id="cemaat">
+  <div class="kapsayici">
+    {bolum_basi("Medresenin dışında da birlikteyiz", "مجالسنا", "Cemaatimizle sohbet ve zikir halkalarında buluşuyor, sofralarımızı paylaşıyoruz.")}
+    <div class="cemaat-izgara">
+    <figure class="cemaat-foto"><img src="img/dernek/cemaat.jpg" alt="Cemaatimiz derneğimizde bir arada, sofra başında" width="960" height="816" loading="lazy"><figcaption>Cemaatimizle bir arada</figcaption></figure>
+    <div class="cemaat-kartlar">
     <article class="kart">
       <div class="kart-ikon">{IKON['cemaat']}</div>
       <h3>Sohbet ve zikir halkalarımız</h3>
@@ -707,6 +712,8 @@ HAKKIMIZDA = sayfa_basi("Hakkımızda", "Mahallelerimizin çocuklarına Kur'an'�
       <p>Medreselerimizin yanında Gazze'deki kardeşlerimize sıcak yemek, Afrika'ya Mushaf-ı Şerif ve kurban ulaştırıyoruz.</p>
       <p><a href="bagis.html">Hayra ortak olun</a></p>
     </article>
+    </div>
+    </div>
   </div>
 </section>
 
@@ -971,11 +978,12 @@ ILETISIM = sayfa_basi("İletişim", "Kayıt, bilgi ya da sadece hal hatır için
       </ul>
       <h2 style="font-size:1.4rem">Medreselerimiz</h2>
       <ul class="medrese-liste">
-{chr(10).join(f'        <li><b>{a}</b>{ {"kiz": " (kız medresesi)", "yakinda": " (yakında açılıyor)", "yeni": " (yeni külliye, tadilatı başlıyor)"}.get(d, "") }</li>' for a, d in MEDRESELER)}
+{chr(10).join(f'        <li><b>{a}</b>{ {"yakinda": " · yakında açılıyor", "yeni": " · yeni külliye, tadilatı başlıyor"}.get(d, "") }</li>' for a, d in MEDRESELER)}
       </ul>
       <p class="alt-not">Adres ve yol tarifi için bizi arayabilirsiniz.</p>
     </div>
 
+    <div class="iletisim-sag">
     <form class="form" id="iletisim-formu" action="iletisim-gonder.php" method="post" data-eposta="{EPOSTA}" novalidate>
       <h2 style="font-size:1.5rem">Bize yazın</h2>
       <div class="form-sonuc" role="status" aria-live="polite"></div>
@@ -989,6 +997,8 @@ ILETISIM = sayfa_basi("İletişim", "Kayıt, bilgi ya da sadece hal hatır için
       <label class="onay"><input type="checkbox" name="kvkk" id="kvkk" value="1" required><span><a href="kvkk.html" target="_blank">Aydınlatma metnini</a> okudum, bilgilerimin bana dönüş yapılması için kullanılmasını kabul ediyorum.</span></label>
       <button class="btn btn-yesil" type="submit">Gönder {IKON['ok']}</button>
     </form>
+      <figure class="kapi-foto"><img src="img/dernek/kapi.jpg" alt="Menekşe İlim Kültür Okuma Derneği'nin girişi, kapıda Türk bayrağı" width="600" height="800" loading="lazy"><figcaption>Derneğimizin kapısı. Buyurun, bekleriz.</figcaption></figure>
+    </div>
   </div>
 </section>
 """
