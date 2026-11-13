@@ -151,6 +151,7 @@
       var adGir = p.querySelector("input.ad");
       var telGir = p.querySelector("input.tel");
       var onay = p.querySelector(".bildir-onay input");
+      var makbuz = p.querySelector(".makbuz-iste input");
       var bildir = p.querySelector("a.bildir-btn");
       var bildirTaban = bildir ? bildir.getAttribute("href").split("?")[0] : "";
       var hataKutu = p.querySelector(".bildir-hata");
@@ -194,7 +195,8 @@
             "Telefon: " + (tel || "-") + "\n" +
             "Bağış: " + p.getAttribute("data-baslik") + "\n" +
             "Tutar: " + son.toplam + "\n" +
-            "Açıklama: " + metin + "\n\n" +
+            "Açıklama: " + metin + "\n" +
+            (makbuz && makbuz.checked ? "Makbuz: Adıma bağış makbuzu istiyorum\n" : "") + "\n" +
             "Dekontumu ekliyorum.");
         }
       };
@@ -226,6 +228,7 @@
             veri.append("tutar", son.toplam);
             veri.append("aciklama", son.aciklama);
             veri.append("kvkk", "1");
+            veri.append("makbuz", makbuz && makbuz.checked ? "1" : "");
             fetch("bagis-bildir.php", { method: "POST", body: veri, keepalive: true, headers: { "Accept": "application/json" } })
               .catch(function () { /* sunucu yoksa (önizleme) WhatsApp mesajı yeterli */ });
           } catch (err) { /* yoksay */ }
@@ -235,6 +238,7 @@
           }
         });
         if (telGir) telGir.addEventListener("input", guncelle);
+        if (makbuz) makbuz.addEventListener("change", guncelle);
         [adGir, telGir, onay].forEach(function (el) {
           if (el) el.addEventListener("input", function () { if (hataKutu) hataKutu.hidden = true; });
         });
@@ -274,9 +278,56 @@
         tutarGir.addEventListener("input", function () { tutarIsaretle(); guncelle(); });
       }
       if (adGir) adGir.addEventListener("input", guncelle);
+      p._guncelle = guncelle;
       guncelle();
     });
+
+    // Adı ve telefonu bir kez yazmak yeter: bütün bağış alanlarında aynı kalsın
+    ["ad", "tel"].forEach(function (sinif) {
+      var alanlar = Array.prototype.slice.call(bagis.querySelectorAll("input." + sinif));
+      alanlar.forEach(function (el) {
+        el.addEventListener("input", function () {
+          alanlar.forEach(function (o) {
+            if (o !== el && o.value !== el.value) {
+              o.value = el.value;
+              var pnl = o.closest(".bagis-panel");
+              if (pnl && pnl._guncelle) pnl._guncelle();
+            }
+          });
+        });
+      });
+    });
+
+    // Bu hayrı paylaşın: telefonda paylaşma menüsü, bilgisayarda WhatsApp
+    bagis.querySelectorAll(".paylas").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var url = b.getAttribute("data-paylas-url");
+        var metin = b.getAttribute("data-paylas-metin");
+        if (navigator.share) {
+          navigator.share({ title: b.getAttribute("data-paylas-baslik"), text: metin, url: url }).catch(function () {});
+        } else {
+          window.open("https://wa.me/?text=" + encodeURIComponent(metin + " " + url), "_blank", "noopener");
+        }
+      });
+    });
   }
+
+  // ---------------------------------------------------------------- Harita: düğmeye basınca yüklenir (o ana kadar Google'a bağlanılmaz)
+  document.querySelectorAll(".harita").forEach(function (h) {
+    var dugme = h.querySelector(".harita-ac");
+    if (!dugme) return;
+    dugme.addEventListener("click", function () {
+      var cerceve = document.createElement("iframe");
+      cerceve.src = h.getAttribute("data-harita");
+      cerceve.title = "Merkezimizin haritası";
+      cerceve.loading = "lazy";
+      cerceve.referrerPolicy = "no-referrer-when-downgrade";
+      cerceve.setAttribute("allowfullscreen", "");
+      h.innerHTML = "";
+      h.appendChild(cerceve);
+      h.classList.add("yuklendi");
+    });
+  });
 
   // ---------------------------------------------------------------- Kopyala (IBAN, alıcı, açıklama)
   document.querySelectorAll("[data-kopyala]").forEach(function (btn) {

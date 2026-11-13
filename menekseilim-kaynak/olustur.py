@@ -91,6 +91,12 @@ MEDRESELER = [  # (ad, durum: "" açık, "kiz" kız medresesi, "yakinda", "yeni"
     ("Maltepe Külliyesi", "yeni"),
 ]
 MALTEPE_M2 = "1.000"       # yeni külliyenin büyüklüğü
+
+# Merkezimiz (harita). Açık adres ya da Google Haritalar konumu gelince ADRES ve HARITA_SORGU güncellenir.
+MERKEZ_MEDRESE = "Atalar Medresesi"
+MERKEZ_ADRES = ""                                   # örn. "Atalar Mah. … Sok. No: 31/B, Kartal / İstanbul"
+MERKEZ_SEMT = "Atalar Mahallesi, Kartal / İstanbul"
+HARITA_SORGU = "Atalar Mahallesi, Kartal, İstanbul"   # haritada aranan yer; koordinat da yazılabilir: "40.9001,29.1802"
 MALTEPE_KISI = "100"       # aynı anda eğitim alabilecek talebe sayısı (en az)
 
 # Müfredat: (grup, arapça, grup açıklaması, [(ders, arapça, açıklama), ...])
@@ -177,8 +183,20 @@ IKON = {
     "cemaat": '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="7.5" r="3.5"/><path d="M2.5 20.5v-1.5a5 5 0 0 1 5-5h3a5 5 0 0 1 5 5v1.5"/><path d="M16 4.3a3.5 3.5 0 0 1 0 6.4M18.5 14.4a5 5 0 0 1 3 4.6v1.5"/></svg>',
     "kopya": '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3h11a2 2 0 0 1 2 2v11h-2V5H8V3zM5 7h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2zm0 2v10h10V9H5z"/></svg>',
     "whatsapp": '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 2a8 8 0 1 1-4.1 14.9l-.4-.2-2.9.8.8-2.8-.2-.4A8 8 0 0 1 12 4zM8.9 7.6c-.2 0-.5 0-.8.4-.3.3-1 1-1 2.3s1 2.6 1.1 2.8c.1.2 2 3.1 4.9 4.3 2.4 1 2.9.8 3.4.7.5 0 1.7-.7 1.9-1.4.2-.7.2-1.2.2-1.4l-.6-.3-1.9-.9c-.3-.1-.4-.1-.6.1l-.9 1.1c-.2.2-.3.2-.6.1a7.3 7.3 0 0 1-3.6-3.2c-.3-.5.3-.4.8-1.4.1-.2 0-.3 0-.5l-.9-2.1c-.2-.5-.4-.5-.6-.5h-.8z"/></svg>',
+    "konum": '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a7 7 0 0 1 7 7c0 5.2-7 13-7 13S5 14.2 5 9a7 7 0 0 1 7-7zm0 4.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5z"/></svg>',
+    "paylas": '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 2a3 3 0 1 1-2.6 4.5L8.9 10.2a3 3 0 0 1 0 3.6l6.5 3.7A3 3 0 1 1 15 19l-6.9-3.9a3 3 0 1 1 0-6.2L15 5A3 3 0 0 1 18 2z"/></svg>',
     "tabak": '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="6.5"/><circle cx="12" cy="13" r="3.5"/><path d="M3 4v5a2 2 0 0 0 2 2M5 4v18M21 4c-1.5 1-2.2 3-2.2 5.5S19.5 13 21 13v9"/></svg>',
 }
+
+
+def harita_linkleri():
+    from urllib.parse import quote
+    q = quote(HARITA_SORGU)
+    return {
+        "gomulu": f"https://www.google.com/maps?q={q}&z=15&output=embed",
+        "google": f"https://www.google.com/maps/dir/?api=1&destination={q}",
+        "yandex": f"https://yandex.com.tr/harita/?text={q}",
+    }
 
 
 def tl(n):
@@ -320,6 +338,7 @@ def son(kok=""):
     <div>
       <h2>Bize ulaşın</h2>
       <ul>
+        <li><a href="{kok}iletisim.html#merkez">Merkez: {MERKEZ_SEMT}</a></li>
         <li>Eğitim ve kayıt: <a href="tel:{TELEFON_LINK}">{TELEFON}</a></li>
         <li>Dernek ve bağış: <a href="tel:{tel_link(DERNEK_TELEFON)}">{DERNEK_TELEFON}</a> · <a href="{wa_link(DERNEK_TELEFON)}" target="_blank" rel="noopener">WhatsApp</a></li>
         <li>Yardım kampanyaları: <a href="tel:{tel_link(BAGIS_TELEFON)}">{BAGIS_TELEFON}</a></li>
@@ -447,6 +466,9 @@ def medrese_kart(ad, durum):
     if durum == "yakinda":
         return (f'      <div class="medrese yakinda">{IKON["medrese"]}'
                 f'<div><h3>{ad}</h3><p>Yakında açılıyor inşallah.</p></div></div>')
+    if ad == MERKEZ_MEDRESE:
+        return (f'      <div class="medrese merkez">{IKON["medrese"]}'
+                f'<div><h3>{ad}</h3><p>Erkek talebelerimiz için · <a href="iletisim.html#merkez">Merkezimiz, haritada gör</a></p></div></div>')
     return (f'      <div class="medrese">{IKON["medrese"]}'
             f'<div><h3>{ad}</h3><p>Erkek talebelerimiz için</p></div></div>')
 
@@ -513,7 +535,7 @@ KURUM = {
     "image": SITE + "/img/og-gorsel.png",
     "telephone": "+90 " + TELEFON[1:],
     "email": EPOSTA,
-    "address": {"@type": "PostalAddress", "addressLocality": "İstanbul", "addressCountry": "TR"},
+    "address": {"@type": "PostalAddress", "streetAddress": MERKEZ_ADRES or "Atalar Mahallesi", "addressLocality": "Kartal", "addressRegion": "İstanbul", "addressCountry": "TR"},
     "sameAs": [INSTAGRAM, FACEBOOK],
 }
 KURUM_HEAD = '<script type="application/ld+json">' + json.dumps(KURUM, ensure_ascii=False) + "</script>\n"
@@ -888,6 +910,7 @@ def bagis_panel(a):
             <span class="etiket">{a['etiket']}</span>
             <h3>{a['baslik']}</h3>
             <p>{a['aciklama']}</p>
+            <button type="button" class="paylas" data-paylas-baslik="{a['baslik']}" data-paylas-metin="{a['baslik']}: {a['fiyat_yazi']}. Siz de hayra ortak olun:" data-paylas-url="{SITE}/bagis.html#bagis-{k}">{IKON['paylas']} Bu hayrı paylaşın</button>
           </div>
         </div>
         <div class="panel-adim">
@@ -896,6 +919,7 @@ def bagis_panel(a):
         </div>
         <div class="panel-adim">
           <h4><span class="adim-no">3</span> Banka uygulamanızdan gönderin</h4>
+          <div class="karekod"><img src="img/qr/bagis-{k}.svg" alt="" width="112" height="112" loading="lazy"><p><b>Banka uygulamanız telefonunuzda mı?</b> Karekodu telefonunuzun kamerasıyla okutun; bu bağış sayfası telefonunuzda açılsın, oradan kopyalayıp gönderin.</p></div>
           <p class="ipucu">Uygulamanızda <b>Para gönder → IBAN'a</b> adımını açın; bu bilgileri kopyalayıp yapıştırmanız yeterli.</p>
           <dl class="hesap">
             <div class="hesap-satir hesap-iban"><dt>IBAN</dt><dd><code id="iban-{k}">{a['iban']}</code>{kopya_btn(f"iban-{k}", "IBAN'ı kopyala", True)}</dd></div>
@@ -910,6 +934,7 @@ def bagis_panel(a):
           <h4><span class="adim-no">4</span> Bağışınızı bize bildirin</h4>
           <p>Havalenizi yaptıktan sonra telefonunuzu yazıp bildirin. Bağışınız hesabımıza geçince size <b>"bağışınız alınmıştır"</b> mesajı gönderelim.</p>
           <label class="ad-gir"><span>Telefonunuz</span><input type="tel" class="tel" autocomplete="tel" inputmode="tel" maxlength="20" placeholder="05xx xxx xx xx"></label>
+          <label class="onay makbuz-iste"><input type="checkbox"><span>Vergi indirimi için adıma <b>bağış makbuzu</b> istiyorum</span></label>
           <label class="onay bildir-onay"><input type="checkbox"><span><a href="kvkk.html" target="_blank">Aydınlatma metnini</a> okudum; adımın, telefonumun ve bağış bilgilerimin bağışımın kaydı ve bana dönüş için derneğe iletilmesini kabul ediyorum.</span></label>
           <p class="bildir-hata" role="alert" hidden></p>
           <div class="butonlar">
@@ -921,12 +946,36 @@ def bagis_panel(a):
       </div>"""
 
 
+BAGIS_SSS = [
+    ("Bağışımın ulaştığını nasıl anlarım?",
+     f"Havalenizi yaptıktan sonra bağış sayfasındaki 4. adımda telefonunuzu yazıp \"Bağışımı bildir\" düğmesine basın. Bağışınız hesabımıza geçince size WhatsApp'tan \"bağışınız alınmıştır\" mesajı göndeririz."),
+    ("Makbuz alabilir miyim?",
+     "Banka dekontunuz bağış makbuzu yerine geçer. Ayrıca adınıza makbuz isterseniz bildirirken \"bağış makbuzu istiyorum\" kutusunu işaretlemeniz yeterli."),
+    ("Kurban vekâletimi nasıl veririm?",
+     "Afrika'da kurban alanını seçtiğinizde havale açıklamasına \"(vekâlet)\" kendiliğinden eklenir. Adınızı yazıp bağışınızı bildirdiğinizde vekâletinizi kaydederiz."),
+    ("Her ay düzenli bağış yapabilir miyim?",
+     "Evet. Banka uygulamanızdan seçtiğiniz bağış alanının IBAN'ına düzenli (otomatik) transfer talimatı verebilirsiniz."),
+    ("Zekât ve fitremi verebilir miyim?",
+     f"Zekât ve fitre için lütfen önce {DERNEK_TELEFON} numarasından bizi arayın; hangi alana uygun olduğunu birlikte belirleyelim."),
+    ("Kartla bağış yapabilir miyim?",
+     "Şu an bağışları banka havalesi ve EFT ile alıyoruz. Her banka uygulamasından birkaç dokunuşla gönderebilirsiniz."),
+    ("Bilgisayardayım, banka uygulamam telefonda. Ne yapmalıyım?",
+     "3. adımdaki karekodu telefonunuzun kamerasıyla okutun. Aynı bağış sayfası telefonunuzda açılır; oradan IBAN'ı kopyalayıp gönderebilirsiniz."),
+]
+
+
 IZIN_SATIRI = (f'\n    <p class="alt-not">Yardım toplama izni: {YARDIM_TOPLAMA_IZIN}</p>' if YARDIM_TOPLAMA_IZIN else "")
 
 BAGIS = sayfa_basi("Bağış", "Bir talebenin sofrasından Gazze'deki bir çocuğun tabağına; hayrınızı dilediğiniz kapıdan ulaştırın.", "صدقة جارية") + f"""
 <section class="bolum" id="bagis-yap">
   <div class="kapsayici">
     {bolum_basi("Bağışınızı birkaç dokunuşla yapın", aciklama="Bağış alanını seçin, tutarı belirleyin, bilgileri kopyalayıp banka uygulamanızdan gönderin. Hepsi bu kadar.")}
+    <ol class="bagis-seridi">
+      <li><span>1</span>Alanı seçin</li>
+      <li><span>2</span>Tutarı belirleyin</li>
+      <li><span>3</span>IBAN'a gönderin</li>
+      <li><span>4</span>Bize bildirin</li>
+    </ol>
     <div class="bagis-kutu" data-bagis>
       <fieldset class="alan-listesi">
         <legend><span class="adim-no">1</span> Bağış alanını seçin</legend>
@@ -942,6 +991,15 @@ BAGIS = sayfa_basi("Bağış", "Bir talebenin sofrasından Gazze'deki bir çocu�
       <li>{IKON['kalp']}<span><b>Dekontunuz makbuzdur</b>Banka dekontu alındı belgesi yerine geçer</span></li>
       <li>{IKON['yildiz']}<span><b>Vergiden düşülebilir</b>Kanuni sınırlar içinde</span></li>
     </ul>{IZIN_SATIRI}
+  </div>
+</section>
+
+<section class="bolum bolum-bej" id="bagis-sorular">
+  <div class="kapsayici">
+    {bolum_basi("Bağışla ilgili sorular", "أسئلة", "Aklınıza takılan başka bir şey olursa bizi arayın ya da WhatsApp'tan yazın.")}
+    <div class="sss">
+{chr(10).join(f'      <details><summary>{q}</summary><p>{c}</p></details>' for q, c in BAGIS_SSS)}
+    </div>
   </div>
 </section>
 
@@ -989,7 +1047,7 @@ ILETISIM = sayfa_basi("İletişim", "Kayıt, bilgi ya da sadece hal hatır için
       <ul class="medrese-liste">
 {chr(10).join(f'        <li><b>{a}</b>{ {"yakinda": " · yakında açılıyor", "yeni": " · yeni külliye, tadilatı başlıyor"}.get(d, "") }</li>' for a, d in MEDRESELER)}
       </ul>
-      <p class="alt-not">Adres ve yol tarifi için bizi arayabilirsiniz.</p>
+      <p class="alt-not">Merkezimiz Atalar'da; diğer medreselerimizin adresi ve yol tarifi için bizi arayabilirsiniz.</p>
     </div>
 
     <div class="iletisim-sag">
@@ -1010,6 +1068,31 @@ ILETISIM = sayfa_basi("İletişim", "Kayıt, bilgi ya da sadece hal hatır için
     </div>
   </div>
 </section>
+
+<section class="bolum bolum-bej" id="merkez">
+  <div class="kapsayici merkez-izgara">
+    <div class="merkez-bilgi">
+      <span class="ar-ust" lang="ar">مركزنا</span>
+      <h2>Merkezimiz Atalar'da</h2>
+      {sus()}
+      <p class="merkez-adres">{IKON['konum']}<span><b>{MERKEZ_ADRES or MERKEZ_SEMT}</b>Derneğimizin merkezi ve {MERKEZ_MEDRESE}</span></p>
+      <p>Gündüzlü eğitim 09.00 – 20.00 arasında. Gelmeden önce aramanız yeterli; sizi kapıda karşılayalım.</p>
+      <div class="butonlar">
+        <a class="btn btn-yesil" href="{harita_linkleri()['google']}" target="_blank" rel="noopener">{IKON['konum']} Yol tarifi al</a>
+        <a class="btn btn-cizgi" href="{harita_linkleri()['yandex']}" target="_blank" rel="noopener">Yandex ile aç</a>
+        <a class="btn btn-cizgi" href="tel:{TELEFON_LINK}">{IKON['tel']} Bizi arayın</a>
+      </div>
+    </div>
+    <div class="harita" data-harita="{harita_linkleri()['gomulu']}">
+      <div class="harita-on">
+        <span class="harita-pin">{IKON['konum']}</span>
+        <b>{MERKEZ_SEMT}</b>
+        <button type="button" class="btn btn-altin harita-ac">Haritayı göster</button>
+        <small>Harita Google Haritalar'dan yüklenir; düğmeye basana kadar Google'a bağlanılmaz.</small>
+      </div>
+    </div>
+  </div>
+</section>
 """
 
 # ================================================================ KVKK
@@ -1025,7 +1108,7 @@ KVKK = sayfa_basi("KVKK Aydınlatma Metni", "Kişisel verileriniz hakkında kıs
     <p>Sitemizdeki fotoğraf ve videolar ilgili kişilerin ve velilerimizin izniyle yayınlanır. Kaldırılmasını istediğiniz bir görsel için bize ulaşmanız yeterlidir.</p>
     <h2>Haklarınız</h2>
     <p>6698 sayılı Kanun'un 11. maddesi gereği bilgilerinizin işlenip işlenmediğini öğrenebilir, düzeltilmesini ya da silinmesini isteyebilirsiniz. Bunun için {EPOSTA} adresine yazabilirsiniz.</p>
-    <p>Sitemiz reklam veya takip çerezi kullanmaz. Yazı tipleri kendi sunucumuzdan yüklenir; ziyaret bilgileriniz üçüncü taraflara aktarılmaz.</p>
+    <p>Sitemiz reklam veya takip çerezi kullanmaz. Yazı tipleri kendi sunucumuzdan yüklenir; ziyaret bilgileriniz üçüncü taraflara aktarılmaz. İletişim sayfasındaki harita yalnızca "Haritayı göster" düğmesine bastığınızda Google Haritalar'dan yüklenir; o andan sonra Google'ın gizlilik koşulları geçerlidir.</p>
     <h2>Bağış bildirimi</h2>
     <p>Bağış sayfasında "Bağışımı bildir" düğmesine bastığınızda adınız, telefonunuz, bağış alanı ve tutarı derneğimize iletilir: dernek e-postamıza bir kayıt düşer ve WhatsApp'ta size hazır bir mesaj açılır. Bu bilgileri yalnızca bağışınızı kayda geçirmek, size "bağışınız alınmıştır" mesajı göndermek ve isterseniz makbuz düzenlemek için kullanırız. WhatsApp üzerinden gönderdiğiniz mesajlar WhatsApp'ın kendi gizlilik koşullarına da tabidir. Düğmeye basmadığınız sürece sayfaya yazdığınız bilgiler hiçbir yere gönderilmez.</p>
   </div>
@@ -1106,6 +1189,15 @@ yaz("onizleme.html", spa_baglanti(ust + govdeler + son()))
 
 # ================================================================ yardımcı dosyalar
 yaz("img/desen-altin.svg", DESEN_ALTIN)
+
+# Bağış alanları için karekodlar: telefonda aynı bağış sayfasını açar
+import segno
+os.makedirs(os.path.join(OUT, "img/qr"), exist_ok=True)
+for a in BAGIS_ALANLARI:
+    qr = segno.make(f"{SITE}/bagis.html#bagis-{a['id']}", error="m")
+    qr.save(os.path.join(OUT, f"img/qr/bagis-{a['id']}.svg"), kind="svg", scale=4, border=2,
+            dark="#123C41", light="#FFFFFF", xmldecl=False, svgns=True)
+    print("yazıldı:", f"img/qr/bagis-{a['id']}.svg")
 
 SITEMAP_SAYFALARI = [d for d, *_ in SAYFALAR]
 yaz("sitemap.xml", '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'

@@ -330,6 +330,43 @@ html.acilis-kapandi .acilis { display: none; }
 .yazi { max-width: 40em; }
 .yazi p { font-size: 1.15rem; }
 
+/* ---------- bağış: adım şeridi, paylaş, karekod, makbuz ---------- */
+.bagis-seridi { list-style: none; margin: -1rem 0 2rem; padding: 0; display: flex; flex-wrap: wrap; gap: .5rem; counter-reset: none; }
+.bagis-seridi li { display: inline-flex; align-items: center; gap: .5rem; background: var(--bej-acik); border: 1px solid var(--cizgi); border-radius: 999px; padding: .4rem .95rem .4rem .45rem; font-weight: 600; font-size: .98rem; color: var(--yesil-koyu); }
+.bagis-seridi li + li::before { content: "→"; color: var(--altin); margin: 0 .35rem 0 -.2rem; font-weight: 700; order: -1; }
+.bagis-seridi span { display: inline-grid; place-items: center; width: 1.6rem; height: 1.6rem; border-radius: 50%; background: var(--yesil); color: #fff; font-size: .85rem; font-weight: 700; }
+.paylas { display: inline-flex; align-items: center; gap: .4rem; margin-top: .6rem; border: 0; background: none; padding: .2rem 0; color: var(--altin-koyu); font-weight: 700; font-size: .95rem; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+.paylas svg { width: 1rem; height: 1rem; fill: currentColor; }
+.paylas:hover { color: var(--yesil-koyu); }
+.karekod { display: none; }
+@media (hover: hover) and (min-width: 901px) {
+  .karekod { display: flex; gap: 1rem; align-items: center; background: var(--yesil-acik); border-radius: 14px; padding: .75rem 1rem .75rem .75rem; margin: 0 0 1rem; }
+  .karekod img { width: 96px; height: 96px; border-radius: 8px; background: #fff; padding: 4px; flex: none; }
+  .karekod p { margin: 0; font-size: .95rem; color: var(--metin); }
+}
+.makbuz-iste { margin: .25rem 0 .5rem; }
+.panel-adim .butonlar ~ .ipucu { margin-top: 1rem; }
+
+/* ---------- merkez ve harita (İletişim) ---------- */
+.merkez-izgara { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: 2.5rem; align-items: center; }
+@media (max-width: 860px) { .merkez-izgara { grid-template-columns: 1fr; gap: 1.75rem; } }
+.merkez-adres { display: flex; gap: .75rem; align-items: flex-start; font-size: 1.05rem; }
+.merkez-adres svg { width: 1.6rem; height: 1.6rem; fill: var(--kirmizi); flex: none; margin-top: .1rem; }
+.merkez-adres span { display: grid; color: var(--metin-soluk); }
+.merkez-adres b { color: var(--yesil-koyu); font-size: 1.15rem; }
+.harita { position: relative; aspect-ratio: 4 / 3; border-radius: var(--radius); overflow: hidden; box-shadow: var(--golge); border: 1px solid var(--cizgi);
+  background:
+    radial-gradient(circle at 50% 46%, rgba(135, 8, 38, .12) 0 60px, transparent 61px),
+    repeating-linear-gradient(28deg, transparent 0 46px, rgba(255, 255, 255, .9) 46px 52px),
+    repeating-linear-gradient(-62deg, transparent 0 70px, rgba(255, 255, 255, .85) 70px 78px),
+    linear-gradient(135deg, #E3EDEB, #EFE7D2); }
+.harita-on { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: .6rem; text-align: center; padding: 1.5rem; }
+.harita-pin svg { width: 54px; height: 54px; fill: var(--kirmizi); filter: drop-shadow(0 6px 8px rgba(0, 0, 0, .2)); }
+.harita-on b { font-family: var(--baslik); font-weight: 600; font-size: 1.2rem; color: var(--yesil-koyu); background: rgba(255, 255, 255, .85); padding: .2rem .7rem; border-radius: 8px; }
+.harita-on small { max-width: 26em; color: var(--metin-soluk); font-size: .85rem; background: rgba(255, 255, 255, .8); padding: .2rem .5rem; border-radius: 6px; }
+.harita iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+.medrese.merkez p a { font-weight: 600; }
+
 /* ---------- cemaat (Hakkımızda) ve kapı (İletişim) ---------- */
 .cemaat-izgara { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 1.5rem; align-items: stretch; }
 .cemaat-foto { margin: 0; position: relative; min-height: 320px; }

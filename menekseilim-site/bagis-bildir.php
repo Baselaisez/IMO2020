@@ -44,6 +44,7 @@ $alan     = $temiz('alan', 80);
 $tutar    = $temiz('tutar', 30);
 $aciklama = $temiz('aciklama', 160);
 $kvkk     = !empty($_POST['kvkk']);
+$makbuz   = !empty($_POST['makbuz']);
 
 $rakam = preg_replace('/\D+/', '', $telefon);
 if ($ad === '' || strlen($rakam) < 10) {
@@ -68,6 +69,7 @@ $govde .= "Telefon  : $telefon\n";
 $govde .= "Bağış    : $alan\n";
 $govde .= "Tutar    : $tutar\n";
 $govde .= "Açıklama : " . ($aciklama !== '' ? $aciklama : '-') . "\n";
+$govde .= "Makbuz   : " . ($makbuz ? "İSTİYOR (adına bağış makbuzu düzenleyin)" : "istemedi") . "\n";
 $govde .= "Tarih    : " . date('d.m.Y H:i') . "\n\n";
 $govde .= "Önce bağışın hesaba geçtiğini kontrol edin.\n";
 if ($wa !== '') {

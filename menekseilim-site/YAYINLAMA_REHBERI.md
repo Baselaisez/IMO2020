@@ -123,6 +123,19 @@ yalnızca kendi tarayıcısında kalır, hiçbir yere gönderilmez.
 `DERNEK_TELEFON` (0543 663 91 55) dernek işleri ve bağış bildirimleri için;
 `BAGIS_TELEFON` (0536 976 99 78) Gazze, Afrika ve kurban kampanyaları için.
 
+**Merkez ve harita:** İletişim sayfasındaki "Merkezimiz Atalar'da" bölümü
+`MERKEZ_ADRES` ve `HARITA_SORGU` ayarlarından beslenir. Şu an harita Atalar
+Mahallesi'ni gösteriyor; açık adres ya da Google Haritalar'daki konum (örneğin
+"40.90,29.18" gibi koordinat) yazılınca pin tam kapıya iner. Harita, ziyaretçi
+"Haritayı göster" düğmesine basana kadar Google'dan yüklenmez.
+
+**Bağış kolaylıkları:** Her bağış alanında "Bu hayrı paylaşın" düğmesi
+(telefonda paylaşma menüsü, bilgisayarda WhatsApp), bilgisayarda bağışı telefonda
+açan karekod (`img/qr/`, betik her çalıştığında yeniden üretilir; `segno`
+paketi gerekir: `pip install segno`), "adıma bağış makbuzu istiyorum" kutusu ve
+Bağış sayfasının altında bağışla ilgili sorular var. Ad ve telefon bir kez
+yazılınca bütün bağış alanlarında hatırlanır.
+
 **Bağış bildirimleri nasıl gelir?** Bağışçı havalesini yaptıktan sonra bağış
 sayfasının 4. adımında telefonunu yazıp "Bağışımı bildir" düğmesine basar:
 
@@ -574,6 +587,7 @@ menekseilim-site/          ← sunucuya (public_html) yüklenen klasör
 ├── js/main.js             Açılış ekranı, menü, form, IBAN kopyalama
 ├── img/                   logo.svg, logo-acik.svg, muhur.svg, desen-altin.svg, medrese-ders.jpg, og-gorsel.png
 │   ├── bagis/             Bağış alanı fotoğrafları (afişlerden kırpıldı)
+│   ├── qr/                Bağış alanlarının karekodları (betik üretir)
 │   ├── dernek/            Kürsü (Hakkımızda), cemaat sofrası (Hakkımızda), dernek kapısı (İletişim)
 │   ├── heyet/             Yönetim heyeti fotoğrafları
 │   └── kitaplar/          Mushaf ve Mecmûa kitap görselleri (Eğitimlerimiz sayfası)

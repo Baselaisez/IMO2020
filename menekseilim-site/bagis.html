@@ -60,6 +60,12 @@
 <section class="bolum" id="bagis-yap">
   <div class="kapsayici">
     <div class="bolum-basi"><h2>Bağışınızı birkaç dokunuşla yapın</h2><div class="sus"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12.00 1.00 L15.22 4.22 L19.78 4.22 L19.78 8.78 L23.00 12.00 L19.78 15.22 L19.78 19.78 L15.22 19.78 L12.00 23.00 L8.78 19.78 L4.22 19.78 L4.22 15.22 L1.00 12.00 L4.22 8.78 L4.22 4.22 L8.78 4.22Z"/></svg></div><p>Bağış alanını seçin, tutarı belirleyin, bilgileri kopyalayıp banka uygulamanızdan gönderin. Hepsi bu kadar.</p></div>
+    <ol class="bagis-seridi">
+      <li><span>1</span>Alanı seçin</li>
+      <li><span>2</span>Tutarı belirleyin</li>
+      <li><span>3</span>IBAN'a gönderin</li>
+      <li><span>4</span>Bize bildirin</li>
+    </ol>
     <div class="bagis-kutu" data-bagis>
       <fieldset class="alan-listesi">
         <legend><span class="adim-no">1</span> Bağış alanını seçin</legend>
@@ -102,6 +108,7 @@
             <span class="etiket">Medreselerimiz</span>
             <h3>Talebelerimizin sofrası</h3>
             <p>Atalar ve Kurfalı medreselerimizde okuyan talebelerimizin kahvaltı ve yemek giderlerini hayırseverlerimizin desteğiyle karşılıyoruz. Dilediğiniz tutarla, ister bir kez ister her ay destek olabilirsiniz.</p>
+            <button type="button" class="paylas" data-paylas-baslik="Talebelerimizin sofrası" data-paylas-metin="Talebelerimizin sofrası: Dilediğiniz tutar. Siz de hayra ortak olun:" data-paylas-url="https://menekseilim.com.tr/bagis.html#bagis-talebe"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 2a3 3 0 1 1-2.6 4.5L8.9 10.2a3 3 0 0 1 0 3.6l6.5 3.7A3 3 0 1 1 15 19l-6.9-3.9a3 3 0 1 1 0-6.2L15 5A3 3 0 0 1 18 2z"/></svg> Bu hayrı paylaşın</button>
           </div>
         </div>
         <div class="panel-adim">
@@ -112,6 +119,7 @@
         </div>
         <div class="panel-adim">
           <h4><span class="adim-no">3</span> Banka uygulamanızdan gönderin</h4>
+          <div class="karekod"><img src="img/qr/bagis-talebe.svg" alt="" width="112" height="112" loading="lazy"><p><b>Banka uygulamanız telefonunuzda mı?</b> Karekodu telefonunuzun kamerasıyla okutun; bu bağış sayfası telefonunuzda açılsın, oradan kopyalayıp gönderin.</p></div>
           <p class="ipucu">Uygulamanızda <b>Para gönder → IBAN'a</b> adımını açın; bu bilgileri kopyalayıp yapıştırmanız yeterli.</p>
           <dl class="hesap">
             <div class="hesap-satir hesap-iban"><dt>IBAN</dt><dd><code id="iban-talebe">TR15 0020 6001 4004 5144 1300 01</code><button class="kopya" type="button" data-kopyala="#iban-talebe" data-bosluksuz aria-label="IBAN'ı kopyala"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3h11a2 2 0 0 1 2 2v11h-2V5H8V3zM5 7h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2zm0 2v10h10V9H5z"/></svg><span>Kopyala</span></button></dd></div>
@@ -127,6 +135,7 @@
           <h4><span class="adim-no">4</span> Bağışınızı bize bildirin</h4>
           <p>Havalenizi yaptıktan sonra telefonunuzu yazıp bildirin. Bağışınız hesabımıza geçince size <b>"bağışınız alınmıştır"</b> mesajı gönderelim.</p>
           <label class="ad-gir"><span>Telefonunuz</span><input type="tel" class="tel" autocomplete="tel" inputmode="tel" maxlength="20" placeholder="05xx xxx xx xx"></label>
+          <label class="onay makbuz-iste"><input type="checkbox"><span>Vergi indirimi için adıma <b>bağış makbuzu</b> istiyorum</span></label>
           <label class="onay bildir-onay"><input type="checkbox"><span><a href="kvkk.html" target="_blank">Aydınlatma metnini</a> okudum; adımın, telefonumun ve bağış bilgilerimin bağışımın kaydı ve bana dönüş için derneğe iletilmesini kabul ediyorum.</span></label>
           <p class="bildir-hata" role="alert" hidden></p>
           <div class="butonlar">
@@ -144,6 +153,7 @@
             <span class="etiket">Yeni külliye</span>
             <h3>Maltepe yeni külliyemiz</h3>
             <p>Maltepe'de 1.000 m²'lik yeni külliyemizin sözleşmesi yapıldı. En az 100 talebenin aynı anda eğitim alabileceği bu medresenin tadilatına başlıyoruz inşallah: dershaneleri, mescidi ve yemekhanesiyle. Her metrekaresi, orada okuyacak talebelerle birlikte sizin için de devam eden bir hayır olsun.</p>
+            <button type="button" class="paylas" data-paylas-baslik="Maltepe yeni külliyemiz" data-paylas-metin="Maltepe yeni külliyemiz: 1 m² 2.500 TL. Siz de hayra ortak olun:" data-paylas-url="https://menekseilim.com.tr/bagis.html#bagis-maltepe"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 2a3 3 0 1 1-2.6 4.5L8.9 10.2a3 3 0 0 1 0 3.6l6.5 3.7A3 3 0 1 1 15 19l-6.9-3.9a3 3 0 1 1 0-6.2L15 5A3 3 0 0 1 18 2z"/></svg> Bu hayrı paylaşın</button>
           </div>
         </div>
         <div class="panel-adim">
@@ -161,6 +171,7 @@
         </div>
         <div class="panel-adim">
           <h4><span class="adim-no">3</span> Banka uygulamanızdan gönderin</h4>
+          <div class="karekod"><img src="img/qr/bagis-maltepe.svg" alt="" width="112" height="112" loading="lazy"><p><b>Banka uygulamanız telefonunuzda mı?</b> Karekodu telefonunuzun kamerasıyla okutun; bu bağış sayfası telefonunuzda açılsın, oradan kopyalayıp gönderin.</p></div>
           <p class="ipucu">Uygulamanızda <b>Para gönder → IBAN'a</b> adımını açın; bu bilgileri kopyalayıp yapıştırmanız yeterli.</p>
           <dl class="hesap">
             <div class="hesap-satir hesap-iban"><dt>IBAN</dt><dd><code id="iban-maltepe">TR63 0020 6001 4004 5144 1300 10</code><button class="kopya" type="button" data-kopyala="#iban-maltepe" data-bosluksuz aria-label="IBAN'ı kopyala"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3h11a2 2 0 0 1 2 2v11h-2V5H8V3zM5 7h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2zm0 2v10h10V9H5z"/></svg><span>Kopyala</span></button></dd></div>
@@ -175,6 +186,7 @@
           <h4><span class="adim-no">4</span> Bağışınızı bize bildirin</h4>
           <p>Havalenizi yaptıktan sonra telefonunuzu yazıp bildirin. Bağışınız hesabımıza geçince size <b>"bağışınız alınmıştır"</b> mesajı gönderelim.</p>
           <label class="ad-gir"><span>Telefonunuz</span><input type="tel" class="tel" autocomplete="tel" inputmode="tel" maxlength="20" placeholder="05xx xxx xx xx"></label>
+          <label class="onay makbuz-iste"><input type="checkbox"><span>Vergi indirimi için adıma <b>bağış makbuzu</b> istiyorum</span></label>
           <label class="onay bildir-onay"><input type="checkbox"><span><a href="kvkk.html" target="_blank">Aydınlatma metnini</a> okudum; adımın, telefonumun ve bağış bilgilerimin bağışımın kaydı ve bana dönüş için derneğe iletilmesini kabul ediyorum.</span></label>
           <p class="bildir-hata" role="alert" hidden></p>
           <div class="butonlar">
@@ -192,6 +204,7 @@
             <span class="etiket">Afrika</span>
             <h3>Afrika'ya Mushaf-ı Şerif</h3>
             <p>Afrika'da Kur'an okumayı öğrenen kardeşlerimize Mushaf-ı Şerif hediye ediyoruz. Hediye ettiğiniz her Mushaf, okundukça sevabı size de ulaşan bir hayırdır.</p>
+            <button type="button" class="paylas" data-paylas-baslik="Afrika'ya Mushaf-ı Şerif" data-paylas-metin="Afrika'ya Mushaf-ı Şerif: 1 Mushaf 200 TL. Siz de hayra ortak olun:" data-paylas-url="https://menekseilim.com.tr/bagis.html#bagis-mushaf"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 2a3 3 0 1 1-2.6 4.5L8.9 10.2a3 3 0 0 1 0 3.6l6.5 3.7A3 3 0 1 1 15 19l-6.9-3.9a3 3 0 1 1 0-6.2L15 5A3 3 0 0 1 18 2z"/></svg> Bu hayrı paylaşın</button>
           </div>
         </div>
         <div class="panel-adim">
@@ -209,6 +222,7 @@
         </div>
         <div class="panel-adim">
           <h4><span class="adim-no">3</span> Banka uygulamanızdan gönderin</h4>
+          <div class="karekod"><img src="img/qr/bagis-mushaf.svg" alt="" width="112" height="112" loading="lazy"><p><b>Banka uygulamanız telefonunuzda mı?</b> Karekodu telefonunuzun kamerasıyla okutun; bu bağış sayfası telefonunuzda açılsın, oradan kopyalayıp gönderin.</p></div>
           <p class="ipucu">Uygulamanızda <b>Para gönder → IBAN'a</b> adımını açın; bu bilgileri kopyalayıp yapıştırmanız yeterli.</p>
           <dl class="hesap">
             <div class="hesap-satir hesap-iban"><dt>IBAN</dt><dd><code id="iban-mushaf">TR90 0020 6001 4004 5144 1300 09</code><button class="kopya" type="button" data-kopyala="#iban-mushaf" data-bosluksuz aria-label="IBAN'ı kopyala"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3h11a2 2 0 0 1 2 2v11h-2V5H8V3zM5 7h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2zm0 2v10h10V9H5z"/></svg><span>Kopyala</span></button></dd></div>
@@ -223,6 +237,7 @@
           <h4><span class="adim-no">4</span> Bağışınızı bize bildirin</h4>
           <p>Havalenizi yaptıktan sonra telefonunuzu yazıp bildirin. Bağışınız hesabımıza geçince size <b>"bağışınız alınmıştır"</b> mesajı gönderelim.</p>
           <label class="ad-gir"><span>Telefonunuz</span><input type="tel" class="tel" autocomplete="tel" inputmode="tel" maxlength="20" placeholder="05xx xxx xx xx"></label>
+          <label class="onay makbuz-iste"><input type="checkbox"><span>Vergi indirimi için adıma <b>bağış makbuzu</b> istiyorum</span></label>
           <label class="onay bildir-onay"><input type="checkbox"><span><a href="kvkk.html" target="_blank">Aydınlatma metnini</a> okudum; adımın, telefonumun ve bağış bilgilerimin bağışımın kaydı ve bana dönüş için derneğe iletilmesini kabul ediyorum.</span></label>
           <p class="bildir-hata" role="alert" hidden></p>
           <div class="butonlar">
@@ -240,6 +255,7 @@
             <span class="etiket">Gazze</span>
             <h3>Gazze'ye bir sofra</h3>
             <p>Gazze'deki kardeşlerimize sıcak yemek ulaştırıyoruz. Bir öğünlük bağışınız, savaşın ortasındaki bir aileye hem karın tokluğu hem de yalnız olmadıklarını gösteren bir selamdır.</p>
+            <button type="button" class="paylas" data-paylas-baslik="Gazze'ye bir sofra" data-paylas-metin="Gazze'ye bir sofra: 1 öğün 200 TL. Siz de hayra ortak olun:" data-paylas-url="https://menekseilim.com.tr/bagis.html#bagis-gazze"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 2a3 3 0 1 1-2.6 4.5L8.9 10.2a3 3 0 0 1 0 3.6l6.5 3.7A3 3 0 1 1 15 19l-6.9-3.9a3 3 0 1 1 0-6.2L15 5A3 3 0 0 1 18 2z"/></svg> Bu hayrı paylaşın</button>
           </div>
         </div>
         <div class="panel-adim">
@@ -257,6 +273,7 @@
         </div>
         <div class="panel-adim">
           <h4><span class="adim-no">3</span> Banka uygulamanızdan gönderin</h4>
+          <div class="karekod"><img src="img/qr/bagis-gazze.svg" alt="" width="112" height="112" loading="lazy"><p><b>Banka uygulamanız telefonunuzda mı?</b> Karekodu telefonunuzun kamerasıyla okutun; bu bağış sayfası telefonunuzda açılsın, oradan kopyalayıp gönderin.</p></div>
           <p class="ipucu">Uygulamanızda <b>Para gönder → IBAN'a</b> adımını açın; bu bilgileri kopyalayıp yapıştırmanız yeterli.</p>
           <dl class="hesap">
             <div class="hesap-satir hesap-iban"><dt>IBAN</dt><dd><code id="iban-gazze">TR20 0020 6001 4004 5144 1300 08</code><button class="kopya" type="button" data-kopyala="#iban-gazze" data-bosluksuz aria-label="IBAN'ı kopyala"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3h11a2 2 0 0 1 2 2v11h-2V5H8V3zM5 7h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2zm0 2v10h10V9H5z"/></svg><span>Kopyala</span></button></dd></div>
@@ -271,6 +288,7 @@
           <h4><span class="adim-no">4</span> Bağışınızı bize bildirin</h4>
           <p>Havalenizi yaptıktan sonra telefonunuzu yazıp bildirin. Bağışınız hesabımıza geçince size <b>"bağışınız alınmıştır"</b> mesajı gönderelim.</p>
           <label class="ad-gir"><span>Telefonunuz</span><input type="tel" class="tel" autocomplete="tel" inputmode="tel" maxlength="20" placeholder="05xx xxx xx xx"></label>
+          <label class="onay makbuz-iste"><input type="checkbox"><span>Vergi indirimi için adıma <b>bağış makbuzu</b> istiyorum</span></label>
           <label class="onay bildir-onay"><input type="checkbox"><span><a href="kvkk.html" target="_blank">Aydınlatma metnini</a> okudum; adımın, telefonumun ve bağış bilgilerimin bağışımın kaydı ve bana dönüş için derneğe iletilmesini kabul ediyorum.</span></label>
           <p class="bildir-hata" role="alert" hidden></p>
           <div class="butonlar">
@@ -288,6 +306,7 @@
             <span class="etiket">Afrika</span>
             <h3>Afrika'da kurban</h3>
             <p>Kurban Bayramı'nda kurbanlarınızı Afrika'daki ihtiyaç sahibi ailelerle buluşturuyoruz. Vekâletiniz için açıklamaya adınızı ve soyadınızı yazmayı unutmayın.</p>
+            <button type="button" class="paylas" data-paylas-baslik="Afrika'da kurban" data-paylas-metin="Afrika'da kurban: Koyun 5.000 · Keçi 4.000 TL. Siz de hayra ortak olun:" data-paylas-url="https://menekseilim.com.tr/bagis.html#bagis-kurban"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 2a3 3 0 1 1-2.6 4.5L8.9 10.2a3 3 0 0 1 0 3.6l6.5 3.7A3 3 0 1 1 15 19l-6.9-3.9a3 3 0 1 1 0-6.2L15 5A3 3 0 0 1 18 2z"/></svg> Bu hayrı paylaşın</button>
           </div>
         </div>
         <div class="panel-adim">
@@ -306,6 +325,7 @@
         </div>
         <div class="panel-adim">
           <h4><span class="adim-no">3</span> Banka uygulamanızdan gönderin</h4>
+          <div class="karekod"><img src="img/qr/bagis-kurban.svg" alt="" width="112" height="112" loading="lazy"><p><b>Banka uygulamanız telefonunuzda mı?</b> Karekodu telefonunuzun kamerasıyla okutun; bu bağış sayfası telefonunuzda açılsın, oradan kopyalayıp gönderin.</p></div>
           <p class="ipucu">Uygulamanızda <b>Para gönder → IBAN'a</b> adımını açın; bu bilgileri kopyalayıp yapıştırmanız yeterli.</p>
           <dl class="hesap">
             <div class="hesap-satir hesap-iban"><dt>IBAN</dt><dd><code id="iban-kurban">TR47 0020 6001 4004 5144 1300 07</code><button class="kopya" type="button" data-kopyala="#iban-kurban" data-bosluksuz aria-label="IBAN'ı kopyala"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3h11a2 2 0 0 1 2 2v11h-2V5H8V3zM5 7h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2zm0 2v10h10V9H5z"/></svg><span>Kopyala</span></button></dd></div>
@@ -320,6 +340,7 @@
           <h4><span class="adim-no">4</span> Bağışınızı bize bildirin</h4>
           <p>Havalenizi yaptıktan sonra telefonunuzu yazıp bildirin. Bağışınız hesabımıza geçince size <b>"bağışınız alınmıştır"</b> mesajı gönderelim.</p>
           <label class="ad-gir"><span>Telefonunuz</span><input type="tel" class="tel" autocomplete="tel" inputmode="tel" maxlength="20" placeholder="05xx xxx xx xx"></label>
+          <label class="onay makbuz-iste"><input type="checkbox"><span>Vergi indirimi için adıma <b>bağış makbuzu</b> istiyorum</span></label>
           <label class="onay bildir-onay"><input type="checkbox"><span><a href="kvkk.html" target="_blank">Aydınlatma metnini</a> okudum; adımın, telefonumun ve bağış bilgilerimin bağışımın kaydı ve bana dönüş için derneğe iletilmesini kabul ediyorum.</span></label>
           <p class="bildir-hata" role="alert" hidden></p>
           <div class="butonlar">
@@ -338,6 +359,21 @@
       <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.7 4.5c2 0 3.6 1.1 4.3 2.6h2c.7-1.5 2.3-2.6 4.3-2.6 3.7 0 5.8 3.9 4.3 7.3C19.5 16.4 12 21 12 21z"/></svg><span><b>Dekontunuz makbuzdur</b>Banka dekontu alındı belgesi yerine geçer</span></li>
       <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12.00 1.00 L15.22 4.22 L19.78 4.22 L19.78 8.78 L23.00 12.00 L19.78 15.22 L19.78 19.78 L15.22 19.78 L12.00 23.00 L8.78 19.78 L4.22 19.78 L4.22 15.22 L1.00 12.00 L4.22 8.78 L4.22 4.22 L8.78 4.22Z"/></svg><span><b>Vergiden düşülebilir</b>Kanuni sınırlar içinde</span></li>
     </ul>
+  </div>
+</section>
+
+<section class="bolum bolum-bej" id="bagis-sorular">
+  <div class="kapsayici">
+    <div class="bolum-basi"><span class="ar-ust" lang="ar">أسئلة</span><h2>Bağışla ilgili sorular</h2><div class="sus"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12.00 1.00 L15.22 4.22 L19.78 4.22 L19.78 8.78 L23.00 12.00 L19.78 15.22 L19.78 19.78 L15.22 19.78 L12.00 23.00 L8.78 19.78 L4.22 19.78 L4.22 15.22 L1.00 12.00 L4.22 8.78 L4.22 4.22 L8.78 4.22Z"/></svg></div><p>Aklınıza takılan başka bir şey olursa bizi arayın ya da WhatsApp'tan yazın.</p></div>
+    <div class="sss">
+      <details><summary>Bağışımın ulaştığını nasıl anlarım?</summary><p>Havalenizi yaptıktan sonra bağış sayfasındaki 4. adımda telefonunuzu yazıp "Bağışımı bildir" düğmesine basın. Bağışınız hesabımıza geçince size WhatsApp'tan "bağışınız alınmıştır" mesajı göndeririz.</p></details>
+      <details><summary>Makbuz alabilir miyim?</summary><p>Banka dekontunuz bağış makbuzu yerine geçer. Ayrıca adınıza makbuz isterseniz bildirirken "bağış makbuzu istiyorum" kutusunu işaretlemeniz yeterli.</p></details>
+      <details><summary>Kurban vekâletimi nasıl veririm?</summary><p>Afrika'da kurban alanını seçtiğinizde havale açıklamasına "(vekâlet)" kendiliğinden eklenir. Adınızı yazıp bağışınızı bildirdiğinizde vekâletinizi kaydederiz.</p></details>
+      <details><summary>Her ay düzenli bağış yapabilir miyim?</summary><p>Evet. Banka uygulamanızdan seçtiğiniz bağış alanının IBAN'ına düzenli (otomatik) transfer talimatı verebilirsiniz.</p></details>
+      <details><summary>Zekât ve fitremi verebilir miyim?</summary><p>Zekât ve fitre için lütfen önce 0543 663 91 55 numarasından bizi arayın; hangi alana uygun olduğunu birlikte belirleyelim.</p></details>
+      <details><summary>Kartla bağış yapabilir miyim?</summary><p>Şu an bağışları banka havalesi ve EFT ile alıyoruz. Her banka uygulamasından birkaç dokunuşla gönderebilirsiniz.</p></details>
+      <details><summary>Bilgisayardayım, banka uygulamam telefonda. Ne yapmalıyım?</summary><p>3. adımdaki karekodu telefonunuzun kamerasıyla okutun. Aynı bağış sayfası telefonunuzda açılır; oradan IBAN'ı kopyalayıp gönderebilirsiniz.</p></details>
+    </div>
   </div>
 </section>
 
@@ -396,6 +432,7 @@
     <div>
       <h2>Bize ulaşın</h2>
       <ul>
+        <li><a href="iletisim.html#merkez">Merkez: Atalar Mahallesi, Kartal / İstanbul</a></li>
         <li>Eğitim ve kayıt: <a href="tel:+905511647464">0551 164 74 64</a></li>
         <li>Dernek ve bağış: <a href="tel:+905436639155">0543 663 91 55</a> · <a href="https://wa.me/905436639155" target="_blank" rel="noopener">WhatsApp</a></li>
         <li>Yardım kampanyaları: <a href="tel:+905369769978">0536 976 99 78</a></li>
