@@ -12,6 +12,40 @@ npm install
 npm run mac
 ```
 
+## Güncelleme — tek komut
+
+```bash
+cd HastaKayit
+npm run guncelle
+```
+
+Sonra `npm run mac`.
+
+`npm run guncelle`, elle yapıldığında üç ayrı yerde **sessizce** tıkanan işi
+sırayla ve her adımı ekrana yazarak yapar:
+
+1. `package-lock.json`'ın yerel değişikliğini atar. Bu dosyayı `npm install`
+   her seferinde değiştiriyor ve `git pull` "local changes would be
+   overwritten — Aborting" deyip iptal oluyordu. Dosya üretilen bir dosyadır,
+   atmak güvenlidir.
+2. `git pull` çalıştırır ve **başarısız olursa DURUR**. Eskiden burada devam
+   edilince eski sürüm derleniyor, her şey çalışıyormuş gibi görünüyordu —
+   doktorun Mac'i bu yüzden beş sürüm geride kaldı.
+3. Electron'un sağlamlığını kontrol eder: `dist` klasörünün VAR OLMASI yetmez,
+   yanındaki tek satırlık `path.txt` de doğru olmak zorundadır. Eksikse
+   dosyayı doğrudan GitHub'dan indirip onarır.
+4. `node build.mjs` ile derler ve sonunda sürüm numarasını yazar.
+
+Sonda yazan sürüm, beklediğiniz sürüm değilse durun — devam etmek eski kodu
+çalıştırır.
+
+### Electron "failed to install correctly" diyorsa
+
+`npm run guncelle` bunu kendiliğinden onarır. Hatanın sebebi neredeyse her
+zaman `node_modules/electron/path.txt` dosyasının eksikliğidir; `dist`
+klasörü yerinde dursa bile Electron bu dosya olmadan çalışmaz, ve Electron'un
+kendi onarım betiği "dist zaten var" deyip hiçbir şey yapmadan çıkar.
+
 ## Dağıtım paketi
 
 ```bash
