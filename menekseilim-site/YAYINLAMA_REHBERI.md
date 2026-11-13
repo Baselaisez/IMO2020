@@ -118,6 +118,30 @@ belirler. Sayfa toplamı ve havale açıklamasını hazırlar (ör. "Gazze yemek
 boşluksuz kopyalanır ki her banka uygulamasına yapışsın. Bağışçının yazdığı ad
 yalnızca kendi tarayıcısında kalır, hiçbir yere gönderilmez.
 
+**Telefonlar:** `olustur.py` içinde üç numara var:
+`TELEFON` (0551 164 74 64) eğitim, kayıt ve ilmî konular için;
+`DERNEK_TELEFON` (0543 663 91 55) dernek işleri ve bağış bildirimleri için;
+`BAGIS_TELEFON` (0536 976 99 78) Gazze, Afrika ve kurban kampanyaları için.
+
+**Bağış bildirimleri nasıl gelir?** Bağışçı havalesini yaptıktan sonra bağış
+sayfasının 4. adımında telefonunu yazıp "Bağışımı bildir" düğmesine basar:
+
+1. Bağışçının telefonunda, 0543 663 91 55'e gidecek hazır bir WhatsApp mesajı
+   açılır: adı, telefonu, bağış alanı, tutarı ve havale açıklaması. Bağışçı
+   gönder'e basar, isterse dekontu da ekler.
+2. Aynı anda dernek e-postasına (`bagis-bildir.php`) bir kayıt düşer. İçinde
+   bağışçıya **tek dokunuşla "bağışınız alınmıştır" WhatsApp mesajı** gönderme
+   bağlantısı vardır. Gmail uygulaması telefonda açıksa bildirim olarak görünür.
+3. Siz bağışın hesaba geçtiğini bankadan kontrol edip WhatsApp'tan cevap
+   verirsiniz. Hazır cevap: *"Selamün aleyküm, … için gönderdiğiniz … TL
+   bağışınız alınmıştır. Allah kabul etsin, hayrınızı daim eylesin."*
+
+İleride bildirimin SMS olarak otomatik gelmesi istenirse bir SMS firmasıyla
+(Netgsm, İleti Merkezi gibi) anlaşıp API bilgisini vermeniz yeterli;
+`bagis-bildir.php`'ye eklenir. "Bağışınız alınmıştır" mesajı ise bağışın
+bankaya geçtiği görülmeden otomatik gönderilmemeli; kartla online ödeme
+eklenirse bu da otomatik olur.
+
 **Kartla online bağış (ileride):** Mümkün ve güvenli bir şekilde eklenebilir.
 Bunun için derneğin lisanslı bir ödeme kuruluşuyla (ör. iyzico, PayTR) ya da
 bankasıyla (Türkiye Finans sanal POS) sözleşme yapması gerekir. Kart bilgileri
@@ -541,6 +565,7 @@ menekseilim-site/          ← sunucuya (public_html) yüklenen klasör
 ├── 404.html               Bulunamayan sayfa
 ├── onizleme.html          Tek dosyalık önizleme (sunucuya YÜKLENMEZ)
 ├── iletisim-gonder.php    Form gönderici (PHP)
+├── bagis-bildir.php      Bağış bildirimi: dernek e-postasına kayıt + "bağışınız alınmıştır" bağlantısı (PHP)
 ├── .htaccess              Yönlendirmeler, önbellek, güvenlik ayarları
 ├── CNAME, robots.txt, sitemap.xml, favicon.svg
 ├── css/style.css          Tüm görünüm

@@ -496,6 +496,11 @@ html.acilis-kapandi .acilis { display: none; }
 .ad-gir { display: grid; gap: .35rem; font-weight: 600; margin-bottom: 1rem; font-size: 1rem; }
 .ad-gir small { font-weight: 400; color: var(--metin-soluk); }
 .ad-gir input { width: 100%; max-width: 26rem; padding: .7rem .9rem; border: 1.5px solid var(--cizgi); border-radius: var(--radius-kucuk); background: #FFFEFA; }
+.bildir-onay { margin: .25rem 0 1rem; }
+.bildir-hata, .bildir-sonuc { padding: .7rem 1rem; border-radius: var(--radius-kucuk); font-weight: 600; font-size: .98rem; }
+.bildir-hata { color: var(--hata); background: #FBE9E7; }
+.bildir-sonuc { color: var(--basari); background: #E6F3EA; margin-top: 1rem; }
+.bildir-hata[hidden], .bildir-sonuc[hidden] { display: none; }
 .whatsapp { background: #1F7A4D; }
 .whatsapp:hover { background: #17633E; }
 @media (max-width: 560px) { .hesap-satir { grid-template-columns: 1fr; gap: .15rem; } .hesap-iban code { font-size: clamp(.8rem, 3.65vw, 1rem); letter-spacing: -.01em; } }

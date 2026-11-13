@@ -149,8 +149,13 @@
       var adet = p.querySelector("input.adet");
       var tutarGir = p.querySelector("input.tutar-gir");
       var adGir = p.querySelector("input.ad");
-      var wa = p.querySelector("a.whatsapp");
-      var waTaban = wa ? wa.getAttribute("href").split("?")[0] : "";
+      var telGir = p.querySelector("input.tel");
+      var onay = p.querySelector(".bildir-onay input");
+      var bildir = p.querySelector("a.bildir-btn");
+      var bildirTaban = bildir ? bildir.getAttribute("href").split("?")[0] : "";
+      var hataKutu = p.querySelector(".bildir-hata");
+      var sonucKutu = p.querySelector(".bildir-sonuc");
+      var son = { toplam: "", aciklama: "" };
       var secilenTutar = 0;
       var ilkTutar = p.querySelector(".tutar-btn.secili");
       if (ilkTutar) secilenTutar = +ilkTutar.getAttribute("data-tutar");
@@ -179,11 +184,61 @@
         p.querySelectorAll(".toplam-tutar").forEach(function (el) { el.textContent = bicim(toplam); });
         var aciklama = p.querySelector(".aciklama-yaz");
         if (aciklama) aciklama.textContent = metin;
-        if (wa) {
-          wa.href = waTaban + "?text=" + encodeURIComponent("Selamün aleyküm. " + p.getAttribute("data-baslik") +
-            " için " + bicim(toplam) + " bağış gönderdim, dekontum ekte." + (ad ? " " + ad : ""));
+        son.toplam = bicim(toplam);
+        son.aciklama = metin;
+        if (bildir) {
+          var tel = telGir ? telGir.value.trim() : "";
+          bildir.href = bildirTaban + "?text=" + encodeURIComponent(
+            "Selamün aleyküm, bağışımı bildirmek istiyorum.\n\n" +
+            "Ad soyad: " + (ad || "-") + "\n" +
+            "Telefon: " + (tel || "-") + "\n" +
+            "Bağış: " + p.getAttribute("data-baslik") + "\n" +
+            "Tutar: " + son.toplam + "\n" +
+            "Açıklama: " + metin + "\n\n" +
+            "Dekontumu ekliyorum.");
         }
       };
+
+      // 4. adım: bağış bildirimi (WhatsApp mesajı + sunucuda PHP varsa e-posta kaydı)
+      if (bildir) {
+        bildir.addEventListener("click", function (e) {
+          var ad = adGir ? adGir.value.trim() : "";
+          var tel = telGir ? telGir.value.trim() : "";
+          var hata = "", odak = null;
+          if (!ad) { hata = "Lütfen 3. adımda adınızı ve soyadınızı yazın."; odak = adGir; }
+          else if (tel.replace(/\D/g, "").length < 10) { hata = "Size dönebilmemiz için telefon numaranızı yazın."; odak = telGir; }
+          else if (onay && !onay.checked) { hata = "Devam etmek için aydınlatma metnini onaylayın."; odak = onay; }
+          if (hata) {
+            e.preventDefault();
+            hataKutu.textContent = hata;
+            hataKutu.hidden = false;
+            if (sonucKutu) sonucKutu.hidden = true;
+            if (odak) odak.focus();
+            return;
+          }
+          hataKutu.hidden = true;
+          guncelle();
+          try {
+            var veri = new FormData();
+            veri.append("ad", ad);
+            veri.append("telefon", tel);
+            veri.append("alan", p.getAttribute("data-baslik"));
+            veri.append("tutar", son.toplam);
+            veri.append("aciklama", son.aciklama);
+            veri.append("kvkk", "1");
+            fetch("bagis-bildir.php", { method: "POST", body: veri, keepalive: true, headers: { "Accept": "application/json" } })
+              .catch(function () { /* sunucu yoksa (önizleme) WhatsApp mesajı yeterli */ });
+          } catch (err) { /* yoksay */ }
+          if (sonucKutu) {
+            sonucKutu.textContent = "Teşekkür ederiz! WhatsApp'ta açılan mesajı göndermeniz yeterli. Bağışınız hesabımıza geçince size \"bağışınız alınmıştır\" mesajı göndereceğiz.";
+            sonucKutu.hidden = false;
+          }
+        });
+        if (telGir) telGir.addEventListener("input", guncelle);
+        [adGir, telGir, onay].forEach(function (el) {
+          if (el) el.addEventListener("input", function () { if (hataKutu) hataKutu.hidden = true; });
+        });
+      }
 
       if (adet) {
         p.querySelectorAll(".adet-btn").forEach(function (b) {

@@ -120,16 +120,21 @@
             <div class="hesap-satir"><dt>Açıklama</dt><dd><span id="aciklama-talebe" class="aciklama-yaz">Talebe sofrası</span><button class="kopya" type="button" data-kopyala="#aciklama-talebe" aria-label="Açıklamayı kopyala"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3h11a2 2 0 0 1 2 2v11h-2V5H8V3zM5 7h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2zm0 2v10h10V9H5z"/></svg><span>Kopyala</span></button></dd></div>
             <div class="hesap-satir"><dt>Banka</dt><dd>Türkiye Finans Katılım Bankası</dd></div>
           </dl>
-          <label class="ad-gir"><span>Adınız soyadınız <small>(isteğe bağlı; açıklamaya eklenir, bize gönderilmez)</small></span><input type="text" class="ad" autocomplete="name" maxlength="60"></label>
+          <label class="ad-gir"><span>Adınız soyadınız <small>(açıklamaya eklenir)</small></span><input type="text" class="ad" autocomplete="name" maxlength="60"></label>
           <p class="ipucu">Her ay düzenli destek olmak isterseniz banka uygulamanızdan <b>düzenli transfer talimatı</b> verebilirsiniz.</p>
         </div>
         <div class="panel-adim">
-          <h4><span class="adim-no">4</span> Dekontu bize iletin <small>isteğe bağlı</small></h4>
-          <p>Banka dekontunuz bağış makbuzu yerine geçer. Bize iletirseniz bağışınızı kayda geçiririz; isterseniz adınıza makbuz da düzenleriz.</p>
+          <h4><span class="adim-no">4</span> Bağışınızı bize bildirin</h4>
+          <p>Havalenizi yaptıktan sonra telefonunuzu yazıp bildirin. Bağışınız hesabımıza geçince size <b>"bağışınız alınmıştır"</b> mesajı gönderelim.</p>
+          <label class="ad-gir"><span>Telefonunuz</span><input type="tel" class="tel" autocomplete="tel" inputmode="tel" maxlength="20" placeholder="05xx xxx xx xx"></label>
+          <label class="onay bildir-onay"><input type="checkbox"><span><a href="kvkk.html" target="_blank">Aydınlatma metnini</a> okudum; adımın, telefonumun ve bağış bilgilerimin bağışımın kaydı ve bana dönüş için derneğe iletilmesini kabul ediyorum.</span></label>
+          <p class="bildir-hata" role="alert" hidden></p>
           <div class="butonlar">
-            <a class="btn btn-yesil whatsapp" href="https://wa.me/905436639155?text=Selam%C3%BCn%20aleyk%C3%BCm.%20Talebelerimizin%20sofras%C4%B1%20i%C3%A7in%20500%20TL%20ba%C4%9F%C4%B1%C5%9F%20g%C3%B6nderdim%2C%20dekontum%20ekte." target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 2a8 8 0 1 1-4.1 14.9l-.4-.2-2.9.8.8-2.8-.2-.4A8 8 0 0 1 12 4zM8.9 7.6c-.2 0-.5 0-.8.4-.3.3-1 1-1 2.3s1 2.6 1.1 2.8c.1.2 2 3.1 4.9 4.3 2.4 1 2.9.8 3.4.7.5 0 1.7-.7 1.9-1.4.2-.7.2-1.2.2-1.4l-.6-.3-1.9-.9c-.3-.1-.4-.1-.6.1l-.9 1.1c-.2.2-.3.2-.6.1a7.3 7.3 0 0 1-3.6-3.2c-.3-.5.3-.4.8-1.4.1-.2 0-.3 0-.5l-.9-2.1c-.2-.5-.4-.5-.6-.5h-.8z"/></svg> WhatsApp'tan gönder</a>
+            <a class="btn btn-yesil whatsapp bildir-btn" href="https://wa.me/905436639155?text=Selam%C3%BCn%20aleyk%C3%BCm%2C%20ba%C4%9F%C4%B1%C5%9F%C4%B1m%C4%B1%20bildirmek%20istiyorum.%20Ba%C4%9F%C4%B1%C5%9F%3A%20Talebelerimizin%20sofras%C4%B1%2C%20tutar%3A%20500%20TL." target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 2a8 8 0 1 1-4.1 14.9l-.4-.2-2.9.8.8-2.8-.2-.4A8 8 0 0 1 12 4zM8.9 7.6c-.2 0-.5 0-.8.4-.3.3-1 1-1 2.3s1 2.6 1.1 2.8c.1.2 2 3.1 4.9 4.3 2.4 1 2.9.8 3.4.7.5 0 1.7-.7 1.9-1.4.2-.7.2-1.2.2-1.4l-.6-.3-1.9-.9c-.3-.1-.4-.1-.6.1l-.9 1.1c-.2.2-.3.2-.6.1a7.3 7.3 0 0 1-3.6-3.2c-.3-.5.3-.4.8-1.4.1-.2 0-.3 0-.5l-.9-2.1c-.2-.5-.4-.5-.6-.5h-.8z"/></svg> Bağışımı bildir</a>
             <a class="btn btn-cizgi" href="tel:+905436639155"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25c1.1.37 2.3.57 3.6.57a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1L6.6 10.8z"/></svg> 0543 663 91 55</a>
           </div>
+          <p class="bildir-sonuc" role="status" hidden></p>
+          <p class="ipucu">Dekontunuzu da aynı WhatsApp yazışmasına ekleyebilirsiniz; banka dekontu bağış makbuzu yerine geçer. İsterseniz adınıza makbuz da düzenleriz.</p>
         </div>
       </div>
       <div class="bagis-panel" id="bagis-maltepe" data-tur="adet" data-kisa="Maltepe külliye" data-baslik="Maltepe yeni külliyemiz" data-fiyat="2500" data-birim="m²">
@@ -164,15 +169,20 @@
             <div class="hesap-satir"><dt>Açıklama</dt><dd><span id="aciklama-maltepe" class="aciklama-yaz">Maltepe külliye 1 m²</span><button class="kopya" type="button" data-kopyala="#aciklama-maltepe" aria-label="Açıklamayı kopyala"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3h11a2 2 0 0 1 2 2v11h-2V5H8V3zM5 7h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2zm0 2v10h10V9H5z"/></svg><span>Kopyala</span></button></dd></div>
             <div class="hesap-satir"><dt>Banka</dt><dd>Türkiye Finans Katılım Bankası</dd></div>
           </dl>
-          <label class="ad-gir"><span>Adınız soyadınız <small>(isteğe bağlı; açıklamaya eklenir, bize gönderilmez)</small></span><input type="text" class="ad" autocomplete="name" maxlength="60"></label>
+          <label class="ad-gir"><span>Adınız soyadınız <small>(açıklamaya eklenir)</small></span><input type="text" class="ad" autocomplete="name" maxlength="60"></label>
         </div>
         <div class="panel-adim">
-          <h4><span class="adim-no">4</span> Dekontu bize iletin <small>isteğe bağlı</small></h4>
-          <p>Banka dekontunuz bağış makbuzu yerine geçer. Bize iletirseniz bağışınızı kayda geçiririz; isterseniz adınıza makbuz da düzenleriz.</p>
+          <h4><span class="adim-no">4</span> Bağışınızı bize bildirin</h4>
+          <p>Havalenizi yaptıktan sonra telefonunuzu yazıp bildirin. Bağışınız hesabımıza geçince size <b>"bağışınız alınmıştır"</b> mesajı gönderelim.</p>
+          <label class="ad-gir"><span>Telefonunuz</span><input type="tel" class="tel" autocomplete="tel" inputmode="tel" maxlength="20" placeholder="05xx xxx xx xx"></label>
+          <label class="onay bildir-onay"><input type="checkbox"><span><a href="kvkk.html" target="_blank">Aydınlatma metnini</a> okudum; adımın, telefonumun ve bağış bilgilerimin bağışımın kaydı ve bana dönüş için derneğe iletilmesini kabul ediyorum.</span></label>
+          <p class="bildir-hata" role="alert" hidden></p>
           <div class="butonlar">
-            <a class="btn btn-yesil whatsapp" href="https://wa.me/905369769978?text=Selam%C3%BCn%20aleyk%C3%BCm.%20Maltepe%20yeni%20k%C3%BClliyemiz%20i%C3%A7in%202.500%20TL%20ba%C4%9F%C4%B1%C5%9F%20g%C3%B6nderdim%2C%20dekontum%20ekte." target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 2a8 8 0 1 1-4.1 14.9l-.4-.2-2.9.8.8-2.8-.2-.4A8 8 0 0 1 12 4zM8.9 7.6c-.2 0-.5 0-.8.4-.3.3-1 1-1 2.3s1 2.6 1.1 2.8c.1.2 2 3.1 4.9 4.3 2.4 1 2.9.8 3.4.7.5 0 1.7-.7 1.9-1.4.2-.7.2-1.2.2-1.4l-.6-.3-1.9-.9c-.3-.1-.4-.1-.6.1l-.9 1.1c-.2.2-.3.2-.6.1a7.3 7.3 0 0 1-3.6-3.2c-.3-.5.3-.4.8-1.4.1-.2 0-.3 0-.5l-.9-2.1c-.2-.5-.4-.5-.6-.5h-.8z"/></svg> WhatsApp'tan gönder</a>
+            <a class="btn btn-yesil whatsapp bildir-btn" href="https://wa.me/905436639155?text=Selam%C3%BCn%20aleyk%C3%BCm%2C%20ba%C4%9F%C4%B1%C5%9F%C4%B1m%C4%B1%20bildirmek%20istiyorum.%20Ba%C4%9F%C4%B1%C5%9F%3A%20Maltepe%20yeni%20k%C3%BClliyemiz%2C%20tutar%3A%202.500%20TL." target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 2a8 8 0 1 1-4.1 14.9l-.4-.2-2.9.8.8-2.8-.2-.4A8 8 0 0 1 12 4zM8.9 7.6c-.2 0-.5 0-.8.4-.3.3-1 1-1 2.3s1 2.6 1.1 2.8c.1.2 2 3.1 4.9 4.3 2.4 1 2.9.8 3.4.7.5 0 1.7-.7 1.9-1.4.2-.7.2-1.2.2-1.4l-.6-.3-1.9-.9c-.3-.1-.4-.1-.6.1l-.9 1.1c-.2.2-.3.2-.6.1a7.3 7.3 0 0 1-3.6-3.2c-.3-.5.3-.4.8-1.4.1-.2 0-.3 0-.5l-.9-2.1c-.2-.5-.4-.5-.6-.5h-.8z"/></svg> Bağışımı bildir</a>
             <a class="btn btn-cizgi" href="tel:+905369769978"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25c1.1.37 2.3.57 3.6.57a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1L6.6 10.8z"/></svg> 0536 976 99 78</a>
           </div>
+          <p class="bildir-sonuc" role="status" hidden></p>
+          <p class="ipucu">Dekontunuzu da aynı WhatsApp yazışmasına ekleyebilirsiniz; banka dekontu bağış makbuzu yerine geçer. İsterseniz adınıza makbuz da düzenleriz.</p>
         </div>
       </div>
       <div class="bagis-panel" id="bagis-mushaf" data-tur="adet" data-kisa="Afrika Mushaf" data-baslik="Afrika'ya Mushaf-ı Şerif" data-fiyat="200" data-birim="adet">
@@ -207,15 +217,20 @@
             <div class="hesap-satir"><dt>Açıklama</dt><dd><span id="aciklama-mushaf" class="aciklama-yaz">Afrika Mushaf 1 adet</span><button class="kopya" type="button" data-kopyala="#aciklama-mushaf" aria-label="Açıklamayı kopyala"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3h11a2 2 0 0 1 2 2v11h-2V5H8V3zM5 7h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2zm0 2v10h10V9H5z"/></svg><span>Kopyala</span></button></dd></div>
             <div class="hesap-satir"><dt>Banka</dt><dd>Türkiye Finans Katılım Bankası</dd></div>
           </dl>
-          <label class="ad-gir"><span>Adınız soyadınız <small>(isteğe bağlı; açıklamaya eklenir, bize gönderilmez)</small></span><input type="text" class="ad" autocomplete="name" maxlength="60"></label>
+          <label class="ad-gir"><span>Adınız soyadınız <small>(açıklamaya eklenir)</small></span><input type="text" class="ad" autocomplete="name" maxlength="60"></label>
         </div>
         <div class="panel-adim">
-          <h4><span class="adim-no">4</span> Dekontu bize iletin <small>isteğe bağlı</small></h4>
-          <p>Banka dekontunuz bağış makbuzu yerine geçer. Bize iletirseniz bağışınızı kayda geçiririz; isterseniz adınıza makbuz da düzenleriz.</p>
+          <h4><span class="adim-no">4</span> Bağışınızı bize bildirin</h4>
+          <p>Havalenizi yaptıktan sonra telefonunuzu yazıp bildirin. Bağışınız hesabımıza geçince size <b>"bağışınız alınmıştır"</b> mesajı gönderelim.</p>
+          <label class="ad-gir"><span>Telefonunuz</span><input type="tel" class="tel" autocomplete="tel" inputmode="tel" maxlength="20" placeholder="05xx xxx xx xx"></label>
+          <label class="onay bildir-onay"><input type="checkbox"><span><a href="kvkk.html" target="_blank">Aydınlatma metnini</a> okudum; adımın, telefonumun ve bağış bilgilerimin bağışımın kaydı ve bana dönüş için derneğe iletilmesini kabul ediyorum.</span></label>
+          <p class="bildir-hata" role="alert" hidden></p>
           <div class="butonlar">
-            <a class="btn btn-yesil whatsapp" href="https://wa.me/905369769978?text=Selam%C3%BCn%20aleyk%C3%BCm.%20Afrika%27ya%20Mushaf-%C4%B1%20%C5%9Eerif%20i%C3%A7in%20200%20TL%20ba%C4%9F%C4%B1%C5%9F%20g%C3%B6nderdim%2C%20dekontum%20ekte." target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 2a8 8 0 1 1-4.1 14.9l-.4-.2-2.9.8.8-2.8-.2-.4A8 8 0 0 1 12 4zM8.9 7.6c-.2 0-.5 0-.8.4-.3.3-1 1-1 2.3s1 2.6 1.1 2.8c.1.2 2 3.1 4.9 4.3 2.4 1 2.9.8 3.4.7.5 0 1.7-.7 1.9-1.4.2-.7.2-1.2.2-1.4l-.6-.3-1.9-.9c-.3-.1-.4-.1-.6.1l-.9 1.1c-.2.2-.3.2-.6.1a7.3 7.3 0 0 1-3.6-3.2c-.3-.5.3-.4.8-1.4.1-.2 0-.3 0-.5l-.9-2.1c-.2-.5-.4-.5-.6-.5h-.8z"/></svg> WhatsApp'tan gönder</a>
+            <a class="btn btn-yesil whatsapp bildir-btn" href="https://wa.me/905436639155?text=Selam%C3%BCn%20aleyk%C3%BCm%2C%20ba%C4%9F%C4%B1%C5%9F%C4%B1m%C4%B1%20bildirmek%20istiyorum.%20Ba%C4%9F%C4%B1%C5%9F%3A%20Afrika%27ya%20Mushaf-%C4%B1%20%C5%9Eerif%2C%20tutar%3A%20200%20TL." target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 2a8 8 0 1 1-4.1 14.9l-.4-.2-2.9.8.8-2.8-.2-.4A8 8 0 0 1 12 4zM8.9 7.6c-.2 0-.5 0-.8.4-.3.3-1 1-1 2.3s1 2.6 1.1 2.8c.1.2 2 3.1 4.9 4.3 2.4 1 2.9.8 3.4.7.5 0 1.7-.7 1.9-1.4.2-.7.2-1.2.2-1.4l-.6-.3-1.9-.9c-.3-.1-.4-.1-.6.1l-.9 1.1c-.2.2-.3.2-.6.1a7.3 7.3 0 0 1-3.6-3.2c-.3-.5.3-.4.8-1.4.1-.2 0-.3 0-.5l-.9-2.1c-.2-.5-.4-.5-.6-.5h-.8z"/></svg> Bağışımı bildir</a>
             <a class="btn btn-cizgi" href="tel:+905369769978"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25c1.1.37 2.3.57 3.6.57a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1L6.6 10.8z"/></svg> 0536 976 99 78</a>
           </div>
+          <p class="bildir-sonuc" role="status" hidden></p>
+          <p class="ipucu">Dekontunuzu da aynı WhatsApp yazışmasına ekleyebilirsiniz; banka dekontu bağış makbuzu yerine geçer. İsterseniz adınıza makbuz da düzenleriz.</p>
         </div>
       </div>
       <div class="bagis-panel" id="bagis-gazze" data-tur="adet" data-kisa="Gazze yemek" data-baslik="Gazze'ye bir sofra" data-fiyat="200" data-birim="öğün">
@@ -250,15 +265,20 @@
             <div class="hesap-satir"><dt>Açıklama</dt><dd><span id="aciklama-gazze" class="aciklama-yaz">Gazze yemek 1 öğün</span><button class="kopya" type="button" data-kopyala="#aciklama-gazze" aria-label="Açıklamayı kopyala"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3h11a2 2 0 0 1 2 2v11h-2V5H8V3zM5 7h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2zm0 2v10h10V9H5z"/></svg><span>Kopyala</span></button></dd></div>
             <div class="hesap-satir"><dt>Banka</dt><dd>Türkiye Finans Katılım Bankası</dd></div>
           </dl>
-          <label class="ad-gir"><span>Adınız soyadınız <small>(isteğe bağlı; açıklamaya eklenir, bize gönderilmez)</small></span><input type="text" class="ad" autocomplete="name" maxlength="60"></label>
+          <label class="ad-gir"><span>Adınız soyadınız <small>(açıklamaya eklenir)</small></span><input type="text" class="ad" autocomplete="name" maxlength="60"></label>
         </div>
         <div class="panel-adim">
-          <h4><span class="adim-no">4</span> Dekontu bize iletin <small>isteğe bağlı</small></h4>
-          <p>Banka dekontunuz bağış makbuzu yerine geçer. Bize iletirseniz bağışınızı kayda geçiririz; isterseniz adınıza makbuz da düzenleriz.</p>
+          <h4><span class="adim-no">4</span> Bağışınızı bize bildirin</h4>
+          <p>Havalenizi yaptıktan sonra telefonunuzu yazıp bildirin. Bağışınız hesabımıza geçince size <b>"bağışınız alınmıştır"</b> mesajı gönderelim.</p>
+          <label class="ad-gir"><span>Telefonunuz</span><input type="tel" class="tel" autocomplete="tel" inputmode="tel" maxlength="20" placeholder="05xx xxx xx xx"></label>
+          <label class="onay bildir-onay"><input type="checkbox"><span><a href="kvkk.html" target="_blank">Aydınlatma metnini</a> okudum; adımın, telefonumun ve bağış bilgilerimin bağışımın kaydı ve bana dönüş için derneğe iletilmesini kabul ediyorum.</span></label>
+          <p class="bildir-hata" role="alert" hidden></p>
           <div class="butonlar">
-            <a class="btn btn-yesil whatsapp" href="https://wa.me/905369769978?text=Selam%C3%BCn%20aleyk%C3%BCm.%20Gazze%27ye%20bir%20sofra%20i%C3%A7in%20200%20TL%20ba%C4%9F%C4%B1%C5%9F%20g%C3%B6nderdim%2C%20dekontum%20ekte." target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 2a8 8 0 1 1-4.1 14.9l-.4-.2-2.9.8.8-2.8-.2-.4A8 8 0 0 1 12 4zM8.9 7.6c-.2 0-.5 0-.8.4-.3.3-1 1-1 2.3s1 2.6 1.1 2.8c.1.2 2 3.1 4.9 4.3 2.4 1 2.9.8 3.4.7.5 0 1.7-.7 1.9-1.4.2-.7.2-1.2.2-1.4l-.6-.3-1.9-.9c-.3-.1-.4-.1-.6.1l-.9 1.1c-.2.2-.3.2-.6.1a7.3 7.3 0 0 1-3.6-3.2c-.3-.5.3-.4.8-1.4.1-.2 0-.3 0-.5l-.9-2.1c-.2-.5-.4-.5-.6-.5h-.8z"/></svg> WhatsApp'tan gönder</a>
+            <a class="btn btn-yesil whatsapp bildir-btn" href="https://wa.me/905436639155?text=Selam%C3%BCn%20aleyk%C3%BCm%2C%20ba%C4%9F%C4%B1%C5%9F%C4%B1m%C4%B1%20bildirmek%20istiyorum.%20Ba%C4%9F%C4%B1%C5%9F%3A%20Gazze%27ye%20bir%20sofra%2C%20tutar%3A%20200%20TL." target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 2a8 8 0 1 1-4.1 14.9l-.4-.2-2.9.8.8-2.8-.2-.4A8 8 0 0 1 12 4zM8.9 7.6c-.2 0-.5 0-.8.4-.3.3-1 1-1 2.3s1 2.6 1.1 2.8c.1.2 2 3.1 4.9 4.3 2.4 1 2.9.8 3.4.7.5 0 1.7-.7 1.9-1.4.2-.7.2-1.2.2-1.4l-.6-.3-1.9-.9c-.3-.1-.4-.1-.6.1l-.9 1.1c-.2.2-.3.2-.6.1a7.3 7.3 0 0 1-3.6-3.2c-.3-.5.3-.4.8-1.4.1-.2 0-.3 0-.5l-.9-2.1c-.2-.5-.4-.5-.6-.5h-.8z"/></svg> Bağışımı bildir</a>
             <a class="btn btn-cizgi" href="tel:+905369769978"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25c1.1.37 2.3.57 3.6.57a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1L6.6 10.8z"/></svg> 0536 976 99 78</a>
           </div>
+          <p class="bildir-sonuc" role="status" hidden></p>
+          <p class="ipucu">Dekontunuzu da aynı WhatsApp yazışmasına ekleyebilirsiniz; banka dekontu bağış makbuzu yerine geçer. İsterseniz adınıza makbuz da düzenleriz.</p>
         </div>
       </div>
       <div class="bagis-panel" id="bagis-kurban" data-tur="adet" data-kisa="Afrika kurban" data-baslik="Afrika'da kurban" data-fiyat="5000" data-birim="adet" data-vekalet>
@@ -294,15 +314,20 @@
             <div class="hesap-satir"><dt>Açıklama</dt><dd><span id="aciklama-kurban" class="aciklama-yaz">Afrika kurban 1 koyun (vekâlet)</span><button class="kopya" type="button" data-kopyala="#aciklama-kurban" aria-label="Açıklamayı kopyala"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3h11a2 2 0 0 1 2 2v11h-2V5H8V3zM5 7h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2zm0 2v10h10V9H5z"/></svg><span>Kopyala</span></button></dd></div>
             <div class="hesap-satir"><dt>Banka</dt><dd>Türkiye Finans Katılım Bankası</dd></div>
           </dl>
-          <label class="ad-gir"><span>Adınız soyadınız <small>(isteğe bağlı; açıklamaya eklenir, bize gönderilmez)</small></span><input type="text" class="ad" autocomplete="name" maxlength="60"></label>
+          <label class="ad-gir"><span>Adınız soyadınız <small>(açıklamaya eklenir)</small></span><input type="text" class="ad" autocomplete="name" maxlength="60"></label>
         </div>
         <div class="panel-adim">
-          <h4><span class="adim-no">4</span> Dekontu bize iletin <small>isteğe bağlı</small></h4>
-          <p>Banka dekontunuz bağış makbuzu yerine geçer. Bize iletirseniz bağışınızı kayda geçiririz; isterseniz adınıza makbuz da düzenleriz.</p>
+          <h4><span class="adim-no">4</span> Bağışınızı bize bildirin</h4>
+          <p>Havalenizi yaptıktan sonra telefonunuzu yazıp bildirin. Bağışınız hesabımıza geçince size <b>"bağışınız alınmıştır"</b> mesajı gönderelim.</p>
+          <label class="ad-gir"><span>Telefonunuz</span><input type="tel" class="tel" autocomplete="tel" inputmode="tel" maxlength="20" placeholder="05xx xxx xx xx"></label>
+          <label class="onay bildir-onay"><input type="checkbox"><span><a href="kvkk.html" target="_blank">Aydınlatma metnini</a> okudum; adımın, telefonumun ve bağış bilgilerimin bağışımın kaydı ve bana dönüş için derneğe iletilmesini kabul ediyorum.</span></label>
+          <p class="bildir-hata" role="alert" hidden></p>
           <div class="butonlar">
-            <a class="btn btn-yesil whatsapp" href="https://wa.me/905369769978?text=Selam%C3%BCn%20aleyk%C3%BCm.%20Afrika%27da%20kurban%20i%C3%A7in%205.000%20TL%20ba%C4%9F%C4%B1%C5%9F%20g%C3%B6nderdim%2C%20dekontum%20ekte." target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 2a8 8 0 1 1-4.1 14.9l-.4-.2-2.9.8.8-2.8-.2-.4A8 8 0 0 1 12 4zM8.9 7.6c-.2 0-.5 0-.8.4-.3.3-1 1-1 2.3s1 2.6 1.1 2.8c.1.2 2 3.1 4.9 4.3 2.4 1 2.9.8 3.4.7.5 0 1.7-.7 1.9-1.4.2-.7.2-1.2.2-1.4l-.6-.3-1.9-.9c-.3-.1-.4-.1-.6.1l-.9 1.1c-.2.2-.3.2-.6.1a7.3 7.3 0 0 1-3.6-3.2c-.3-.5.3-.4.8-1.4.1-.2 0-.3 0-.5l-.9-2.1c-.2-.5-.4-.5-.6-.5h-.8z"/></svg> WhatsApp'tan gönder</a>
+            <a class="btn btn-yesil whatsapp bildir-btn" href="https://wa.me/905436639155?text=Selam%C3%BCn%20aleyk%C3%BCm%2C%20ba%C4%9F%C4%B1%C5%9F%C4%B1m%C4%B1%20bildirmek%20istiyorum.%20Ba%C4%9F%C4%B1%C5%9F%3A%20Afrika%27da%20kurban%2C%20tutar%3A%205.000%20TL." target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 2a8 8 0 1 1-4.1 14.9l-.4-.2-2.9.8.8-2.8-.2-.4A8 8 0 0 1 12 4zM8.9 7.6c-.2 0-.5 0-.8.4-.3.3-1 1-1 2.3s1 2.6 1.1 2.8c.1.2 2 3.1 4.9 4.3 2.4 1 2.9.8 3.4.7.5 0 1.7-.7 1.9-1.4.2-.7.2-1.2.2-1.4l-.6-.3-1.9-.9c-.3-.1-.4-.1-.6.1l-.9 1.1c-.2.2-.3.2-.6.1a7.3 7.3 0 0 1-3.6-3.2c-.3-.5.3-.4.8-1.4.1-.2 0-.3 0-.5l-.9-2.1c-.2-.5-.4-.5-.6-.5h-.8z"/></svg> Bağışımı bildir</a>
             <a class="btn btn-cizgi" href="tel:+905369769978"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25c1.1.37 2.3.57 3.6.57a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1L6.6 10.8z"/></svg> 0536 976 99 78</a>
           </div>
+          <p class="bildir-sonuc" role="status" hidden></p>
+          <p class="ipucu">Dekontunuzu da aynı WhatsApp yazışmasına ekleyebilirsiniz; banka dekontu bağış makbuzu yerine geçer. İsterseniz adınıza makbuz da düzenleriz.</p>
         </div>
       </div>
       </div>
@@ -371,8 +396,9 @@
     <div>
       <h2>Bize ulaşın</h2>
       <ul>
-        <li><a href="tel:+905511647464">0551 164 74 64</a></li>
-        <li>Bağış hattı: <a href="tel:+905369769978">0536 976 99 78</a> · <a href="https://wa.me/905369769978" target="_blank" rel="noopener">WhatsApp</a></li>
+        <li>Eğitim ve kayıt: <a href="tel:+905511647464">0551 164 74 64</a></li>
+        <li>Dernek ve bağış: <a href="tel:+905436639155">0543 663 91 55</a> · <a href="https://wa.me/905436639155" target="_blank" rel="noopener">WhatsApp</a></li>
+        <li>Yardım kampanyaları: <a href="tel:+905369769978">0536 976 99 78</a></li>
         <li><a href="mailto:menekseilim@gmail.com">menekseilim@gmail.com</a></li>
         <li><a href="https://www.instagram.com/menekseilim/" target="_blank" rel="noopener">Instagram</a> · <a href="https://www.facebook.com/menekseilimkulturokumadernegi/" target="_blank" rel="noopener">Facebook</a></li>
       </ul>

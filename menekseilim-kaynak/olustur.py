@@ -37,8 +37,10 @@ KAMU_YARARI_KARAR = ""   # biliniyorsa: "12.03.2024 tarihli ve 1234 sayılı Cum
 
 # ---- Bağış
 BANKA = "Türkiye Finans Katılım Bankası"
-BAGIS_TELEFON = "0536 976 99 78"   # bağış ve dekont için irtibat (afişlerdeki numara)
-BAGIS_WHATSAPP = True              # dekont WhatsApp'tan iletilebilsin mi
+# TELEFON yukarıda: eğitim, kayıt ve ilmî konular için (sitenin ana numarası)
+DERNEK_TELEFON = "0543 663 91 55"  # dernek işleri ve bağış bildirimleri (WhatsApp)
+BAGIS_TELEFON = "0536 976 99 78"   # yardım kampanyaları: Gazze, Afrika, kurban (afişlerdeki numara)
+BAGIS_WHATSAPP = True              # "Bağışımı bildir" düğmesi WhatsApp'tan DERNEK_TELEFON'a gitsin mi
 YARDIM_TOPLAMA_IZIN = ""           # izin alınırsa: "İstanbul Valiliği, izin no 2026/123" gibi; bağış sayfasında yazılır
 
 # Bağış alanları: her biri bağış sayfasında ayrı bir seçenek olur ve kendi hesabıyla görünür.
@@ -318,8 +320,9 @@ def son(kok=""):
     <div>
       <h2>Bize ulaşın</h2>
       <ul>
-        <li><a href="tel:{TELEFON_LINK}">{TELEFON}</a></li>
-        <li>Bağış hattı: <a href="tel:{tel_link(BAGIS_TELEFON)}">{BAGIS_TELEFON}</a> · <a href="{wa_link(BAGIS_TELEFON)}" target="_blank" rel="noopener">WhatsApp</a></li>
+        <li>Eğitim ve kayıt: <a href="tel:{TELEFON_LINK}">{TELEFON}</a></li>
+        <li>Dernek ve bağış: <a href="tel:{tel_link(DERNEK_TELEFON)}">{DERNEK_TELEFON}</a> · <a href="{wa_link(DERNEK_TELEFON)}" target="_blank" rel="noopener">WhatsApp</a></li>
+        <li>Yardım kampanyaları: <a href="tel:{tel_link(BAGIS_TELEFON)}">{BAGIS_TELEFON}</a></li>
         <li><a href="mailto:{EPOSTA}">{EPOSTA}</a></li>
         <li><a href="{INSTAGRAM}" target="_blank" rel="noopener">Instagram</a> · <a href="{FACEBOOK}" target="_blank" rel="noopener">Facebook</a></li>
       </ul>
@@ -876,8 +879,8 @@ def bagis_panel(a):
         aciklama0 += " (vekâlet)"
     wa = ""
     if BAGIS_WHATSAPP:
-        wa = (f'<a class="btn btn-yesil whatsapp" href="{wa_link(tel, "Selamün aleyküm. " + a["baslik"] + " için " + tl(toplam0) + " bağış gönderdim, dekontum ekte.")}" '
-              f'target="_blank" rel="noopener">{IKON["whatsapp"]} WhatsApp\'tan gönder</a>\n            ')
+        wa = (f'<a class="btn btn-yesil whatsapp bildir-btn" href="{wa_link(DERNEK_TELEFON, "Selamün aleyküm, bağışımı bildirmek istiyorum. Bağış: " + a["baslik"] + ", tutar: " + tl(toplam0) + ".")}" '
+              f'target="_blank" rel="noopener">{IKON["whatsapp"]} Bağışımı bildir</a>\n            ')
     return f"""      <div class="bagis-panel" id="bagis-{k}" data-tur="{a['tur']}" data-kisa="{a['kisa']}" data-baslik="{a['baslik']}"{veri}{" data-vekalet" if a.get("vekalet") else ""}>
         <div class="panel-bas">
           <div class="panel-gorsel">{bagis_gorsel(a)}</div>
@@ -901,14 +904,19 @@ def bagis_panel(a):
             <div class="hesap-satir"><dt>Açıklama</dt><dd><span id="aciklama-{k}" class="aciklama-yaz">{aciklama0}</span>{kopya_btn(f"aciklama-{k}", "Açıklamayı kopyala")}</dd></div>
             <div class="hesap-satir"><dt>Banka</dt><dd>{BANKA}</dd></div>
           </dl>
-          <label class="ad-gir"><span>Adınız soyadınız <small>(isteğe bağlı; açıklamaya eklenir, bize gönderilmez)</small></span><input type="text" class="ad" autocomplete="name" maxlength="60"></label>{ipucu}
+          <label class="ad-gir"><span>Adınız soyadınız <small>(açıklamaya eklenir)</small></span><input type="text" class="ad" autocomplete="name" maxlength="60"></label>{ipucu}
         </div>
         <div class="panel-adim">
-          <h4><span class="adim-no">4</span> Dekontu bize iletin <small>isteğe bağlı</small></h4>
-          <p>Banka dekontunuz bağış makbuzu yerine geçer. Bize iletirseniz bağışınızı kayda geçiririz; isterseniz adınıza makbuz da düzenleriz.</p>
+          <h4><span class="adim-no">4</span> Bağışınızı bize bildirin</h4>
+          <p>Havalenizi yaptıktan sonra telefonunuzu yazıp bildirin. Bağışınız hesabımıza geçince size <b>"bağışınız alınmıştır"</b> mesajı gönderelim.</p>
+          <label class="ad-gir"><span>Telefonunuz</span><input type="tel" class="tel" autocomplete="tel" inputmode="tel" maxlength="20" placeholder="05xx xxx xx xx"></label>
+          <label class="onay bildir-onay"><input type="checkbox"><span><a href="kvkk.html" target="_blank">Aydınlatma metnini</a> okudum; adımın, telefonumun ve bağış bilgilerimin bağışımın kaydı ve bana dönüş için derneğe iletilmesini kabul ediyorum.</span></label>
+          <p class="bildir-hata" role="alert" hidden></p>
           <div class="butonlar">
             {wa}<a class="btn btn-cizgi" href="tel:{tel_link(tel)}">{IKON['tel']} {tel}</a>
           </div>
+          <p class="bildir-sonuc" role="status" hidden></p>
+          <p class="ipucu">Dekontunuzu da aynı WhatsApp yazışmasına ekleyebilirsiniz; banka dekontu bağış makbuzu yerine geçer. İsterseniz adınıza makbuz da düzenleriz.</p>
         </div>
       </div>"""
 
@@ -971,9 +979,10 @@ ILETISIM = sayfa_basi("İletişim", "Kayıt, bilgi ya da sadece hal hatır için
   <div class="kapsayici iletisim-izgara">
     <div>
       <ul class="bilgi">
-        <li><span class="simge">{IKON['tel']}</span><div><small>Telefon</small><a href="tel:{TELEFON_LINK}">{TELEFON}</a></div></li>
+        <li><span class="simge">{IKON['tel']}</span><div><small>Eğitim, kayıt ve ilmî konular</small><a href="tel:{TELEFON_LINK}">{TELEFON}</a></div></li>
+        <li><span class="simge">{IKON['whatsapp']}</span><div><small>Dernek ve bağış bildirimi · WhatsApp</small><a href="tel:{tel_link(DERNEK_TELEFON)}">{DERNEK_TELEFON}</a> · <a href="{wa_link(DERNEK_TELEFON, "Selamün aleyküm, derneğiniz hakkında bilgi almak istiyorum.")}" target="_blank" rel="noopener">WhatsApp</a></div></li>
         <li><span class="simge">{IKON['mail']}</span><div><small>E-posta</small><a href="mailto:{EPOSTA}">{EPOSTA}</a></div></li>
-        <li><span class="simge">{IKON['whatsapp']}</span><div><small>Bağış hattı · WhatsApp</small><a href="{wa_link(BAGIS_TELEFON, "Selamün aleyküm, bağış hakkında bilgi almak istiyorum.")}" target="_blank" rel="noopener">{BAGIS_TELEFON}</a></div></li>
+        <li><span class="simge">{IKON['kalp']}</span><div><small>Yardım kampanyaları (Gazze, Afrika, kurban)</small><a href="tel:{tel_link(BAGIS_TELEFON)}">{BAGIS_TELEFON}</a> · <a href="{wa_link(BAGIS_TELEFON, "Selamün aleyküm, yardım kampanyalarınız hakkında bilgi almak istiyorum.")}" target="_blank" rel="noopener">WhatsApp</a></div></li>
         <li><span class="simge">{IKON['ig']}</span><div><small>Instagram</small><a href="{INSTAGRAM}" target="_blank" rel="noopener">@menekseilim</a></div></li>
       </ul>
       <h2 style="font-size:1.4rem">Medreselerimiz</h2>
@@ -1017,7 +1026,8 @@ KVKK = sayfa_basi("KVKK Aydınlatma Metni", "Kişisel verileriniz hakkında kıs
     <h2>Haklarınız</h2>
     <p>6698 sayılı Kanun'un 11. maddesi gereği bilgilerinizin işlenip işlenmediğini öğrenebilir, düzeltilmesini ya da silinmesini isteyebilirsiniz. Bunun için {EPOSTA} adresine yazabilirsiniz.</p>
     <p>Sitemiz reklam veya takip çerezi kullanmaz. Yazı tipleri kendi sunucumuzdan yüklenir; ziyaret bilgileriniz üçüncü taraflara aktarılmaz.</p>
-    <p>Bağış sayfasındaki ad alanı yalnızca tarayıcınızda açıklama metni hazırlamak için kullanılır; bize ya da başka bir yere gönderilmez. Dekontunuzu WhatsApp'tan iletirseniz mesajınız WhatsApp'ın kendi gizlilik koşullarına tabidir.</p>
+    <h2>Bağış bildirimi</h2>
+    <p>Bağış sayfasında "Bağışımı bildir" düğmesine bastığınızda adınız, telefonunuz, bağış alanı ve tutarı derneğimize iletilir: dernek e-postamıza bir kayıt düşer ve WhatsApp'ta size hazır bir mesaj açılır. Bu bilgileri yalnızca bağışınızı kayda geçirmek, size "bağışınız alınmıştır" mesajı göndermek ve isterseniz makbuz düzenlemek için kullanırız. WhatsApp üzerinden gönderdiğiniz mesajlar WhatsApp'ın kendi gizlilik koşullarına da tabidir. Düğmeye basmadığınız sürece sayfaya yazdığınız bilgiler hiçbir yere gönderilmez.</p>
   </div>
 </section>
 """
