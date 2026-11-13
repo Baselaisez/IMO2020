@@ -132,7 +132,10 @@ test('"Bugün" şeridi: telefon GÖRÜNÜR ve oradan ARANABİLİR', () => {
   // Sorgu numarayı gerçekten getiriyor mu?
   const repo = readFileSync(join(ROOT, 'src/js/repo.js'), 'utf8');
   const q = repo.slice(repo.indexOf('export async function listTodayAppointments'), repo.indexOf('export async function listTodayAppointments') + 600);
-  assert.match(q, /SELECT id, name, phone, next_appt FROM patients/, 'telefon sorguda seçilmeli');
+  // Sütun listesinin TAMAMINI sabitlemiyoruz (tanı eklenince bu test kırılmıştı
+  // ve kırılma gerçek bir hatayı değil, testin fazla katılığını gösteriyordu).
+  // Korunması gereken tek şey: phone SEÇİLİYOR olmalı.
+  assert.match(q, /SELECT[^`]*\bphone\b[^`]*FROM patients/, 'telefon sorguda seçilmeli');
 });
 
 test('"Bugün" şeridinde ad ve telefon AYRI dokunma hedefi', () => {
@@ -159,4 +162,44 @@ test('şerit çipleri parmakla vurulabilir ve şerit ekranı kaplamaz', () => {
   assert.ok(serit, '.today kuralı bulunamadı');
   assert.match(serit[0], /max-height:/, 'şeridin yüksekliği sınırlı olmalı');
   assert.match(serit[0], /overflow-y:\s*auto/, 'sınırı aşan randevulara kaydırarak ulaşılmalı');
+});
+
+test('"Bugün" şeridi: adın TIKLANABİLİR olduğu GÖRÜNÜYOR', () => {
+  // Doktor 5.14'te "adın üstüne tıklayıp detayları görebilir miyiz? bu olmalı"
+  // diye yazdı. Oysa ada tıklamak 5.13'ten beri kartı açıyordu. Demek ki eksik
+  // olan İŞLEV değil İŞARET'ti: düz mavi kalın yazı bir başlık gibi okunuyor,
+  // kimse üstüne basmayı denemiyordu. Görünmeyen özellik, olmayan özelliktir.
+  const src = readFileSync(join(ROOT, 'src/js/ui-home.js'), 'utf8');
+  const bas = src.indexOf('async function renderToday');
+  const fn = src.slice(bas, src.indexOf('async function resetAndLoadFirstPage', bas));
+  assert.match(fn, /class="today-nm"/, 'ad kendi kabında olmalı (kırpma ok işaretini yemesin)');
+  assert.match(fn, /class="today-chev"/, 'adın sonunda "devamı var" oku olmalı');
+  assert.match(fn, /aria-label="\$\{esc\(p\.name\)\} — hasta kartını aç"/,
+    'ekran okuyucu da ne olacağını söylemeli');
+  // Altı çizili olmak YAZIDA değil CSS'te: üç işaret bir arada olmalı.
+  assert.match(CSS, /\.today-nm \{[^}]*text-decoration:\s*underline/s, 'adın altı çizili olmalı');
+  assert.match(CSS, /\.today-chev \{[^}]*flex-shrink:\s*0/s, 'uzun adda ok işareti küçülüp kaybolmamalı');
+  assert.match(CSS, /\.today-name \{[^}]*cursor:\s*pointer/s);
+});
+
+test('"Bugün" şeridi: TANI kartı açmadan görünüyor', () => {
+  // "Daha hızlı ve kullanıcı dostu olsun." En hızlı kart, hiç açılmayan karttır:
+  // doktorun listeye bakarken sorduğu "bu hasta neden geliyor" artık şeritte
+  // yazıyor. Tanı boşsa satır HİÇ basılmaz — boş bir etiket yer kaplar, bilgi
+  // vermez.
+  const src = readFileSync(join(ROOT, 'src/js/ui-home.js'), 'utf8');
+  const bas = src.indexOf('async function renderToday');
+  const fn = src.slice(bas, src.indexOf('async function resetAndLoadFirstPage', bas));
+  assert.match(fn, /class="today-diag"/, 'tanı şeritte gösterilmeli');
+  assert.match(fn, /tani \? `<span class="today-diag">/, 'tanı boşsa satır basılmamalı');
+  // Sorgu tanıyı GERÇEKTEN getiriyor mu? (Getirmezse ekranda sessizce hiç
+  // görünmez — tam da bu testin yakalaması gereken sessiz hata.)
+  const repo = readFileSync(join(ROOT, 'src/js/repo.js'), 'utf8');
+  const i = repo.indexOf('export async function listTodayAppointments');
+  assert.match(repo.slice(i, i + 700),
+    /SELECT id, name, phone, diagnosis, next_appt FROM patients/,
+    'tanı sorguda seçilmeli');
+  // Tanı bir bilgi satırı, dokunma hedefi değil: 44px kuralına girmemeli.
+  assert.match(CSS, /\.today-diag \{/, '.today-diag kuralı olmalı');
+  assert.doesNotMatch(CSS.match(/\.today-diag \{[^}]*\}/s)[0], /min-height/);
 });

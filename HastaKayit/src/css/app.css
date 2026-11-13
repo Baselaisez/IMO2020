@@ -358,10 +358,31 @@ html[data-platform="ios"] .fab-mini { bottom: calc(92px + env(safe-area-inset-bo
 .today-time { font-weight: 700; color: var(--blue); font-variant-numeric: tabular-nums;
   display: flex; align-items: center; min-height: 28px; }
 .today-main { display: flex; flex-direction: column; align-items: flex-start; min-width: 0; gap: 2px; }
+/* Adın TIKLANABİLİR olduğu görünmek zorunda.
+   Doktor "adın üstüne tıklayıp detayları görebilir miyiz?" diye sordu; işlev
+   zaten vardı, görünmüyordu. Düz mavi kalın yazı "başlık" gibi okunuyordu.
+   Şimdi üç işaret birlikte: altı çizili + sonunda ok + imleç el. */
 .today-name {
   background: none; border: 0; padding: 2px 0; font: inherit; font-weight: 600;
   color: var(--blue); text-align: left; cursor: pointer; min-height: 28px;
-  max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  max-width: 100%; display: inline-flex; align-items: center; gap: 2px;
+}
+/* Ellipsis düğmenin DEĞİL, adın kendisinin üstünde: yoksa uzun adda ok işareti
+   de kırpılır ve "devamı var" işareti kaybolurdu. */
+.today-nm {
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  text-decoration: underline; text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+}
+/* Ok: 'back' simgesi aynadan çevrilmiş — sağa bakan ayrı bir çizim eklemeye
+   gerek yok, tek kaynak korunur. flex-shrink: 0 — ad uzasa da ok küçülmez. */
+.today-chev { display: inline-flex; flex-shrink: 0; transform: scaleX(-1); opacity: 0.6; }
+.today-name:hover .today-nm { text-decoration-thickness: 2px; }
+/* Tanı: bilgi satırı, dokunma hedefi DEĞİL. Bu yüzden 44px kuralına girmiyor;
+   yanlışlıkla basıldığında hiçbir şey olmaz. */
+.today-diag {
+  color: #5b6472; font-size: 13px; line-height: 1.3; max-width: 100%;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 .today-call {
   display: inline-flex; align-items: center; gap: 2px; color: var(--green);

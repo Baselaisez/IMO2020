@@ -83,10 +83,23 @@ async function renderToday() {
       ? `<a class="today-call" href="tel:${esc(tel.replace(/\s+/g, ''))}" aria-label="${esc(p.name)} — ara: ${esc(tel)}">`
         + `${iconHtml('phone', 15)}${esc(tel)}</a>`
       : '<span class="today-nophone">telefon kayıtlı değil</span>';
+    // Tanı KARTI AÇMADAN görünsün: doktorun bugünkü listeye bakarken en çok
+    // sorduğu şey "bu hasta neden geliyor". Boşsa satır hiç basılmaz —
+    // "Tanı: —" gibi boş bir etiket yer kaplar, bilgi vermez.
+    const tani = String(p.diagnosis || '').trim();
+    const taniSatiri = tani ? `<span class="today-diag">${esc(tani)}</span>` : '';
     return '<div class="today-row">'
       + `<span class="today-time">${saat}</span>`
       + '<div class="today-main">'
-      + `<button type="button" class="today-name" data-id="${p.id}">${esc(p.name)}</button>`
+      // Ad bir düğme; ama DÜĞME GÖRÜNMÜYORDU. Doktor "adın üstüne tıklayıp
+      // detayları görebilir miyiz?" diye sordu — oysa 5.13'ten beri açılıyordu.
+      // Demek ki eksik olan işlev değil, İŞARET'ti: artık adın altı çizili ve
+      // sonunda bir ok var, yani "buraya basılır, devamı var" diyor.
+      + `<button type="button" class="today-name" data-id="${p.id}"`
+      + ` aria-label="${esc(p.name)} — hasta kartını aç">`
+      + `<span class="today-nm">${esc(p.name)}</span>`
+      + `<span class="today-chev">${iconHtml('back', 14)}</span></button>`
+      + taniSatiri
       + arama
       + '</div></div>';
   }).join('') + '</div>';
