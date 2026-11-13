@@ -209,7 +209,7 @@ html.acilis-kapandi .acilis { display: none; }
 .yolculuk::before { content: ""; position: absolute; top: 2.1rem; left: 8%; right: 8%; height: 2px; background: repeating-linear-gradient(90deg, var(--altin) 0 10px, transparent 10px 18px); opacity: .7; }
 .yolculuk li { counter-increment: adim; position: relative; background: #fff; border: 1px solid var(--cizgi); border-radius: var(--radius); padding: 1.5rem 1.25rem 1.4rem; text-align: center; min-width: 0; }
 .yolculuk li::before { content: counter(adim); display: grid; place-items: center; width: 2.6rem; height: 2.6rem; margin: -2.85rem auto .8rem; border-radius: 50%; background: var(--yesil); color: #fff; font-weight: 700; border: 4px solid var(--bej-acik); }
-.yolculuk .ar { display: block; font-family: var(--hat); font-weight: 700; font-size: 1.7rem; line-height: 1.5; color: var(--altin-koyu); }
+.yolculuk .kitap { width: 72px; margin: 0 auto .9rem; }
 .yolculuk h3 { font-size: 1.15rem; margin: .1rem 0 .35rem; }
 .yolculuk p { color: var(--metin-soluk); font-size: 1rem; }
 @media (max-width: 900px) { .yolculuk { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 2.5rem; } .yolculuk::before { display: none; } }
@@ -221,17 +221,29 @@ html.acilis-kapandi .acilis { display: none; }
 .ders-grubu-baslik h3 { font-size: 1.5rem; margin: 0; }
 .ders-grubu-baslik .ar { font-family: var(--hat); font-weight: 700; font-size: 1.6rem; color: var(--altin-koyu); }
 .ders-grubu-baslik p { flex-basis: 100%; color: var(--metin-soluk); margin: .2rem 0 0; }
-.dersler { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr)); gap: 1rem; }
-.ders { background: #fff; border: 1px solid var(--cizgi); border-radius: var(--radius); padding: 1.25rem 1.35rem; display: grid; gap: .2rem; min-width: 0; position: relative; overflow: hidden; }
+.dersler { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); gap: 1rem; }
+.ders { background: #fff; border: 1px solid var(--cizgi); border-radius: var(--radius); padding: 1.2rem; display: grid; grid-template-columns: 76px minmax(0, 1fr); gap: 1.1rem; align-items: start; min-width: 0; position: relative; overflow: hidden; }
 .ders::after { content: ""; position: absolute; inset: 0 0 auto 0; height: 3px; background: linear-gradient(90deg, var(--yesil), var(--altin)); }
-.ders .ar { font-family: var(--arapca); font-size: 1.65rem; line-height: 1.5; color: var(--yesil); text-align: right; }
-.ders b { font-family: var(--baslik); font-size: 1.15rem; font-weight: 600; color: var(--yesil-koyu); }
-.ders span { color: var(--metin-soluk); font-size: 1rem; }
-.ders small { color: var(--altin-koyu); font-weight: 700; font-size: .78rem; letter-spacing: .08em; text-transform: uppercase; }
-.ders.hafizlik .ar, .ders.hafizlik b, .ders.hafizlik span { color: var(--kirmizi); }
+.ders-metin { display: grid; gap: .3rem; min-width: 0; padding-top: .2rem; }
+.ders b { font-family: var(--baslik); font-size: 1.2rem; font-weight: 600; color: var(--yesil-koyu); }
+.ders-metin > span { color: var(--metin-soluk); font-size: 1rem; line-height: 1.55; }
+.ders.hafizlik b, .ders.hafizlik .ders-metin > span { color: var(--kirmizi); }
+.ders.hafizlik { border-color: #E9CFD5; }
 .ders.hafizlik::after { background: linear-gradient(90deg, var(--kirmizi), var(--altin)); }
 .ders-grubu .alinti { margin-top: 1.5rem; }
 .alinti { font-family: var(--baslik); font-style: italic; font-size: 1.25rem; color: var(--yesil-koyu); border-left: 3px solid var(--altin); padding-left: 1.1rem; margin: 2.25rem 0 0; max-width: 42em; }
+
+/* ---------- kitap kapağı (klasik cilt: şemse, köşebent, cetvel) ---------- */
+.kitap { --deri: #16464A; position: relative; display: block; flex: none; width: 76px; aspect-ratio: 120 / 168; color: var(--deri); border-radius: 2px 6px 6px 2px; overflow: hidden; container-type: inline-size; box-shadow: 0 8px 18px rgba(18, 60, 65, .22), 0 2px 4px rgba(18, 60, 65, .18); }
+.kitap svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.kitap::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(circle at 28% 18%, rgba(255, 255, 255, .16), transparent 55%), linear-gradient(90deg, rgba(0, 0, 0, .38), rgba(0, 0, 0, 0) 11%, rgba(255, 255, 255, .06) 13%, rgba(0, 0, 0, 0) 16%); }
+.kapak-yazi { position: absolute; left: 20%; right: 20%; top: 50%; transform: translateY(-50%); text-align: center; font-family: var(--hat); font-weight: 700; font-size: 11px; font-size: 17cqw; line-height: 1.35; color: #F1DFA6; text-shadow: 0 1px 2px rgba(0, 0, 0, .35); }
+.kapak-yazi.uzun { font-size: 9px; font-size: 13cqw; }
+.kitap-yesil { --deri: #16464A; }
+.kitap-kahve { --deri: #5B3A20; }
+.kitap-lacivert { --deri: #1E2C4C; }
+.kitap-bordo { --deri: #5E1120; }
+.kitap-kirmizi { --deri: var(--kirmizi); }
 
 /* ---------- medreseler ---------- */
 .medrese { display: flex; align-items: center; gap: 1rem; background: #fff; border: 1px solid var(--cizgi); border-radius: var(--radius); padding: 1.3rem 1.4rem; }
@@ -283,6 +295,8 @@ html.acilis-kapandi .acilis { display: none; }
 
 /* ---------- heyet ---------- */
 .heyet { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1.75rem 1.25rem; }
+.heyet-uc { grid-template-columns: repeat(3, minmax(0, 1fr)); max-width: 900px; }
+.one-cikan .unvan { color: var(--altin-koyu); font-weight: 700; margin: -.2rem 0 .2rem; }
 @media (max-width: 900px) { .heyet { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 .kisi { text-align: center; min-width: 0; }
 .kisi-foto { position: relative; margin-bottom: .9rem; }

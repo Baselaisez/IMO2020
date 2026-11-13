@@ -92,44 +92,45 @@ MALTEPE_M2 = "1.000"       # yeni külliyenin büyüklüğü
 MALTEPE_KISI = "100"       # aynı anda eğitim alabilecek talebe sayısı (en az)
 
 # Müfredat: (grup, arapça, grup açıklaması, [(ders, arapça, açıklama), ...])
+# Müfredat: (grup, arapça, grup açıklaması, kapak rengi, [(ders, arapça, açıklama), ...])
+# Kapak renkleri: yesil, kahve, lacivert, bordo, kirmizi (css/style.css içinde .kitap-*)
 MUFREDAT = [
     ("Kur'an-ı Kerim", "القرآن الكريم",
-     "Harfleri tanımaktan hafızlığa: Kur'an'ı doğru, güzel ve ezberden okumak.",
-     [("Elif-Ba", "ألفبا", "Arap harflerini tanıma ve Kur'an okumaya ilk adım"),
-      ("Kur'an-ı Kerim", "القرآن الكريم", "Yüzünden akıcı ve doğru okuma"),
-      ("Tecvid", "تجويد", "Kur'an'ı kurallarına uygun, doğru okuma ilmi"),
-      ("Kıraat", "قراءات", "Kur'an'ın okunuş usullerini öğreten ilim"),
-      ("Talim ve Makam", "تعليم ومقام", "Hocayla birebir okuyuş ve Kur'an'ı güzel sesle okuma")]),
+     "Harfleri tanımaktan hafızlığa: Kur'an'ı doğru, güzel ve ezberden okumak.", "yesil",
+     [("Elif-Ba", "ألفبا", "Arap harflerini, harekeleri ve harflerin birleşmesini öğrenir; Kur'an okumaya ilk adımı atar."),
+      ("Kur'an-ı Kerim", "القرآن الكريم", "Elif-Ba'nın ardından Kur'an-ı Kerim'i yüzünden akıcı ve doğru okumaya geçer."),
+      ("Tecvid", "التجويد", "Harflerin çıkış yerlerini (mahreç), med, idğam ve ihfâ gibi kuralları öğrenerek Kur'an'ı hatasız okur."),
+      ("Kıraat", "القراءات", "Kur'an-ı Kerim'in Peygamber Efendimiz'den (s.a.v.) bize ulaşan okunuş usullerini tanır."),
+      ("Talim ve Makam", "تعليم", "Hocasıyla birebir okuyarak okuyuşunu düzeltir; Kur'an'ı güzel sesle, makamıyla okumayı öğrenir.")]),
     ("Temel İslami ilimler", "علوم دينية",
-     "Her Müslümanın bilmesi gereken farz-ı ayn bilgiler ve Peygamber Efendimiz'in hayatı.",
-     [("İlm-i Hal", "علم حال", "İman, ibadet ve günlük hayata dair temel dinî bilgiler"),
-      ("Siyer", "سيرة", "Peygamber Efendimiz'in (s.a.v.) hayatı"),
-      ("Adab", "آداب", "Güzel ahlak ve edep")]),
+     "Her Müslümanın bilmesi gereken farz-ı ayn bilgiler ve Peygamber Efendimiz'in hayatı.", "kahve",
+     [("İlm-i Hal", "علم حال", "İman esaslarını; abdest, namaz ve oruç gibi ibadetleri; helal ve haramı, yani her Müslümanın bilmesi farz olan bilgileri öğrenir."),
+      ("Siyer", "السيرة", "Peygamber Efendimiz'in (s.a.v.) doğumundan vefatına hayatını, ahlakını ve örnek alınacak hâllerini okur."),
+      ("Adab", "الآداب", "Anne-babaya, hocaya, büyüğe ve arkadaşa karşı edebi; sofrada, mescitte ve sohbette güzel ahlakı öğrenir.")]),
     ("Arapça: Sarf", "صرف",
-     "Kelimelerin yapısını öğreten ilim; medrese usulüyle, klasik kitaplardan.",
-     [("Emsile", "الأمثلة", "Arapça kelime kalıpları; sarfa giriş"),
-      ("Binâ", "البناء", "Fiillerin yapısı ve çekimleri"),
-      ("Maksûd", "المقصود", "Sarf ilminin temel kaideleri")]),
+     "Kelimelerin yapısını öğreten ilim. Asırlardır medreselerde okutulan klasik kitaplardan, aynı sırayla.", "lacivert",
+     [("Emsile", "الأمثلة", "Medresede okunan ilk kitap. Arapça fiil ve isim kalıplarını tablolar hâlinde ezberletir; sarfın kapısıdır."),
+      ("Binâ", "البناء", "Binâü'l-Ef'âl. Fiillerin bablarını ve çekimlerini kaideleriyle anlatır."),
+      ("Maksûd", "المقصود", "İmam-ı Âzam Ebû Hanîfe'ye nispet edilen, sarf ilminin temel kaidelerini toplayan kitap.")]),
     ("Arapça: Nahiv", "نحو",
-     "Cümlenin yapısını öğreten ilim; Kur'an'ı ve klasik eserleri anlamanın anahtarı.",
-     [("Avâmil", "العوامل", "Kelimeye etki eden âmiller; nahve giriş"),
-      ("İzhâr", "الإظهار", "Nahiv ilminin temel kaideleri")]),
+     "Cümlenin yapısını öğreten ilim; Kur'an'ı ve klasik eserleri anlamanın anahtarı.", "bordo",
+     [("Avâmil", "العوامل", "Birgivî Mehmed Efendi'nin (ö. 1573) eseri. Kelimelerin sonunu değiştiren âmilleri öğretir; nahve giriş kitabıdır."),
+      ("İzhâr", "الإظهار", "Yine Birgivî'nin, Avâmil'in ardından okunan İzhârü'l-Esrâr'ı. Nahiv kaidelerini örnekleriyle işler.")]),
 ]
 
-YOLCULUK = [  # anasayfadaki dört adım: (arapça, başlık, açıklama)
-    ("ألفبا", "Elif-Ba", "Harfleri tanır, Kur'an okumaya ilk adımı atar."),
-    ("القرآن", "Kur'an-ı Kerim", "Tecvid ve kıraatle Kur'an'ı doğru okur, hafızlık yolunda ilerler."),
-    ("علم حال", "Temel ilimler", "İlm-i Hal, Siyer ve Adab ile farz-ı ayn bilgileri öğrenir."),
-    ("العربية", "Arapça", "Sarf ve nahivle Emsile'den İzhâr'a uzanan Arapça eğitimi alır."),
+YOLCULUK = [  # anasayfadaki dört adım: (kapak yazısı, kapak rengi, başlık, açıklama)
+    ("ألفبا", "yesil", "Elif-Ba", "Harfleri tanır, Kur'an okumaya ilk adımı atar."),
+    ("القرآن الكريم", "kirmizi", "Kur'an-ı Kerim", "Tecvid ve kıraatle Kur'an'ı doğru okur, hafızlık yolunda ilerler."),
+    ("علم حال", "kahve", "Temel ilimler", "İlm-i Hal, Siyer ve Adab ile farz-ı ayn bilgileri öğrenir."),
+    ("الأمثلة", "lacivert", "Arapça", "Sarf ve nahivle Emsile'den İzhâr'a uzanan Arapça eğitimi alır."),
 ]
 
-HEYET = [  # (fotoğraf img/heyet/ altında, isim, ünvan) – isim boşsa yalnız ünvan görünür
-    ("heyet-1.jpg", "", "Yönetim Kurulu Üyesi"),
-    ("heyet-2.jpg", "", "Yönetim Kurulu Üyesi"),
-    ("heyet-3.jpg", "", "Yönetim Kurulu Üyesi"),
-    ("heyet-4.jpg", "", "Yönetim Kurulu Üyesi"),
+HEYET = [  # (fotoğraf img/heyet/ altında, isim, görev) – ilk sıradaki Heyetimiz sayfasında öne çıkar
+    ("heyet-1.jpg", "Salih Gedik", "Yönetim Kurulu Başkanı"),
+    ("heyet-4.jpg", "Salih Özbey", "Muhasebe ve Finans Müdürü"),
+    ("heyet-2.jpg", "Musa Yıldız", "Yönetim Kurulu Üyesi"),
+    ("heyet-3.jpg", "Ercan Kul", "Yönetim Kurulu Üyesi"),
 ]
-ONE_CIKAN_HOCA = {"isim": "Salih Gedik Hocamız", "foto": "img/hocalar/salih-gedik.jpg"}
 
 VIDEOLAR = [  # (dosya, kapak, açıklama)
     ("merasim-1", "merasim-1-kapak", "Talebelerimizin merasim alanına girişi"),
@@ -354,6 +355,24 @@ def video(v, kapak, on_yukle="none"):
             f'Tarayıcınız videoyu oynatamıyor. <a href="video/{v}.mp4">Videoyu indirin</a>.</video>')
 
 
+KAPAK_SVG = ('<svg viewBox="0 0 120 168" aria-hidden="true" focusable="false">'
+             '<rect width="120" height="168" fill="currentColor"/>'
+             '<g fill="none" stroke="#D9BE7C"><rect x="7" y="7" width="106" height="154" stroke-width="1.6"/>'
+             '<rect x="11.5" y="11.5" width="97" height="145" stroke-width=".7"/></g>'
+             '<g fill="#D9BE7C" opacity=".9"><path d="M12 12h20a20 20 0 0 1-20 20z"/><path d="M108 12h-20a20 20 0 0 0 20 20z"/>'
+             '<path d="M12 156h20a20 20 0 0 0-20-20z"/><path d="M108 156h-20a20 20 0 0 1 20-20z"/>'
+             '<path d="M60 22l5 7-5 7-5-7z"/><path d="M60 146l5-7-5-7-5 7z"/></g>'
+             '<ellipse cx="60" cy="84" rx="37" ry="47" fill="rgba(0,0,0,.22)" stroke="#D9BE7C" stroke-width="1.4"/>'
+             '<ellipse cx="60" cy="84" rx="32.5" ry="42.5" fill="none" stroke="#D9BE7C" stroke-width=".6"/></svg>')
+
+
+def kitap(yazi, renk, boy=""):
+    """Klasik cilt (şemse, köşebent, cetvel) görünümlü kitap kapağı; yazı sayfanın hat fontuyla."""
+    uzun = " uzun" if len(yazi) > 8 else ""
+    return (f'<span class="kitap kitap-{renk}{(" " + boy) if boy else ""}" aria-hidden="true">{KAPAK_SVG}'
+            f'<span class="kapak-yazi{uzun}" lang="ar">{yazi}</span></span>')
+
+
 def kisi(foto, isim, unvan, yukle="lazy"):
     baslik = f"<h3>{isim}</h3><p>{unvan}</p>" if isim else f"<h3>{unvan}</h3>"
     alt = f"{isim}, {unvan}" if isim else f"{DERNEK} {unvan.lower()}"
@@ -402,7 +421,7 @@ def medrese_kart(ad, durum):
         return (f'      <div class="medrese yakinda">{IKON["medrese"]}'
                 f'<div><h3>{ad}</h3><p>Yakında açılıyor inşallah.</p></div></div>')
     return (f'      <div class="medrese">{IKON["medrese"]}'
-            f'<div><h3>{ad}</h3><p>Kayıt ve bilgi için bizi arayın.</p></div></div>')
+            f'<div><h3>{ad}</h3><p>Erkek talebelerimiz için</p></div></div>')
 
 
 def bagis_gorsel(a, yukle="lazy"):
@@ -534,7 +553,7 @@ ANASAYFA = f"""
   <div class="kapsayici">
     {bolum_basi("Elif-Ba'dan Arapçaya bir eğitim yolculuğu", "دروسنا", "Temel İslami ilimleri, farz-ı ayn bilgileri ve Arapçayı medrese usulüyle, adım adım öğretiyoruz.")}
     <ol class="yolculuk">
-{chr(10).join(f'      <li><span class="ar" lang="ar">{ar}</span><h3>{t}</h3><p>{a}</p></li>' for ar, t, a in YOLCULUK)}
+{chr(10).join(f'      <li>{kitap(ar, r)}<h3>{t}</h3><p>{a}</p></li>' for ar, r, t, a in YOLCULUK)}
     </ol>
     <p class="alt-not"><a class="btn btn-cizgi" href="egitimlerimiz.html">Bütün derslerimiz {IKON['ok']}</a></p>
   </div>
@@ -589,7 +608,7 @@ ANASAYFA = f"""
 
 <section class="bolum bolum-bej" id="heyet-tanitim">
   <div class="kapsayici">
-    {bolum_basi("Yönetim kurulumuz", "هيئتنا", "Derneğimizi gönüllü olarak yürüten yönetim kurulu heyetimiz.")}
+    {bolum_basi("Yönetim heyetimiz", "هيئتنا", "Derneğimizi gönüllü olarak yürüten kardeşlerimiz; başkanımız Salih Gedik Hocamızla birlikte.")}
     <div class="heyet">
 {chr(10).join('      ' + kisi(*k) for k in HEYET)}
     </div>
@@ -686,10 +705,13 @@ HAKKIMIZDA = sayfa_basi("Hakkımızda", "Mahallelerimizin çocuklarına Kur'an'�
 
 
 # ================================================================ EĞİTİMLERİMİZ
-def ders_grubu(grup, ar, aciklama, dersler):
-    kartlar = "\n".join(
-        f'        <li class="ders"><span class="ar" lang="ar">{dar}</span><b>{d}</b><span>{a}</span></li>'
-        for d, dar, a in dersler)
+def ders_karti(d, dar, a, renk, sinif=""):
+    return (f'        <li class="ders{(" " + sinif) if sinif else ""}">{kitap(dar, renk)}'
+            f'<span class="ders-metin"><b>{d}</b><span>{a}</span></span></li>')
+
+
+def ders_grubu(grup, ar, aciklama, renk, dersler):
+    kartlar = "\n".join(ders_karti(d, dar, a, renk) for d, dar, a in dersler)
     return f"""    <div class="ders-grubu">
       <div class="ders-grubu-baslik"><h3>{grup}</h3><span class="ar" lang="ar">{ar}</span><p>{aciklama}</p></div>
       <ul class="dersler">
@@ -713,7 +735,7 @@ EGITIMLER = sayfa_basi("Eğitimlerimiz", "Temel İslami ilimler, farz-ı ayn bil
     <div class="ders-grubu">
       <div class="ders-grubu-baslik"><h3>Hafızlık</h3><span class="ar" lang="ar">حفظ القرآن الكريم</span><p>Talebelerimiz bütün bu derslerin yanında Kur'an-ı Kerim'i ezberler.</p></div>
       <ul class="dersler">
-        <li class="ders hafizlik"><span class="ar" lang="ar">حافظ</span><b>Hafızlık</b><span>Kur'an-ı Kerim'in tamamını ezberleme</span></li>
+{ders_karti("Hafızlık", "مصحف شريف", "Kur'an-ı Kerim'in tamamını, hocasının yanında sayfa sayfa ezberler ve tekrarlarla kalıcı hâle getirir.", "kirmizi", "hafizlik")}
       </ul>
       <p class="alinti">"Hafızlık sadece ezber değildir. Sabrı öğrenmek, disiplini kazanmak, kardeşliği yaşamak ve Allah'ın kelamıyla büyümektir."</p>
     </div>
@@ -733,25 +755,27 @@ EGITIMLER = sayfa_basi("Eğitimlerimiz", "Temel İslami ilimler, farz-ı ayn bil
 """
 
 # ================================================================ HEYETİMİZ
-HEYETIMIZ = sayfa_basi("Heyetimiz", "Derneğimizi ve medreselerimizi yürüten yönetim kurulumuz ve hocalarımız.", "هيئتنا") + f"""
-<section class="bolum" id="yonetim-kurulu">
-  <div class="kapsayici">
-    {bolum_basi("Yönetim kurulu heyetimiz", aciklama="Derneğimizin işlerini gönüllü olarak yürüten kardeşlerimiz.")}
-    <div class="heyet">
-{chr(10).join('      ' + kisi(*k, yukle="eager") for k in HEYET)}
+BASKAN = HEYET[0]
+HEYETIMIZ = sayfa_basi("Heyetimiz", "Derneğimizi ve medreselerimizi gönüllü olarak yürüten kardeşlerimiz.", "هيئتنا") + f"""
+<section class="bolum" id="baskan">
+  <div class="kapsayici one-cikan">
+    <div class="kisi kisi-foto"><img src="img/heyet/{BASKAN[0]}" alt="{BASKAN[1]}, {BASKAN[2].lower()}" width="640" height="800"></div>
+    <div class="yazi">
+      <span class="ar-ust" lang="ar">رئيسنا</span>
+      <h2>{BASKAN[1]} Hocamız</h2>
+      <p class="unvan">{BASKAN[2]}</p>
+      {sus()}
+      <p>Derneğimizin yönetim kurulu başkanı {BASKAN[1]} Hocamız, medreselerimizdeki eğitimi de bizzat yönetiyor. Talebelerimiz onun rehberliğinde hem hafızlık yolunda ilerliyor hem de millî ve manevî değerlerle yetişiyor.</p>
+      <p>Hocalarımız talebelerimizle birebir ilgilenir; Kur'an'ı, ilmi ve edebi bir arada öğretir.</p>
     </div>
   </div>
 </section>
 
-<section class="bolum bolum-bej" id="egitim-heyeti">
-  <div class="kapsayici one-cikan">
-    <div class="kisi kisi-foto"><img src="{ONE_CIKAN_HOCA['foto']}" alt="{ONE_CIKAN_HOCA['isim']}" width="400" height="500" loading="lazy"></div>
-    <div class="yazi">
-      <span class="ar-ust" lang="ar">المعلمون</span>
-      <h2>Eğitim heyetimiz</h2>
-      {sus()}
-      <p>{HOCA_METNI}</p>
-      <p>Hocalarımız talebelerimizle birebir ilgilenir; Kur'an'ı, ilmi ve edebi bir arada öğretir.</p>
+<section class="bolum bolum-bej" id="yonetim-kurulu">
+  <div class="kapsayici">
+    {bolum_basi("Yönetim heyetimiz", "هيئة الإدارة", "Derneğimizin işlerini başkanımızla birlikte gönüllü olarak yürüten kardeşlerimiz.")}
+    <div class="heyet heyet-uc">
+{chr(10).join('      ' + kisi(*k, yukle="eager") for k in HEYET[1:])}
     </div>
   </div>
 </section>
@@ -968,7 +992,7 @@ SAYFALAR = [  # (dosya, önizleme kimliği, başlık, açıklama, gövde, ek hea
      "Gündüzlü ve yatılı eğitim; Elif-Ba, Kur'an-ı Kerim, Tecvid, Kıraat, İlm-i Hal, Siyer, Emsile, Binâ, Maksûd, Avâmil, İzhâr ve hafızlık.",
      EGITIMLER, ""),
     ("heyetimiz.html", "heyetimiz", f"Heyetimiz | {MARKA}",
-     "Menekşe İlim Kültür Okuma Derneği yönetim kurulu heyeti ve eğitim heyeti.",
+     "Menekşe İlim Kültür Okuma Derneği yönetim heyeti: Yönetim Kurulu Başkanı Salih Gedik Hocamız, Salih Özbey, Musa Yıldız ve Ercan Kul.",
      HEYETIMIZ, ""),
     ("bagis.html", "bagis", f"Bağış | {MARKA}",
      "Menekşe Medreseleri'ne bağış: talebe sofrası, Maltepe medrese inşaatı, Afrika'ya Mushaf ve kurban, Gazze'ye yemek. Her hayrın ayrı IBAN'ı; kolay havale ve EFT.",
@@ -1088,9 +1112,12 @@ ErrorDocument 404 /404.html
 # Artık kullanılmayan eski dosyalar
 for eski in ["duyurular.html", "faaliyetler.html", "galeri.html", "talebelerimiz.html", "hocalarimiz.html",
              "img/amblem.svg", "img/isaret.svg", "img/yer-tutucu.svg", "img/hero.svg", "img/kisi.svg",
-             "img/desen.svg", "video/merasim-1.jpg"]:
+             "img/desen.svg", "video/merasim-1.jpg",
+             "img/hocalar/salih-gedik.jpg"]:  # videodan alınan kare Salih Gedik Hocamız değilmiş
     yol = os.path.join(OUT, eski)
     if os.path.exists(yol):
         os.remove(yol)
         print("silindi:", eski)
+if os.path.isdir(os.path.join(OUT, "img/hocalar")) and not os.listdir(os.path.join(OUT, "img/hocalar")):
+    os.rmdir(os.path.join(OUT, "img/hocalar"))
 print("tamam")

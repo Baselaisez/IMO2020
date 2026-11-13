@@ -38,9 +38,7 @@ isterseniz" kısmına bakın).
 
 | Eksik bilgi | Sitede nerede | Ne gerekiyor |
 |---|---|---|
-| Yönetim kurulu isim ve görevleri | Heyetimiz sayfası ve anasayfa | Gönderdiğiniz 4 fotoğraf sitede; her birinin adı ve görevi (başkan, başkan yardımcısı, sayman gibi). Şu an hepsinde "Yönetim Kurulu Üyesi" yazıyor |
-| Diğer hocalarımızın fotoğrafları (isteğe bağlı) | Heyetimiz → Eğitim heyetimiz | Sınıf hocalarımızın fotoğrafı, adı ve görevi |
-| Salih Gedik Hocamızın fotoğrafı | Heyetimiz | Tanıtım videosundan alınan karenin gerçekten Salih Gedik Hocamız olduğunun teyidi, varsa daha net bir fotoğraf |
+| Hocalarımızın fotoğrafları (isteğe bağlı) | Heyetimiz | Sınıf hocalarımızın fotoğrafı, adı ve görevi; eklenirse Heyetimiz sayfasına "Hocalarımız" bölümü açılır |
 | WhatsApp teyidi | Bağış sayfası → Dekontu iletin | Dekont için WhatsApp düğmesi 0536 976 99 78'e (talebe sofrası için 0543 663 91 55'e) gider. Bu numaralarda WhatsApp yoksa `BAGIS_WHATSAPP = False` yapın |
 | Kız medreselerinin adı | Medreselerimiz | Sitede "Atalar Kız Medresesi" ve "Osmaniye Kız Medresesi" yazıyor; resmî adları farklıysa `MEDRESELER` listesinden düzeltin |
 | Maltepe Külliyesi | Anasayfa (Müjde bandı), Medreselerimiz, Bağış | 1.000 m², en az 100 talebe, tadilat başlıyor. Rakamlar `MALTEPE_M2` ve `MALTEPE_KISI` ayarlarında |
@@ -61,8 +59,10 @@ Sitede kullanılan bilgiler ve kaynakları:
 * **Saatler ve dersler** sizin mesajınızdan alındı: gündüzlü 09.00–20.00,
   yatılı Pazar 21.00 giriş, Cumartesi 10.00 çıkış, hafta sonu ders yok.
 * **Logo** gönderdiğiniz orijinal PDF'ten birebir alındı.
-* **Salih Gedik Hocamızın fotoğrafı**, tanıtım videosunda onun adının geçtiği
-  bölümdeki kareden kırpıldı.
+* **Yönetim heyeti** fotoğrafları, isimleri ve görevleri derneğin gönderdiği
+  bilgilerden alındı (Salih Gedik Hocamız yönetim kurulu başkanı).
+* **Kitap kapakları** telifli görsel kullanmamak için klasik cilt sanatından
+  (şemse, köşebent, cetvel) esinlenerek çizildi (`kitap()` fonksiyonu).
 * **Talebe fotoğrafları** hukuki nedenlerle siteden kaldırıldı.
 
 ### Kendiniz düzenlemek isterseniz
@@ -478,7 +478,6 @@ gelir. Teknik bir yakınınız varsa iyi bir seçenektir.
 - [ ] Telefonda menü (☰) açılıp kapanıyor
 - [ ] İletişim formundan gönderilen deneme mesajı e-postaya düştü
 - [ ] Bağış alanlarındaki IBAN ve banka bilgileri gerçek bilgilerle değiştirildi
-- [ ] Yönetim kurulu isim ve görevleri yazıldı
 - [ ] [Google Search Console](https://search.google.com/search-console)'a site eklendi ve `https://menekseilim.com.tr/sitemap.xml` gönderildi
 - [ ] Facebook sayfasının "Web sitesi" alanına adres yazıldı
 
@@ -543,8 +542,7 @@ menekseilim-site/          ← sunucuya (public_html) yüklenen klasör
 ├── js/main.js             Açılış ekranı, menü, form, IBAN kopyalama
 ├── img/                   logo.svg, logo-acik.svg, muhur.svg, desen-altin.svg, medrese-ders.jpg, og-gorsel.png
 │   ├── bagis/             Bağış alanı fotoğrafları (afişlerden kırpıldı)
-│   ├── heyet/             Yönetim kurulu fotoğrafları
-│   └── hocalar/           Hoca fotoğrafları (salih-gedik.jpg)
+│   └── heyet/             Yönetim heyeti fotoğrafları
 └── video/                 Tanıtım ve yıl sonu merasimi videoları (.mp4) ve kapakları (.jpg)
 
 menekseilim-kaynak/        ← sunucuya YÜKLENMEZ; siteyi üreten dosyalar
