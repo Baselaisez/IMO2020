@@ -312,6 +312,46 @@
     });
   }
 
+  // ---------------------------------------------------------------- Videolar: açılmazsa dosyayı bir kerede indirip oynat
+  // iPhone videoyu parça parça ister; parça desteği olmayan sunucularda (ör. önizleme) video
+  // hiç açılmaz. Böyle bir hata ya da takılma olursa dosya bütünüyle indirilip oynatılır.
+  document.querySelectorAll("video.video").forEach(function (v) {
+    var kaynak = v.querySelector("source");
+    if (!kaynak || !window.fetch || !window.URL || !URL.createObjectURL) return;
+    var adres = kaynak.getAttribute("src");
+    var kap = v.parentNode;
+    var denendi = false;
+    var yedek = function () {
+      if (denendi) return;
+      denendi = true;
+      kap.classList.remove("video-hata");
+      kap.classList.add("video-yukleniyor");
+      fetch(adres).then(function (r) {
+        if (!r.ok) throw new Error("HTTP " + r.status);
+        return r.blob();
+      }).then(function (b) {
+        v.addEventListener("error", function () { kap.classList.add("video-hata"); }, { once: true });
+        v.src = URL.createObjectURL(b.type === "video/mp4" ? b : new Blob([b], { type: "video/mp4" }));
+        v.load();
+        var oynat = v.play();
+        if (oynat && oynat.catch) oynat.catch(function () { /* kullanıcı tekrar dokunur */ });
+      }).catch(function () {
+        kap.classList.add("video-hata");
+      }).then(function () {
+        kap.classList.remove("video-yukleniyor");
+      });
+    };
+    kaynak.addEventListener("error", yedek);
+    v.addEventListener("error", yedek);
+    v.addEventListener("play", function () {
+      if (denendi) return;
+      var bekle = setTimeout(function () {
+        if (v.readyState < 3) { v.pause(); yedek(); }
+      }, 6000);
+      v.addEventListener("playing", function () { clearTimeout(bekle); }, { once: true });
+    });
+  });
+
   // ---------------------------------------------------------------- Harita: düğmeye basınca yüklenir (o ana kadar Google'a bağlanılmaz)
   document.querySelectorAll(".harita").forEach(function (h) {
     var dugme = h.querySelector(".harita-ac");

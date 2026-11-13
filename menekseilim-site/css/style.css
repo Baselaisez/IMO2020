@@ -306,6 +306,11 @@ html.acilis-kapandi .acilis { display: none; }
 .videolar figcaption { color: var(--metin-soluk); font-size: 1rem; }
 @media (max-width: 700px) { .videolar { grid-template-columns: 1fr; } .videolar .video { max-width: 320px; margin-inline: auto; } }
 
+.giris-video, .videolar figure { position: relative; }
+.video-yukleniyor::after, .video-hata::after { position: absolute; left: 50%; top: 42%; transform: translate(-50%, -50%); z-index: 2; max-width: 80%; text-align: center; padding: .55rem 1rem; border-radius: 999px; font-weight: 700; font-size: .95rem; pointer-events: none; }
+.video-yukleniyor::after { content: "Video yükleniyor…"; background: rgba(18, 60, 65, .9); color: #fff; }
+.video-hata::after { content: "Video şu an açılamadı, lütfen biraz sonra tekrar deneyin."; background: rgba(255, 255, 255, .95); color: var(--hata); border-radius: 14px; }
+
 /* ---------- heyet ---------- */
 .heyet { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1.75rem 1.25rem; }
 .heyet-uc { grid-template-columns: repeat(3, minmax(0, 1fr)); max-width: 900px; }
