@@ -61,7 +61,10 @@ Sitede kullanılan bilgiler ve kaynakları:
   WhatsApp dernek tarafından teyit edildi.
 * **Yönetim heyeti** fotoğrafları, isimleri ve görevleri derneğin gönderdiği
   bilgilerden alındı (Salih Gedik Hocamız yönetim kurulu başkanı).
-* **Kitap kapakları** telifli görsel kullanmamak için klasik cilt sanatından
+* **Kitap görselleri** (tezhipli Mushaf, Mecmûatü's-Sarf, Mecmûatü'n-Nahv)
+  dernek tarafından gönderildi; `GRUP_KITAPLARI` ve `EGITIM_GORSELI` ayarlarında.
+  Yayınevinin ürün görseli iseler kullanım için yayınevinin onayını almanız iyi olur.
+* **Ders kartlarındaki kapaklar** telifli görsel kullanmamak için klasik cilt sanatından
   (şemse, köşebent, cetvel) esinlenerek çizildi (`kitap()` fonksiyonu).
 * **Talebe fotoğrafları** hukuki nedenlerle siteden kaldırıldı.
 
@@ -542,7 +545,8 @@ menekseilim-site/          ← sunucuya (public_html) yüklenen klasör
 ├── js/main.js             Açılış ekranı, menü, form, IBAN kopyalama
 ├── img/                   logo.svg, logo-acik.svg, muhur.svg, desen-altin.svg, medrese-ders.jpg, og-gorsel.png
 │   ├── bagis/             Bağış alanı fotoğrafları (afişlerden kırpıldı)
-│   └── heyet/             Yönetim heyeti fotoğrafları
+│   ├── heyet/             Yönetim heyeti fotoğrafları
+│   └── kitaplar/          Mushaf ve Mecmûa kitap görselleri (Eğitimlerimiz sayfası)
 └── video/                 Tanıtım ve yıl sonu merasimi videoları (.mp4) ve kapakları (.jpg)
 
 menekseilim-kaynak/        ← sunucuya YÜKLENMEZ; siteyi üreten dosyalar

@@ -118,6 +118,13 @@ MUFREDAT = [
       ("İzhâr", "الإظهار", "Yine Birgivî'nin, Avâmil'in ardından okunan İzhârü'l-Esrâr'ı. Nahiv kaidelerini örnekleriyle işler.")]),
 ]
 
+# Ders gruplarının yanında gösterilen kitap fotoğrafları: grup adı -> (dosya, kitap adı, açıklama)
+GRUP_KITAPLARI = {
+    "Arapça: Sarf": ("img/kitaplar/mecmuatus-sarf.jpg", "Mecmûatü's-Sarf", "Emsile, Binâ, Maksûd ve İzzî bir arada"),
+    "Arapça: Nahiv": ("img/kitaplar/mecmuatun-nahv.jpg", "Mecmûatü'n-Nahv", "Avâmil, İzhâr ve Kâfiye bir arada"),
+}
+EGITIM_GORSELI = ("img/kitaplar/mushaf.jpg", "Tezhipli bir Mushaf-ı Şerif'in Fâtiha ve Bakara sayfaları")
+
 YOLCULUK = [  # anasayfadaki dört adım: (kapak yazısı, kapak rengi, başlık, açıklama)
     ("ألفبا", "yesil", "Elif-Ba", "Harfleri tanır, Kur'an okumaya ilk adımı atar."),
     ("القرآن الكريم", "kirmizi", "Kur'an-ı Kerim", "Tecvid ve kıraatle Kur'an'ı doğru okur, hafızlık yolunda ilerler."),
@@ -194,6 +201,12 @@ DESEN_ALTIN = """<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" 
   </g>
 </svg>
 """
+
+
+def gorsel_boyut(rel):
+    from PIL import Image
+    with Image.open(os.path.join(OUT, rel)) as im:
+        return im.size
 
 
 def yaz(rel, icerik):
@@ -338,8 +351,18 @@ def bolum_basi(baslik, ar="", aciklama="", orta=False, h="h2"):
     return f'<div class="bolum-basi{" orta" if orta else ""}">{ust}<{h}>{baslik}</{h}>{sus()}{p}</div>'
 
 
-def sayfa_basi(baslik, aciklama, ar=""):
+def sayfa_basi(baslik, aciklama, ar="", gorsel=None):
     ust = f'<span class="ar-ust" lang="ar">{ar}</span>' if ar else ""
+    if gorsel:
+        g, b = gorsel_boyut(gorsel[0])
+        return f"""<section class="sayfa-basi koyu gorselli">
+  <div class="kapsayici sayfa-basi-ic">
+    <div>{ust}<h1>{baslik}</h1>
+    <p>{aciklama}</p></div>
+    <figure class="sayfa-basi-gorsel"><img src="{gorsel[0]}" alt="{gorsel[1]}" width="{g}" height="{b}"></figure>
+  </div>
+</section>
+"""
     return f"""<section class="sayfa-basi koyu">
   <div class="kapsayici">
     {ust}<h1>{baslik}</h1>
@@ -712,15 +735,23 @@ def ders_karti(d, dar, a, renk, sinif=""):
 
 def ders_grubu(grup, ar, aciklama, renk, dersler):
     kartlar = "\n".join(ders_karti(d, dar, a, renk) for d, dar, a in dersler)
+    liste = f"""      <ul class="dersler">
+{kartlar}
+      </ul>"""
+    if grup in GRUP_KITAPLARI:
+        foto, ad, alt = GRUP_KITAPLARI[grup]
+        g, b = gorsel_boyut(foto)
+        liste = f"""      <div class="grup-govde">
+        <figure class="grup-kitap"><img src="{foto}" alt="{ad} kitabı" width="{g}" height="{b}" loading="lazy"><figcaption><b>{ad}</b><span>{alt}</span></figcaption></figure>
+{liste}
+      </div>"""
     return f"""    <div class="ders-grubu">
       <div class="ders-grubu-baslik"><h3>{grup}</h3><span class="ar" lang="ar">{ar}</span><p>{aciklama}</p></div>
-      <ul class="dersler">
-{kartlar}
-      </ul>
+{liste}
     </div>"""
 
 
-EGITIMLER = sayfa_basi("Eğitimlerimiz", "Temel İslami ilimler, farz-ı ayn bilgiler ve Arapça: Elif-Ba'dan İzhâr'a uzanan bir müfredat.", "تعليم") + f"""
+EGITIMLER = sayfa_basi("Eğitimlerimiz", "Temel İslami ilimler, farz-ı ayn bilgiler ve Arapça: Elif-Ba'dan İzhâr'a uzanan bir müfredat. Hepsinin başında ve merkezinde Kur'an-ı Kerim.", "تعليم", EGITIM_GORSELI) + f"""
 <section class="bolum" id="programlar">
   <div class="kapsayici">
     {bolum_basi("Eğitim programlarımız", "خدماتنا", "Ailenizin düzenine uygun programı birlikte seçelim.")}
