@@ -39,11 +39,9 @@ isterseniz" kısmına bakın).
 | Eksik bilgi | Sitede nerede | Ne gerekiyor |
 |---|---|---|
 | Hocalarımızın fotoğrafları (isteğe bağlı) | Heyetimiz | Sınıf hocalarımızın fotoğrafı, adı ve görevi; eklenirse Heyetimiz sayfasına "Hocalarımız" bölümü açılır |
-| WhatsApp teyidi | Bağış sayfası → Dekontu iletin | Dekont için WhatsApp düğmesi 0536 976 99 78'e (talebe sofrası için 0543 663 91 55'e) gider. Bu numaralarda WhatsApp yoksa `BAGIS_WHATSAPP = False` yapın |
 | Kız medreselerinin adı | Medreselerimiz | Sitede "Atalar Kız Medresesi" ve "Osmaniye Kız Medresesi" yazıyor; resmî adları farklıysa `MEDRESELER` listesinden düzeltin |
 | Maltepe Külliyesi | Anasayfa (Müjde bandı), Medreselerimiz, Bağış | 1.000 m², en az 100 talebe, tadilat başlıyor. Rakamlar `MALTEPE_M2` ve `MALTEPE_KISI` ayarlarında |
 | Yardım toplama izni (varsa) | Bağış sayfası | Valilikten izin alındıysa izin numarası (`YARDIM_TOPLAMA_IZIN`); aşağıdaki Yasal hatırlatmalar'a bakın |
-| Osmanlıca yazının teyidi | Açılış ekranı | Açılışta "منكشه درنكی" (Menekşe Derneği) yazıyor; yazımı uygun mu? |
 | Medrese adresleri | İletişim sayfası | Atalar, Cevizli, Kurfalı (ve açılınca Topselvi) medreselerinin açık adresi |
 | Sohbet ve zikir günleri | Anasayfa ve Hakkımızda | İsterseniz gün ve saatleri yazarız; şu an "bizi arayın" yazıyor |
 | Yaş ve ücret bilgisi (isteğe bağlı) | Anasayfa → Sık sorulanlar | Kaç yaşında başlanabildiği ve eğitimin ücretli olup olmadığı; velilerin en çok sorduğu iki soru |
@@ -59,6 +57,8 @@ Sitede kullanılan bilgiler ve kaynakları:
 * **Saatler ve dersler** sizin mesajınızdan alındı: gündüzlü 09.00–20.00,
   yatılı Pazar 21.00 giriş, Cumartesi 10.00 çıkış, hafta sonu ders yok.
 * **Logo** gönderdiğiniz orijinal PDF'ten birebir alındı.
+* **Açılıştaki Osmanlıca yazı** (منكشه درنكی) ve iki bağış numarasındaki
+  WhatsApp dernek tarafından teyit edildi.
 * **Yönetim heyeti** fotoğrafları, isimleri ve görevleri derneğin gönderdiği
   bilgilerden alındı (Salih Gedik Hocamız yönetim kurulu başkanı).
 * **Kitap kapakları** telifli görsel kullanmamak için klasik cilt sanatından

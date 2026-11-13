@@ -305,7 +305,7 @@ def son(kok=""):
       <h2>Bize ulaşın</h2>
       <ul>
         <li><a href="tel:{TELEFON_LINK}">{TELEFON}</a></li>
-        <li>Bağış hattı: <a href="tel:{tel_link(BAGIS_TELEFON)}">{BAGIS_TELEFON}</a></li>
+        <li>Bağış hattı: <a href="tel:{tel_link(BAGIS_TELEFON)}">{BAGIS_TELEFON}</a> · <a href="{wa_link(BAGIS_TELEFON)}" target="_blank" rel="noopener">WhatsApp</a></li>
         <li><a href="mailto:{EPOSTA}">{EPOSTA}</a></li>
         <li><a href="{INSTAGRAM}" target="_blank" rel="noopener">Instagram</a> · <a href="{FACEBOOK}" target="_blank" rel="noopener">Facebook</a></li>
       </ul>
@@ -935,6 +935,7 @@ ILETISIM = sayfa_basi("İletişim", "Kayıt, bilgi ya da sadece hal hatır için
       <ul class="bilgi">
         <li><span class="simge">{IKON['tel']}</span><div><small>Telefon</small><a href="tel:{TELEFON_LINK}">{TELEFON}</a></div></li>
         <li><span class="simge">{IKON['mail']}</span><div><small>E-posta</small><a href="mailto:{EPOSTA}">{EPOSTA}</a></div></li>
+        <li><span class="simge">{IKON['whatsapp']}</span><div><small>Bağış hattı · WhatsApp</small><a href="{wa_link(BAGIS_TELEFON, "Selamün aleyküm, bağış hakkında bilgi almak istiyorum.")}" target="_blank" rel="noopener">{BAGIS_TELEFON}</a></div></li>
         <li><span class="simge">{IKON['ig']}</span><div><small>Instagram</small><a href="{INSTAGRAM}" target="_blank" rel="noopener">@menekseilim</a></div></li>
       </ul>
       <h2 style="font-size:1.4rem">Medreselerimiz</h2>
