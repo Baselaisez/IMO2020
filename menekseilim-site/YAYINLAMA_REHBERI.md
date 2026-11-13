@@ -38,9 +38,11 @@ isterseniz" kısmına bakın).
 
 | Eksik bilgi | Sitede nerede | Ne gerekiyor |
 |---|---|---|
-| Hoca ve kadro fotoğrafları | Hocalarımız sayfası | Başkan, başkan yardımcıları, finans müdürü, ilmî bölüm başkanı ve sınıf hocalarının fotoğrafı ve adı |
-| Salih Gedik Hocamızın fotoğrafı | Anasayfa ve Hocalarımız | Tanıtım videosundan alınan karenin gerçekten Salih Gedik Hocamız olduğunun teyidi, varsa daha net bir fotoğraf |
-| IBAN ve banka | Bağış sayfası | Derneğin IBAN numarası, banka ve şube adı |
+| Yönetim kurulu isim ve görevleri | Heyetimiz sayfası ve anasayfa | Gönderdiğiniz 4 fotoğraf sitede; her birinin adı ve görevi (başkan, başkan yardımcısı, sayman gibi). Şu an hepsinde "Yönetim Kurulu Üyesi" yazıyor |
+| Diğer hocalarımızın fotoğrafları (isteğe bağlı) | Heyetimiz → Eğitim heyetimiz | Sınıf hocalarımızın fotoğrafı, adı ve görevi |
+| Salih Gedik Hocamızın fotoğrafı | Heyetimiz | Tanıtım videosundan alınan karenin gerçekten Salih Gedik Hocamız olduğunun teyidi, varsa daha net bir fotoğraf |
+| Bağış alanları ve IBAN'lar | Bağış sayfası | Her bağış alanı için (ör. genel bağış, zekât, kurban, talebe bursu) ayrı IBAN, banka ve şube adı. Şu an tek bir örnek kart var |
+| Osmanlıca yazının teyidi | Açılış ekranı | Açılışta "منكشه درنكی" (Menekşe Derneği) yazıyor; yazımı uygun mu? |
 | Medrese adresleri | İletişim sayfası | Atalar, Cevizli, Kurfalı (ve açılınca Topselvi) medreselerinin açık adresi |
 | Sohbet ve zikir günleri | Anasayfa ve Hakkımızda | İsterseniz gün ve saatleri yazarız; şu an "bizi arayın" yazıyor |
 | Yaş ve ücret bilgisi (isteğe bağlı) | Anasayfa → Sık sorulanlar | Kaç yaşında başlanabildiği ve eğitimin ücretli olup olmadığı; velilerin en çok sorduğu iki soru |
@@ -63,20 +65,43 @@ Sitede kullanılan bilgiler ve kaynakları:
 ### Kendiniz düzenlemek isterseniz
 
 Sayfalar `menekseilim-kaynak/olustur.py` betiğiyle üretiliyor. En kolayı bu
-dosyanın başındaki **AYARLAR** bölümünü (telefon, IBAN, dersler, medreseler,
-kadro) değiştirip depo kökünden şunu çalıştırmaktır:
+dosyanın başındaki **AYARLAR** bölümünü (telefon, bağış hesapları, dersler,
+medreseler, heyet) değiştirip depo kökünden şunu çalıştırmaktır:
 
 ```bash
 python3 menekseilim-kaynak/olustur.py
 ```
 
-**Hoca ve kadro fotoğrafı eklemek:** Fotoğrafları `menekseilim-site/img/hocalar/`
-klasörüne koyun (dikey, yaklaşık 800×1000 piksel). Sonra `olustur.py` içindeki
-KADRO listesinde ilgili satıra isim ve dosya adını yazın, örneğin:
+**Yönetim kurulu:** Fotoğraflar `menekseilim-site/img/heyet/` klasöründe
+(dikey, 640×800 piksel). `olustur.py` içindeki `HEYET` listesinde her satır
+`(fotoğraf, isim, görev)` şeklindedir, örneğin:
 
 ```python
-("Dernek Başkanı", "Ahmet Yılmaz", "baskan.jpg"),
+("heyet-1.jpg", "Ahmet Yılmaz", "Dernek Başkanı"),
 ```
+
+İsim boş bırakılırsa yalnızca görev yazılır.
+
+**Bağış alanları ve IBAN'lar:** `BAGIS_HESAPLARI` listesindeki her sözlük
+Bağış sayfasında ayrı bir kart olur. Yeni alan eklemek için bir sözlük daha
+yazın:
+
+```python
+{"id": "burs", "baslik": "Talebe bursu", "ar": "منحة",
+ "aciklama": "Bir talebemizin eğitim ve iaşe giderlerine destek olur.",
+ "banka": "Örnek Bankası, Kadıköy şubesi", "iban": "TR00 0000 0000 0000 0000 0000 00"},
+```
+
+**Dersler:** `MUFREDAT` listesi Eğitimlerimiz sayfasındaki ders kartlarını,
+`YOLCULUK` listesi anasayfadaki dört adımı üretir.
+
+**Açılış ekranı:** Siteye ilk girişte (tarayıcı oturumu başına bir kez) yaklaşık
+3 saniye görünür; tıklayınca ya da bir tuşa basınca hemen kapanır. Yazılar
+`olustur.py` içindeki `acilis()` fonksiyonundadır.
+
+**Önizleme dosyası:** Betik ayrıca `onizleme.html` üretir. Bütün sayfaları tek
+dosyada toplar; yalnızca önizleme içindir. Otomatik yükleme bu dosyayı sunucuya
+göndermez, sunucuda açılırsa da `.htaccess` anasayfaya yönlendirir.
 
 **Logo:** `menekseilim-kaynak/logo_uret.py` orijinal PDF'ten `img/logo.svg`,
 `img/logo-acik.svg` (koyu zemin için), `img/muhur.svg` ve `favicon.svg`
@@ -426,8 +451,8 @@ gelir. Teknik bir yakınınız varsa iyi bir seçenektir.
 - [ ] `menekşeilim.com` ana adrese yönleniyor
 - [ ] Telefonda menü (☰) açılıp kapanıyor
 - [ ] İletişim formundan gönderilen deneme mesajı e-postaya düştü
-- [ ] IBAN, telefon, adres ve kütük numarası gerçek bilgilerle değiştirildi
-- [ ] Yer tutucu görseller gerçek fotoğraflarla değiştirildi
+- [ ] Bağış alanlarındaki IBAN ve banka bilgileri gerçek bilgilerle değiştirildi
+- [ ] Yönetim kurulu isim ve görevleri yazıldı
 - [ ] [Google Search Console](https://search.google.com/search-console)'a site eklendi ve `https://menekseilim.com.tr/sitemap.xml` gönderildi
 - [ ] Facebook sayfasının "Web sitesi" alanına adres yazıldı
 
@@ -468,20 +493,25 @@ gelir. Teknik bir yakınınız varsa iyi bir seçenektir.
 
 ```
 menekseilim-site/          ← sunucuya (public_html) yüklenen klasör
-├── index.html             Anasayfa: giriş videosu, eğitimlerimiz, dersler, medreseler, hocalarımız
-├── hakkimizda.html        Hakkımızda, sohbet/zikir, sosyal etkinlikler, merasim videoları
-├── hocalarimiz.html       Salih Gedik Hocamız ve kadromuz
-├── bagis.html             Bağış ve IBAN
+├── index.html             Anasayfa: açılış, hizmetler, eğitim yolculuğu, medreseler, sadaka-i câriye, merasim, heyet, sorular
+├── hakkimizda.html        Biz kimiz, değerlerimiz, sohbet/zikir, sosyal etkinlikler, dernek bilgileri
+├── egitimlerimiz.html     Gündüzlü/yatılı programlar, bütün dersler (Elif-Ba'dan İzhâr'a), kayıt
+├── heyetimiz.html         Yönetim kurulu heyeti ve eğitim heyeti
+├── bagis.html             Bağış alanları (her biri ayrı IBAN), vergi indirimi
 ├── iletisim.html          Telefon, e-posta, medreseler ve iletişim formu
 ├── kvkk.html              KVKK aydınlatma metni
 ├── 404.html               Bulunamayan sayfa
+├── onizleme.html          Tek dosyalık önizleme (sunucuya YÜKLENMEZ)
 ├── iletisim-gonder.php    Form gönderici (PHP)
 ├── .htaccess              Yönlendirmeler, önbellek, güvenlik ayarları
 ├── CNAME, robots.txt, sitemap.xml, favicon.svg
 ├── css/style.css          Tüm görünüm
-├── js/main.js             Menü, form, IBAN kopyalama
-├── img/                   logo.svg, logo-acik.svg, muhur.svg, kisi.svg, medrese-ders.jpg, og-gorsel.png, desen.svg
-│   └── hocalar/           Hoca ve kadro fotoğrafları (salih-gedik.jpg; diğerleri eklenecek)
+├── css/fonts.css          Yazı tipleri (kendi sunucumuzdan; Google'a bağlanmaz)
+├── fonts/                 Lora, Source Sans 3, Aref Ruqaa (hat), Amiri (Arapça) ve lisansları
+├── js/main.js             Açılış ekranı, menü, form, IBAN kopyalama
+├── img/                   logo.svg, logo-acik.svg, muhur.svg, desen-altin.svg, medrese-ders.jpg, og-gorsel.png
+│   ├── heyet/             Yönetim kurulu fotoğrafları
+│   └── hocalar/           Hoca fotoğrafları (salih-gedik.jpg)
 └── video/                 Tanıtım ve yıl sonu merasimi videoları (.mp4) ve kapakları (.jpg)
 
 menekseilim-kaynak/        ← sunucuya YÜKLENMEZ; siteyi üreten dosyalar

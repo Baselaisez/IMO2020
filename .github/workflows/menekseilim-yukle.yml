@@ -66,7 +66,7 @@ jobs:
           set net:max-retries 3
           set net:timeout 30
           open --env-password -u "$FTP_KULLANICI" "$FTP_SUNUCU"
-          mirror --reverse --verbose --parallel=4 --exclude-glob README.md --exclude-glob YAYINLAMA_REHBERI.md --exclude-glob CNAME menekseilim-site "$HEDEF"
+          mirror --reverse --verbose --parallel=4 --exclude-glob README.md --exclude-glob YAYINLAMA_REHBERI.md --exclude-glob CNAME --exclude-glob onizleme.html menekseilim-site "$HEDEF"
           bye
           EOF
 

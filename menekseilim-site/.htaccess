@@ -20,10 +20,13 @@ ErrorDocument 404 /404.html
   RewriteRule ^ https://menekseilim.com.tr%{REQUEST_URI} [R=301,L]
 
   # 4) Eski sayfa adresleri
-  RewriteRule ^faaliyetler\.html$ /#egitimlerimiz [R=301,NE,L]
-  RewriteRule ^galeri\.html$ /hocalarimiz.html [R=301,L]
-  RewriteRule ^talebelerimiz\.html$ /hocalarimiz.html [R=301,L]
+  RewriteRule ^faaliyetler\.html$ /egitimlerimiz.html [R=301,L]
+  RewriteRule ^galeri\.html$ / [R=301,L]
   RewriteRule ^duyurular\.html$ / [R=301,L]
+  RewriteRule ^(talebelerimiz|hocalarimiz)\.html$ /heyetimiz.html [R=301,L]
+
+  # 5) Önizleme dosyası sunucuda yayınlanmaz
+  RewriteRule ^onizleme\.html$ / [R=301,L]
 </IfModule>
 
 <IfModule mod_expires.c>
@@ -33,6 +36,7 @@ ErrorDocument 404 /404.html
   ExpiresByType image/svg+xml "access plus 30 days"
   ExpiresByType image/jpeg "access plus 30 days"
   ExpiresByType image/png "access plus 30 days"
+  ExpiresByType font/woff2 "access plus 1 year"
   ExpiresByType video/mp4 "access plus 30 days"
 </IfModule>
 
