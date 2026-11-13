@@ -5,6 +5,16 @@ def appVersionName = new groovy.json.JsonSlurper()
         .parseText(rootProject.file('../package.json').text)
         .version
 
+// versionCode de AYNI kaynaktan türetilir. Eskiden elle "51000" yazıyordu
+// (5.10.0'ın karşılığı) ve sürüm yükseldiğinde kimse onu güncellemiyordu.
+// Android, versionCode ARTMAMIŞSA güncellemeyi reddeder — üstelik çoğu zaman
+// anlaşılmaz bir hatayla. Yani elle tutulan bu sayı, bir sonraki güncellemeyi
+// sessizce engelleyecek bir mayındı.
+// Formül: 5.16.0 -> 5*10000 + 16*100 + 0 = 51600. Mevcut 51000 değeri de
+// 5.10.0 için bu formülün tam sonucudur, yani geçmişle uyumlu ve artan.
+def vp = appVersionName.toString().tokenize('.')
+def appVersionCode = vp[0].toInteger() * 10000 + vp[1].toInteger() * 100 + vp[2].toInteger()
+
 // İmzalama parolaları build.gradle'a GÖMÜLMEZ; android/keystore.properties'ten
 // okunur. Dosya yoksa release yapılandırması imzasız kalır (derleme yine çalışır),
 // böylece anahtarı olmayan bir çalışma kopyasında da proje derlenebilir.
@@ -33,7 +43,7 @@ android {
         applicationId "com.hastakayit.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 51000
+        versionCode appVersionCode
         versionName appVersionName
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {

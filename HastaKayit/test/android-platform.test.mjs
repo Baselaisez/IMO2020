@@ -81,3 +81,42 @@ test('iOS\'a özel iCloud eklentisi Android derlemesine KARIŞMAZ', () => {
     assert.match(settings.toLowerCase(), new RegExp(p), `${p} eklentisi Android'e bağlanmalı`);
   }
 });
+
+// ---------------------------------------------------------------------------
+// versionCode: Android'in güncellemeyi KABUL etmesinin tek şartı
+// ---------------------------------------------------------------------------
+
+test('Android versionCode elle yazılmaz, sürümden türetilir', () => {
+  // Eskiden "versionCode 51000" elle yazılıydı — 5.10.0'ın karşılığı. Sürüm
+  // 5.16.0'a çıktığında bu sayı 51000'de kalıyordu ve Android, versionCode
+  // ARTMADIĞI için güncellemeyi REDDEDER. Bu, bir sonraki Samsung
+  // güncellemesini sessizce engelleyecek bir mayındı: derleme başarılı
+  // görünür, APK üretilir, telefon kurmaz.
+  const g = readFileSync(join(ROOT, 'android/app/build.gradle'), 'utf8');
+  assert.match(g, /versionCode appVersionCode/, 'versionCode türetilen değişkenden gelmeli');
+  assert.doesNotMatch(g, /versionCode\s+\d/, 'versionCode sabit sayı OLMAMALI');
+  assert.match(g, /appVersionName\.toString\(\)\.tokenize\('\.'\)/,
+    'sürüm numarası package.json\'dan parçalanmalı');
+  // Formülün kendisi: sürüm yükseldikçe sayı ARTMALI. Azalan ya da eşit kalan
+  // bir formül, hatayı aynen geri getirir.
+  const kod = (v) => { const p = v.split('.').map(Number); return p[0]*10000 + p[1]*100 + p[2]; };
+  assert.equal(kod('5.10.0'), 51000, 'geçmişteki değerle uyumlu olmalı');
+  assert.ok(kod('5.16.0') > kod('5.15.0'));
+  assert.ok(kod('5.15.0') > kod('5.9.1'));
+  assert.ok(kod('6.0.0') > kod('5.99.99'));
+  // build.gradle'daki formül ile buradaki formül AYNI olmalı:
+  assert.match(g, /vp\[0\]\.toInteger\(\) \* 10000 \+ vp\[1\]\.toInteger\(\) \* 100 \+ vp\[2\]\.toInteger\(\)/);
+});
+
+test('release APK imzasız kalırsa bu BİLİNEREK olur', () => {
+  // Android imzasız APK'yı kurmaz. build.gradle, keystore.properties yoksa
+  // imzalamayı atlıyor — bu kasıtlı (anahtarı olmayan kopyada da derlensin
+  // diye), ama sessiz: derleme başarılı görünür, APK kurulamaz. Kuralın
+  // kasıtlı olduğunu yazıya döküyoruz ki yanlışlıkla "düzeltilmesin".
+  const g = readFileSync(join(ROOT, 'android/app/build.gradle'), 'utf8');
+  assert.match(g, /def hasReleaseKeystore = keystorePropsFile\.exists\(\)/);
+  assert.match(g, /if \(hasReleaseKeystore\) \{\s*signingConfig signingConfigs\.release/s);
+  // Parolalar ASLA gradle dosyasına gömülmemeli.
+  assert.doesNotMatch(g, /storePassword\s+["']/, 'parola build.gradle\'a gömülmemeli');
+  assert.doesNotMatch(g, /keyPassword\s+["']/, 'parola build.gradle\'a gömülmemeli');
+});
