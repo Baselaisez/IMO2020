@@ -341,6 +341,39 @@ port 21, uzak klasör `/public_html`.
 > **Dikkat:** Bu satırları SSL kurulmadan açarsanız site "güvenli değil"
 > uyarısıyla açılmaz. Sıra önemli: önce SSL, sonra yönlendirme.
 
+### A4b. Turhost ücretsiz SSL vermiyorsa: Cloudflare ile kilit simgesi
+
+Turhost hesabında AutoSSL ve Let's Encrypt kapalı olduğu için kilit simgesi
+Cloudflare'in ücretsiz planıyla alınır.
+
+1. **Hesap ve site:** dash.cloudflare.com adresinde ücretsiz hesap açın,
+   `menekseilim.com.tr` alan adını ekleyin, **Free** planı seçin.
+2. **DNS kayıtları:** Cloudflare mevcut kayıtları kopyalar. cPanel → **Zone
+   Editor** ile karşılaştırın, eksik kayıt varsa ekleyin.
+   * `menekseilim.com.tr` ve `www`: **turuncu bulut** (Proxied)
+   * `mail`, `ftp`, `cpanel`, `webmail`, `webdisk`, `autodiscover`,
+     `autoconfig`, `cpcalendars`, `cpcontacts`: **gri bulut** (DNS only);
+     yoksa e-posta ve FTP çalışmaz
+   * MX ve TXT (SPF, DKIM) kayıtlarına dokunmayın
+3. **Ad sunucuları:** Cloudflare'in verdiği iki ad sunucusunu Turhost
+   panelinde (Alan Adlarım → menekseilim.com.tr → Ad Sunucuları) eskilerinin
+   yerine yazın. `.com.tr` alan adlarında yayılması birkaç saat sürebilir.
+4. **Sunucu sertifikası:** Cloudflare etkinleşince → SSL/TLS → **Origin
+   Server → Create Certificate** (varsayılanlarla). Çıkan "Origin
+   Certificate" ve "Private Key" metinlerini cPanel → SSL/TLS →
+   **Installation** ekranında menekseilim.com.tr için ilgili kutulara
+   yapıştırıp **Install Certificate** deyin. Private Key'i kimseyle paylaşmayın.
+5. **Mod:** Cloudflare → SSL/TLS → **Full (strict)**. "Flexible" seçmeyin.
+6. **Yönlendirme:** Cloudflare → SSL/TLS → Edge Certificates → **Always Use
+   HTTPS** açık. Bu durumda `.htaccess`'teki https satırlarını açmaya gerek
+   yoktur; yönlendirmeyi Cloudflare yapar.
+
+Notlar: cPanel'e her zaman sunucu adresinden girin
+(`srvc77.trwww.com:2083`). Otomatik yükleme de `FTP_SUNUCU =
+srvc77.trwww.com` ile çalışmaya devam eder. Bir resmi aynı adla
+değiştirdiğinizde eski hâli görünürse Cloudflare → Caching → **Purge
+Everything**.
+
 ### A5. Alan adı başka yerdeyse: DNS ayarı
 
 Alan adı ile hosting aynı firmadaysa bu adımı atlayın. (Turhost kurulumunda
