@@ -79,8 +79,19 @@ dosyanın başındaki **AYARLAR** bölümünü (telefon, bağış hesapları, de
 medreseler, heyet) değiştirip depo kökünden şunu çalıştırmaktır:
 
 ```bash
+pip install segno fonttools brotli   # bir kez: karekod ve yazı tipi küçültme için
 python3 menekseilim-kaynak/olustur.py
 ```
+
+Betik her çalıştığında şunları da kendiliğinden yapar:
+
+* **Önbellek:** Stil ve betik dosyalarının adresine içerik özeti eklenir
+  (`style.css?v=…`). Dosya değişince ziyaretçinin tarayıcısı eski kopyayı
+  kullanmaz.
+* **Arapça yazı tipleri:** Tam dosyalar `menekseilim-kaynak/fonts-tam/`
+  içinde durur. Siteye Arap alfabesinin tamamı ve sitede geçen bütün Arapça
+  harfler bırakılarak küçültülmüş hâlleri konur (Amiri 106 KB → 40 KB).
+* **Karekodlar:** Bağış alanlarının karekodları yeniden üretilir.
 
 **Yönetim kurulu:** Fotoğraflar `menekseilim-site/img/heyet/` klasöründe
 (dikey, 640×800 piksel). `olustur.py` içindeki `HEYET` listesinde her satır
@@ -128,6 +139,16 @@ yalnızca kendi tarayıcısında kalır, hiçbir yere gönderilmez.
 Mahallesi'ni gösteriyor; açık adres ya da Google Haritalar'daki konum (örneğin
 "40.90,29.18" gibi koordinat) yazılınca pin tam kapıya iner. Harita, ziyaretçi
 "Haritayı göster" düğmesine basana kadar Google'dan yüklenmez.
+
+**Telefonda bağış:** Bağış yaparken ekranın altında "Toplam + IBAN'ı
+kopyala" çubuğu sabit durur; Bağış sayfasında alttaki düğme WhatsApp'a döner.
+"Bütün hesap numaralarımızı bir arada görün" listesi, ne yapacağını bilen
+bağışçılar için bütün IBAN'ları tek yerde verir.
+
+**Hız ve erişilebilirlik (Lighthouse, yayına benzer koşulda):** anasayfa hız 88,
+erişilebilirlik 100, iyi uygulamalar 100, SEO 100. Aşağıdaki videoların kapak
+resimleri bölüme yaklaşınca yüklenir; sayfalar kaydırınca yumuşakça belirir
+(hareket azaltma ayarı açık olanlarda belirmez).
 
 **Bağış kolaylıkları:** Her bağış alanında "Bu hayrı paylaşın" düğmesi
 (telefonda paylaşma menüsü, bilgisayarda WhatsApp), bilgisayarda bağışı telefonda

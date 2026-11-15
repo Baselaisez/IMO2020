@@ -45,6 +45,7 @@ html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; scroll-padding-t
 body { margin: 0; font-family: var(--govde); font-size: 1.125rem; line-height: 1.65; color: var(--metin); background: var(--zemin); }
 img, video { max-width: 100%; height: auto; display: block; }
 a { color: var(--yesil); text-underline-offset: 3px; }
+a[href^="tel:"] { white-space: nowrap; }
 a:hover { color: var(--yesil-koyu); }
 h1, h2, h3 { font-family: var(--baslik); font-weight: 600; line-height: 1.2; color: var(--yesil-koyu); margin: 0 0 .5em; text-wrap: balance; }
 h1 { font-size: clamp(2.2rem, 4.8vw, 3.4rem); }
@@ -103,7 +104,8 @@ html.acilis-kapandi .acilis { display: none; }
 .butonlar { display: flex; flex-wrap: wrap; gap: .75rem; }
 
 /* ---------- başlık ve menü ---------- */
-.ana-baslik { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 900; background: #fff; border-bottom: 1px solid var(--cizgi); }
+.ana-baslik { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 900; background: #fff; border-bottom: 1px solid var(--cizgi); transition: box-shadow var(--gecis); }
+.ana-baslik.kaydi { box-shadow: 0 6px 20px rgba(18, 60, 65, .1); }
 .baslik-ic { display: flex; align-items: center; justify-content: space-between; gap: 1rem; min-height: 82px; }
 .marka { display: block; flex: none; }
 .marka img { height: 54px; width: auto; }
@@ -356,6 +358,26 @@ html.acilis-kapandi .acilis { display: none; }
 }
 .makbuz-iste { margin: .25rem 0 .5rem; }
 .panel-adim .butonlar ~ .ipucu { margin-top: 1rem; }
+/* telefonda bağış yaparken altta sabit duran toplam ve IBAN kopyalama */
+.panel-ozet { display: none; }
+@media (max-width: 700px) {
+  .panel-ozet { position: sticky; bottom: calc(4.9rem + env(safe-area-inset-bottom, 0px)); z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: .75rem; margin: 0 .75rem .75rem; padding: .6rem .7rem .6rem 1rem; background: var(--yesil-koyu); color: #fff; border-radius: 14px; box-shadow: 0 10px 24px rgba(10, 34, 37, .3); }
+  .panel-ozet > span { font-size: .9rem; color: var(--metin-acik); }
+  .panel-ozet > span b { display: block; font-family: var(--baslik); font-size: 1.25rem; color: #fff; line-height: 1.15; }
+  .panel-ozet .kopya { background: var(--altin-acik); border-color: var(--altin-acik); color: var(--yesil-koyu); }
+}
+/* bütün hesap numaraları */
+.tum-hesaplar { margin-top: 2rem; background: #fff; border: 1px solid var(--cizgi); border-radius: var(--radius); padding: 0 1.25rem; }
+.tum-hesaplar summary { cursor: pointer; list-style: none; padding: 1rem 0; font-weight: 700; color: var(--yesil-koyu); display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
+.tum-hesaplar summary::-webkit-details-marker { display: none; }
+.tum-hesaplar summary::after { content: "+"; font-size: 1.5rem; line-height: 1; color: var(--altin-koyu); }
+.tum-hesaplar[open] summary::after { content: "–"; }
+.tum-hesaplar ul { list-style: none; margin: 0; padding: 0; display: grid; }
+.tum-hesaplar li { display: flex; align-items: center; justify-content: space-between; gap: .5rem 1rem; flex-wrap: wrap; padding: .75rem 0; border-top: 1px solid var(--cizgi); }
+.tum-hesaplar li > span { display: grid; gap: .1rem; min-width: 0; }
+.tum-hesaplar b { color: var(--yesil-koyu); }
+.tum-hesaplar code { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-weight: 700; color: var(--metin); font-size: clamp(.8rem, 3.6vw, 1rem); }
+.tum-hesaplar > p { color: var(--metin-soluk); font-size: .95rem; padding: .75rem 0 1rem; border-top: 1px solid var(--cizgi); margin: 0; }
 
 /* ---------- merkez ve harita (İletişim) ---------- */
 .merkez-izgara { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: 2.5rem; align-items: center; }
@@ -481,7 +503,7 @@ html.acilis-kapandi .acilis { display: none; }
 .alan-secim.secili .secim-isaret, .alan-secim:has(input:checked) .secim-isaret { border-color: var(--yesil); background: var(--yesil); box-shadow: inset 0 0 0 4px #fff; }
 .alan-secim:has(input:focus-visible) { outline: 3px solid var(--altin); outline-offset: 2px; }
 
-.bagis-panel { background: #fff; border: 1px solid var(--cizgi); border-radius: var(--radius); box-shadow: var(--golge); overflow: hidden; min-width: 0; scroll-margin-top: 96px; }
+.bagis-panel { background: #fff; border: 1px solid var(--cizgi); border-radius: var(--radius); box-shadow: var(--golge); overflow: hidden; overflow: clip; min-width: 0; scroll-margin-top: 96px; }
 .bagis-panel[hidden] { display: none; }
 .bagis-panel + .bagis-panel { margin-top: 1.5rem; }
 .panel-bas { display: grid; grid-template-columns: 210px minmax(0, 1fr); gap: 1.5rem; align-items: center; padding: 1.25rem; background: var(--bej-acik); border-bottom: 1px solid var(--cizgi); }
@@ -619,6 +641,9 @@ html.acilis-kapandi .acilis { display: none; }
   .mobil-cubuk svg { width: 1.15em; height: 1.15em; fill: currentColor; }
   .mobil-cubuk .ara { background: var(--yesil); color: #fff; }
   .mobil-cubuk .bagis { background: var(--altin-acik); color: var(--yesil-koyu); }
+  .mobil-cubuk .wa { display: none; background: #1F7A4D; color: #fff; }
+  .sayfa-bagis .mobil-cubuk .bagis { display: none; }
+  .sayfa-bagis .mobil-cubuk .wa { display: flex; }
   .alt-cizgi { padding-bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px)); }
 }
 
@@ -628,3 +653,9 @@ html.acilis-kapandi .acilis { display: none; }
 /* 404 */
 .hata-sayfa { text-align: center; padding-block: 5rem; }
 .hata-sayfa img { width: 120px; margin: 0 auto 1.5rem; }
+
+/* ---------- kaydırınca beliren bölümler (hareket azaltma tercihine saygılı) ---------- */
+.canli .belir { opacity: 0; transform: translateY(18px); transition: opacity .6s ease, transform .6s cubic-bezier(.2, .7, .2, 1); transition-delay: var(--gecikme, 0ms); }
+.canli .belir.gorundu { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) { .canli .belir { opacity: 1; transform: none; transition: none; } }
+@media print { .canli .belir { opacity: 1 !important; transform: none !important; } .mobil-cubuk, .panel-ozet, .acilis { display: none !important; } }

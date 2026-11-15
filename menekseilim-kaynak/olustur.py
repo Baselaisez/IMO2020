@@ -231,6 +231,18 @@ def gorsel_boyut(rel):
         return im.size
 
 
+def _surum(rel):
+    import hashlib
+    with open(os.path.join(OUT, rel), "rb") as f:
+        return hashlib.md5(f.read()).hexdigest()[:8]
+
+
+# Stil ve betik değişince tarayıcı eski kopyayı kullanmasın: adreslerine içerik özeti eklenir
+SURUM = {r: _surum(r) for r in ("css/style.css", "css/fonts.css", "js/main.js")}
+# Sayfa açılırken hemen gereken yazı tipleri önceden yüklenir
+ONYUKLE_FONTLAR = ["source-sans-3-latin-400-normal.woff2", "lora-latin-600-normal.woff2", "aref-ruqaa-arabic-700-normal.woff2"]
+
+
 def yaz(rel, icerik):
     yol = os.path.join(OUT, rel)
     os.makedirs(os.path.dirname(yol), exist_ok=True)
@@ -268,7 +280,9 @@ def acilis(kok=""):
 
 def bas(baslik, aciklama, sayfa, kok="", ek_head="", font_css=None, spa=False):
     yol = "" if sayfa == "index.html" else sayfa
-    fontlar = f'<style>{font_css}</style>' if font_css else f'<link rel="stylesheet" href="{kok}css/fonts.css">'
+    fontlar = (f'<style>{font_css}</style>' if font_css else
+               "".join(f'<link rel="preload" href="{kok}fonts/{f}" as="font" type="font/woff2" crossorigin>\n' for f in ONYUKLE_FONTLAR)
+               + f'<link rel="stylesheet" href="{kok}css/fonts.css?v={SURUM["css/fonts.css"]}">')
     return f"""<!DOCTYPE html>
 <html lang="tr">
 <head>
@@ -283,15 +297,19 @@ def bas(baslik, aciklama, sayfa, kok="", ek_head="", font_css=None, spa=False):
 <meta property="og:type" content="website">
 <meta property="og:url" content="{SITE}/{yol}">
 <meta property="og:image" content="{SITE}/img/og-gorsel.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="tr_TR">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#123C41">
 <link rel="icon" href="{kok}favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="{kok}apple-touch-icon.png">
 <link rel="manifest" href="{kok}site.webmanifest">
 {fontlar}
-<link rel="stylesheet" href="{kok}css/style.css">
+<link rel="stylesheet" href="{kok}css/style.css{"" if spa else "?v=" + SURUM["css/style.css"]}">
 {ACILIS_BETIK}
 {ek_head}</head>
-<body{' data-spa' if spa else ''}>
+<body{' data-spa' if spa else ''}{' class="sayfa-bagis"' if sayfa == "bagis.html" else ''}>
 <a class="atla" href="#icerik">İçeriğe geç</a>
 {acilis(kok)}<header class="ana-baslik">
   <div class="kapsayici baslik-ic">
@@ -311,7 +329,7 @@ def bas(baslik, aciklama, sayfa, kok="", ek_head="", font_css=None, spa=False):
 """
 
 
-def son(kok=""):
+def son(kok="", spa=False):
     return f"""</main>
 <footer class="alt-bilgi koyu">
   <div class="kapsayici alt-izgara">
@@ -360,8 +378,9 @@ def son(kok=""):
 <nav class="mobil-cubuk" aria-label="Hızlı erişim">
   <a class="ara" href="tel:{TELEFON_LINK}">{IKON['tel']} Bizi arayın</a>
   <a class="bagis" href="{kok}bagis.html">{IKON['kalp']} Bağış yapın</a>
+  <a class="wa" href="{wa_link(DERNEK_TELEFON, "Selamün aleyküm, bağışla ilgili bir sorum var.")}" target="_blank" rel="noopener">{IKON['whatsapp']} WhatsApp</a>
 </nav>
-<script src="{kok}js/main.js"></script>
+<script src="{kok}js/main.js{"" if spa else "?v=" + SURUM["js/main.js"]}"></script>
 </body>
 </html>
 """
@@ -399,7 +418,9 @@ def sayfa_basi(baslik, aciklama, ar="", gorsel=None):
 
 
 def video(v, kapak, on_yukle="none"):
-    return (f'<video class="video" controls preload="{on_yukle}" playsinline poster="video/{kapak}.jpg" width="540" height="960">'
+    # Giriş videosunun kapağı hemen, diğerlerininki bölüme yaklaşınca yüklenir (js/main.js)
+    kapak_attr = f'poster="video/{kapak}.jpg"' if on_yukle != "none" else f'data-poster="video/{kapak}.jpg"'
+    return (f'<video class="video" controls preload="{on_yukle}" playsinline {kapak_attr} width="540" height="960">'
             f'<source src="video/{v}.mp4" type="video/mp4">'
             f'Tarayıcınız videoyu oynatamıyor. <a href="video/{v}.mp4">Videoyu indirin</a>.</video>')
 
@@ -540,6 +561,9 @@ KURUM = {
     "email": EPOSTA,
     "address": {"@type": "PostalAddress", "streetAddress": MERKEZ_ADRES or "Atalar Mahallesi", "addressLocality": "Kartal", "addressRegion": "İstanbul", "addressCountry": "TR"},
     "sameAs": [INSTAGRAM, FACEBOOK],
+    "areaServed": {"@type": "City", "name": "İstanbul"},
+    "potentialAction": {"@type": "DonateAction", "name": "Bağış yap", "target": SITE + "/bagis.html",
+                        "recipient": {"@type": "NGO", "name": DERNEK}},
 }
 KURUM_HEAD = '<script type="application/ld+json">' + json.dumps(KURUM, ensure_ascii=False) + "</script>\n"
 
@@ -946,6 +970,7 @@ def bagis_panel(a):
           <p class="bildir-sonuc" role="status" hidden></p>
           <p class="ipucu">Dekontunuzu da aynı WhatsApp yazışmasına ekleyebilirsiniz; banka dekontu bağış makbuzu yerine geçer. İsterseniz adınıza makbuz da düzenleriz.</p>
         </div>
+        <div class="panel-ozet"><span>Toplam <b class="toplam-tutar">{tl(toplam0)}</b></span><button class="kopya" type="button" data-kopyala="#iban-{k}" data-bosluksuz>{IKON['kopya']}<span>IBAN'ı kopyala</span></button></div>
       </div>"""
 
 
@@ -988,6 +1013,13 @@ BAGIS = sayfa_basi("Bağış", "Bir talebenin sofrasından Gazze'deki bir çocu�
 {chr(10).join(bagis_panel(a) for a in BAGIS_ALANLARI)}
       </div>
     </div>
+    <details class="tum-hesaplar">
+      <summary>Bütün hesap numaralarımızı bir arada görün</summary>
+      <ul>
+{chr(10).join(f"""        <li><span><b>{a['baslik']}</b><code id="iban-liste-{a['id']}">{a['iban']}</code></span><button class="kopya" type="button" data-kopyala="#iban-liste-{a['id']}" data-bosluksuz aria-label="{a['baslik']} IBAN'ını kopyala">{IKON['kopya']}<span>Kopyala</span></button></li>""" for a in BAGIS_ALANLARI)}
+      </ul>
+      <p>Alıcı adı: <b>{DERNEK}</b> · Banka: <b>{BANKA}</b>. Havale açıklamasına adınızı ve bağış alanını yazmanız yeterli.</p>
+    </details>
     <ul class="guven">
       <li>{IKON['kalkan']}<span><b>Kamu yararına dernek</b>Cumhurbaşkanı Kararı ile</span></li>
       <li>{IKON['yildiz']}<span><b>Her hayrın ayrı hesabı</b>Bağışınızı dilediğiniz işe yönlendirin</span></li>
@@ -1159,6 +1191,29 @@ HATA = """
 yaz("404.html", bas(f"Sayfa bulunamadı | {MARKA}", "Aradığınız sayfa bulunamadı.", "404.html", kok="/", ek_head='<meta name="robots" content="noindex">\n') + HATA + son(kok="/"))
 
 
+# Arapça yazı tiplerini küçült: Arap alfabesinin tamamı + sitede geçen bütün Arapça karakterler kalır.
+# Tam dosyalar menekseilim-kaynak/fonts-tam/ içinde durur; fonttools yoksa olduğu gibi kopyalanır.
+import glob
+import shutil
+TAM = os.path.join(KOK, "menekseilim-kaynak", "fonts-tam")
+ARAP_ALFABESI = "U+0020,U+0621-063A,U+0640-0655,U+0660-0669,U+0670,U+067E,U+0686,U+0698,U+06A9,U+06AF,U+06CC,U+200C-200D,U+FD3E-FD3F"
+metin = "".join(open(f, encoding="utf-8").read() for f in glob.glob(os.path.join(OUT, "*.html")))
+metin += open(os.path.join(KOK, "menekseilim-kaynak", "og-gorsel.html"), encoding="utf-8").read()
+arapca = "".join(sorted({c for c in metin if "\u0600" <= c <= "\u06FF" or "\uFB50" <= c <= "\uFEFF"}))
+try:
+    from fontTools import subset as _alt
+except ImportError:
+    _alt = None
+for kaynak in sorted(glob.glob(os.path.join(TAM, "*.woff2"))):
+    hedef = os.path.join(OUT, "fonts", os.path.basename(kaynak))
+    if _alt is None:
+        shutil.copyfile(kaynak, hedef)
+        print("kopyalandı (fonttools yok):", os.path.basename(kaynak))
+        continue
+    _alt.main([kaynak, f"--unicodes={ARAP_ALFABESI}", f"--text={arapca}", "--layout-features=*",
+               "--flavor=woff2", f"--output-file={hedef}"])
+    print(f"küçültüldü: {os.path.basename(kaynak)} {os.path.getsize(kaynak) // 1024} KB -> {os.path.getsize(hedef) // 1024} KB")
+
 # ================================================================ ÖNİZLEME (tek dosya)
 def font_css_gomulu():
     """css/fonts.css içindeki yazı tiplerini data URI olarak gömer (önizleme için)."""
@@ -1188,7 +1243,7 @@ ust = bas(f"{MARKA} | Önizleme", SAYFALAR[0][3], "index.html", font_css=font_cs
 govdeler = "\n".join(
     f'<div class="spa-sayfa" id="sayfa-{i}" data-baslik="{b}"{"" if i == "anasayfa" else " hidden"}>\n{g}\n</div>'
     for _d, i, b, _a, g, _e in SAYFALAR)
-yaz("onizleme.html", spa_baglanti(ust + govdeler + son()))
+yaz("onizleme.html", spa_baglanti(ust + govdeler + son(spa=True)))
 
 # ================================================================ yardımcı dosyalar
 yaz("img/desen-altin.svg", DESEN_ALTIN)
@@ -1248,6 +1303,10 @@ ErrorDocument 404 /404.html
   RewriteRule ^onizleme\.html$ / [R=301,L]
 </IfModule>
 
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/css application/javascript application/json image/svg+xml application/manifest+json text/plain
+</IfModule>
+
 <IfModule mod_expires.c>
   ExpiresActive On
   ExpiresByType text/css "access plus 7 days"
@@ -1263,6 +1322,7 @@ ErrorDocument 404 /404.html
   Header set X-Content-Type-Options "nosniff"
   Header set X-Frame-Options "SAMEORIGIN"
   Header set Referrer-Policy "strict-origin-when-cross-origin"
+  Header set Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=()"
 </IfModule>
 """)
 

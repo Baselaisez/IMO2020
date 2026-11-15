@@ -24,6 +24,31 @@
     setTimeout(acilisKapat, 3600);
   }
 
+  // ---------------------------------------------------------------- Kaydırınca: üst menüye gölge, bölümler yumuşakça belirir
+  var baslik = document.querySelector(".ana-baslik");
+  if (baslik) {
+    var golge = function () { baslik.classList.toggle("kaydi", (window.scrollY || document.documentElement.scrollTop) > 8); };
+    window.addEventListener("scroll", golge, { passive: true });
+    golge();
+  }
+  if ("IntersectionObserver" in window && !(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches)) {
+    var secici = ".bolum-basi, .izgara > .kart, .hayir-kart, .hayir-vitrin, .medreseler > .medrese, .heyet > .kisi, .yolculuk > li, " +
+      ".dersler > .ders, .grup-kitap, .videolar > figure, .mujde-ic, .sadaka-ic > *, .cagri .kapsayici > *, .cemaat-foto, " +
+      ".cemaat-kartlar > .kart, .one-cikan > *, .yan-yana > *, .bilgi-kutusu, .merkez-izgara > *, .sss, .adimlar > li, .guven";
+    var gozcu = new IntersectionObserver(function (girdiler) {
+      girdiler.forEach(function (g) {
+        if (g.isIntersecting) { g.target.classList.add("gorundu"); gozcu.unobserve(g.target); }
+      });
+    }, { rootMargin: "0px 0px -6% 0px", threshold: 0.05 });
+    document.querySelectorAll(secici).forEach(function (el) {
+      var kardes = el.parentNode ? Array.prototype.indexOf.call(el.parentNode.children, el) : 0;
+      el.style.setProperty("--gecikme", Math.min(kardes, 4) * 70 + "ms");
+      el.classList.add("belir");
+      gozcu.observe(el);
+    });
+    kok.classList.add("canli");
+  }
+
   // ---------------------------------------------------------------- Mobil menü
   var menu = document.getElementById("ana-menu");
   var ac = document.querySelector(".menu-ac");
@@ -89,6 +114,7 @@
         if (aktif) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current");
       });
       document.title = sayfa.getAttribute("data-baslik") || anaBaslik;
+      document.body.classList.toggle("sayfa-bagis", sayfaAdi === "bagis");
       if (hedef && /^bagis-/.test(ad) && bagisSec) bagisSec(ad.slice(6));
       if (hedef) { hedef.scrollIntoView(); }
       else if (!ilk) { yukari(); }
@@ -310,6 +336,20 @@
         }
       });
     });
+  }
+
+  // ---------------------------------------------------------------- Video kapakları: bölüme yaklaşınca yüklenir
+  var kapaklar = document.querySelectorAll("video[data-poster]");
+  if (kapaklar.length) {
+    var kapakKoy = function (v) { v.setAttribute("poster", v.getAttribute("data-poster")); v.removeAttribute("data-poster"); };
+    if ("IntersectionObserver" in window) {
+      var kapakGozcu = new IntersectionObserver(function (girdiler) {
+        girdiler.forEach(function (g) { if (g.isIntersecting) { kapakKoy(g.target); kapakGozcu.unobserve(g.target); } });
+      }, { rootMargin: "600px 0px" });
+      kapaklar.forEach(function (v) { kapakGozcu.observe(v); });
+    } else {
+      kapaklar.forEach(kapakKoy);
+    }
   }
 
   // ---------------------------------------------------------------- Videolar: açılmazsa dosyayı bir kerede indirip oynat
