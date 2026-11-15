@@ -354,19 +354,33 @@ Cloudflare'in ücretsiz planıyla alınır.
    * `mail`, `ftp`, `cpanel`, `webmail`, `webdisk`, `autodiscover`,
      `autoconfig`, `cpcalendars`, `cpcontacts`: **gri bulut** (DNS only);
      yoksa e-posta ve FTP çalışmaz
-   * MX ve TXT (SPF, DKIM) kayıtlarına dokunmayın
+   * `mail` bir **A** kaydı olmalı (sunucunun IP'si, gri bulut). CNAME ise
+     silip A kaydı olarak yeniden ekleyin.
+   * **MX** kaydı `mail.menekseilim.com.tr`'yi göstermeli (öncelik 0).
+     Alan adının kendisini (turuncu bulut) gösterirse e-postalar gelmez.
+   * TXT (SPF, DKIM) ve SRV kayıtlarına dokunmayın
 3. **Ad sunucuları:** Cloudflare'in verdiği iki ad sunucusunu Turhost
-   panelinde (Alan Adlarım → menekseilim.com.tr → Ad Sunucuları) eskilerinin
-   yerine yazın. `.com.tr` alan adlarında yayılması birkaç saat sürebilir.
+   panelinde (Alan Adlarım → menekseilim.com.tr → NS Kayıtları) eskilerinin
+   yerine yazın. Yanlarındaki **IP kutuları boş kalmalı**. `.com.tr` alan
+   adlarında yayılması birkaç saat sürebilir. Turhost'un "nameserver
+   kayıtları hosting hizmetinizi kullanacak şekilde yapılandırılmamış"
+   uyarısı beklenen bir durumdur, geri almayın.
 4. **Sunucu sertifikası:** Cloudflare etkinleşince → SSL/TLS → **Origin
-   Server → Create Certificate** (varsayılanlarla). Çıkan "Origin
+   Server → Create Certificate** (RSA 2048, PEM, 15 yıl). Site "Pending"
+   iken bu ekran hata verir; "Active" olmasını bekleyin. Çıkan "Origin
    Certificate" ve "Private Key" metinlerini cPanel → SSL/TLS →
    **Installation** ekranında menekseilim.com.tr için ilgili kutulara
-   yapıştırıp **Install Certificate** deyin. Private Key'i kimseyle paylaşmayın.
+   yapıştırıp **Install Certificate** deyin (CA Bundle boş). Private Key
+   yalnızca bir kez gösterilir; kimseyle paylaşmayın.
 5. **Mod:** Cloudflare → SSL/TLS → **Full (strict)**. "Flexible" seçmeyin.
 6. **Yönlendirme:** Cloudflare → SSL/TLS → Edge Certificates → **Always Use
    HTTPS** açık. Bu durumda `.htaccess`'teki https satırlarını açmaya gerek
    yoktur; yönlendirmeyi Cloudflare yapar.
+
+**Durum (Kasım 2026):** Bu adımların hepsi yapıldı. Site Cloudflare
+üzerinden kilitli açılıyor; sunucu sertifikası 11.11.2041'e kadar geçerli.
+**DNS ayarları artık cPanel'den değil, Cloudflare → DNS sayfasından
+yapılır.** Biri "şu kaydı ekleyin" derse oraya ekleyin.
 
 Notlar: cPanel'e her zaman sunucu adresinden girin
 (`srvc77.trwww.com:2083`). Otomatik yükleme de `FTP_SUNUCU =
