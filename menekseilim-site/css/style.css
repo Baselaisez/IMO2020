@@ -315,6 +315,11 @@ html.acilis-kapandi .acilis { display: none; }
 .heyet { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1.75rem 1.25rem; }
 .heyet-uc { grid-template-columns: repeat(3, minmax(0, 1fr)); max-width: 900px; }
 .one-cikan .unvan { color: var(--altin-koyu); font-weight: 700; margin: -.2rem 0 .2rem; }
+.heyet-bes { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 1.5rem 1rem; }
+.heyet-bes .kisi h3 { font-size: 1.05rem; }
+.heyet-bes .kisi p { font-size: .88rem; }
+@media (max-width: 1100px) { .heyet-bes { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 900px) { .heyet-bes > .kisi:last-child:nth-child(odd) { grid-column: 1 / -1; justify-self: center; width: calc(50% - .5rem); } }
 @media (max-width: 900px) { .heyet { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 .kisi { text-align: center; min-width: 0; }
 .kisi-foto { position: relative; margin-bottom: .9rem; }
@@ -600,6 +605,7 @@ html.acilis-kapandi .acilis { display: none; }
 .alt-bilgi ul { list-style: none; margin: 0; padding: 0; display: grid; gap: .45rem; }
 .alt-bilgi a { color: #EDF3F0; text-decoration: none; }
 .alt-bilgi a:hover { color: #fff; text-decoration: underline; }
+.alt-iletisim a { text-decoration: underline; text-decoration-color: rgba(220, 198, 144, .7); text-underline-offset: 3px; }
 .alt-statu { display: flex; align-items: flex-start; gap: .45rem; color: #EDF3F0; font-weight: 600; font-size: .95rem; margin-top: .75rem; }
 .alt-statu svg { width: 1.1rem; height: 1.1rem; fill: var(--altin-acik); flex: none; margin-top: .15rem; }
 .alt-cizgi { border-top: 1px solid rgba(255, 255, 255, .12); padding-block: 1.1rem calc(1.1rem + env(safe-area-inset-bottom, 0px)); font-size: .92rem; }

@@ -1,5 +1,6 @@
 # Menekşe Medreseleri – Apache ayarları (cPanel hosting)
 AddDefaultCharset UTF-8
+AddType application/manifest+json .webmanifest
 Options -Indexes
 DirectoryIndex index.html index.php
 ErrorDocument 404 /404.html

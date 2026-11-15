@@ -143,6 +143,7 @@ YOLCULUK = [  # anasayfadaki dört adım: (kapak yazısı, kapak rengi, başlık
 
 HEYET = [  # (fotoğraf img/heyet/ altında, isim, görev) – ilk sıradaki Heyetimiz sayfasında öne çıkar
     ("heyet-1.jpg", "Salih Gedik", "Yönetim Kurulu Başkanı"),
+    ("heyet-5.jpg", "Mustafa Şen", "İlmî İşler Sorumlusu"),
     ("heyet-4.jpg", "Salih Özbey", "Muhasebe ve Finans Müdürü"),
     ("heyet-2.jpg", "Musa Yıldız", "Yönetim Kurulu Üyesi"),
     ("heyet-3.jpg", "Ercan Kul", "Yönetim Kurulu Üyesi"),
@@ -284,6 +285,8 @@ def bas(baslik, aciklama, sayfa, kok="", ek_head="", font_css=None, spa=False):
 <meta property="og:image" content="{SITE}/img/og-gorsel.png">
 <meta name="theme-color" content="#123C41">
 <link rel="icon" href="{kok}favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="{kok}apple-touch-icon.png">
+<link rel="manifest" href="{kok}site.webmanifest">
 {fontlar}
 <link rel="stylesheet" href="{kok}css/style.css">
 {ACILIS_BETIK}
@@ -337,7 +340,7 @@ def son(kok=""):
     </div>
     <div>
       <h2>Bize ulaşın</h2>
-      <ul>
+      <ul class="alt-iletisim">
         <li><a href="{kok}iletisim.html#merkez">Merkez: {MERKEZ_SEMT}</a></li>
         <li>Eğitim ve kayıt: <a href="tel:{TELEFON_LINK}">{TELEFON}</a></li>
         <li>Dernek ve bağış: <a href="tel:{tel_link(DERNEK_TELEFON)}">{DERNEK_TELEFON}</a> · <a href="{wa_link(DERNEK_TELEFON)}" target="_blank" rel="noopener">WhatsApp</a></li>
@@ -658,7 +661,7 @@ ANASAYFA = f"""
 <section class="bolum bolum-bej" id="heyet-tanitim">
   <div class="kapsayici">
     {bolum_basi("Yönetim heyetimiz", "هيئتنا", "Derneğimizi gönüllü olarak yürüten kardeşlerimiz; başkanımız Salih Gedik Hocamızla birlikte.")}
-    <div class="heyet">
+    <div class="heyet heyet-bes">
 {chr(10).join('      ' + kisi(*k) for k in HEYET)}
     </div>
     <p class="alt-not"><a class="btn btn-cizgi" href="heyetimiz.html">Heyetimizi tanıyın {IKON['ok']}</a></p>
@@ -828,7 +831,7 @@ HEYETIMIZ = sayfa_basi("Heyetimiz", "Derneğimizi ve medreselerimizi gönüllü 
       <h2>{BASKAN[1]} Hocamız</h2>
       <p class="unvan">{BASKAN[2]}</p>
       {sus()}
-      <p>Derneğimizin yönetim kurulu başkanı {BASKAN[1]} Hocamız, medreselerimizdeki eğitimi de bizzat yönetiyor. Talebelerimiz onun rehberliğinde hem hafızlık yolunda ilerliyor hem de millî ve manevî değerlerle yetişiyor.</p>
+      <p>Derneğimizin yönetim kurulu başkanı {BASKAN[1]} Hocamız, medreselerimizdeki eğitimi de bizzat yönetiyor; ilmî işlerimizi Mustafa Şen Hocamızla birlikte yürütüyor. Talebelerimiz onların rehberliğinde hem hafızlık yolunda ilerliyor hem de millî ve manevî değerlerle yetişiyor.</p>
       <p>Hocalarımız talebelerimizle birebir ilgilenir; Kur'an'ı, ilmi ve edebi bir arada öğretir.</p>
     </div>
   </div>
@@ -837,7 +840,7 @@ HEYETIMIZ = sayfa_basi("Heyetimiz", "Derneğimizi ve medreselerimizi gönüllü 
 <section class="bolum bolum-bej" id="yonetim-kurulu">
   <div class="kapsayici">
     {bolum_basi("Yönetim heyetimiz", "هيئة الإدارة", "Derneğimizin işlerini başkanımızla birlikte gönüllü olarak yürüten kardeşlerimiz.")}
-    <div class="heyet heyet-uc">
+    <div class="heyet">
 {chr(10).join('      ' + kisi(*k, yukle="eager") for k in HEYET[1:])}
     </div>
   </div>
@@ -1127,7 +1130,7 @@ SAYFALAR = [  # (dosya, önizleme kimliği, başlık, açıklama, gövde, ek hea
      "Gündüzlü ve yatılı eğitim; Elif-Ba, Kur'an-ı Kerim, Tecvid, Kıraat, İlm-i Hal, Siyer, Emsile, Binâ, Maksûd, Avâmil, İzhâr ve hafızlık.",
      EGITIMLER, ""),
     ("heyetimiz.html", "heyetimiz", f"Heyetimiz | {MARKA}",
-     "Menekşe İlim Kültür Okuma Derneği yönetim heyeti: Yönetim Kurulu Başkanı Salih Gedik Hocamız, Salih Özbey, Musa Yıldız ve Ercan Kul.",
+     "Menekşe İlim Kültür Okuma Derneği yönetim heyeti: Yönetim Kurulu Başkanı Salih Gedik Hocamız, İlmî İşler Sorumlusu Mustafa Şen Hocamız, Salih Özbey, Musa Yıldız ve Ercan Kul.",
      HEYETIMIZ, ""),
     ("bagis.html", "bagis", f"Bağış | {MARKA}",
      "Menekşe Medreseleri'ne bağış: talebe sofrası, Maltepe medrese inşaatı, Afrika'ya Mushaf ve kurban, Gazze'ye yemek. Her hayrın ayrı IBAN'ı; kolay havale ve EFT.",
@@ -1153,7 +1156,7 @@ HATA = """
   </div>
 </section>
 """
-yaz("404.html", bas(f"Sayfa bulunamadı | {MARKA}", "Aradığınız sayfa bulunamadı.", "404.html", kok="/") + HATA + son(kok="/"))
+yaz("404.html", bas(f"Sayfa bulunamadı | {MARKA}", "Aradığınız sayfa bulunamadı.", "404.html", kok="/", ek_head='<meta name="robots" content="noindex">\n') + HATA + son(kok="/"))
 
 
 # ================================================================ ÖNİZLEME (tek dosya)
@@ -1190,6 +1193,15 @@ yaz("onizleme.html", spa_baglanti(ust + govdeler + son()))
 # ================================================================ yardımcı dosyalar
 yaz("img/desen-altin.svg", DESEN_ALTIN)
 
+# Telefonda "Ana ekrana ekle" için tanım (simgeler: apple-touch-icon.png, img/ikon-192.png, img/ikon-512.png)
+yaz("site.webmanifest", json.dumps({
+    "name": MARKA, "short_name": "Menekşe", "description": f"{DERNEK} · Kur'an, ilim ve edep",
+    "lang": "tr", "start_url": "/", "scope": "/", "display": "standalone",
+    "background_color": "#F8F4E9", "theme_color": "#123C41",
+    "icons": [{"src": "/img/ikon-192.png", "sizes": "192x192", "type": "image/png"},
+              {"src": "/img/ikon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}],
+}, ensure_ascii=False, indent=2) + "\n")
+
 # Bağış alanları için karekodlar: telefonda aynı bağış sayfasını açar
 import segno
 os.makedirs(os.path.join(OUT, "img/qr"), exist_ok=True)
@@ -1206,6 +1218,7 @@ yaz("sitemap.xml", '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http:
 
 yaz(".htaccess", r"""# Menekşe Medreseleri – Apache ayarları (cPanel hosting)
 AddDefaultCharset UTF-8
+AddType application/manifest+json .webmanifest
 Options -Indexes
 DirectoryIndex index.html index.php
 ErrorDocument 404 /404.html
